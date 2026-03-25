@@ -77,6 +77,13 @@ public class JumpHeightScreen extends Screen {
     }
 
     private void sendJumpPacket(float value) {
+        // Apply immediately on the client so JumpMixin sees it on the very next jump,
+        // without waiting for a server round-trip. This also works when cheats are off.
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) {
+            PlayerJumpData.setMultiplier(mc.player.getUUID(), value);
+        }
+        // Also tell the server so server-side physics (and multiplayer) stay in sync.
         ClientPlayNetworking.send(new JumpHeightPayload(value));
     }
 
