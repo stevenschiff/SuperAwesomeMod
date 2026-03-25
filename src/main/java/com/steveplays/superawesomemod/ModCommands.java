@@ -12,6 +12,7 @@ public class ModCommands {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
             dispatcher.register(
                 Commands.literal("jumpheight")
+                    .requires(source -> true)  // allow all players, cheats not required
                     // /jumpheight  — show current value
                     .executes(ctx -> {
                         if (ctx.getSource().getEntity() instanceof ServerPlayer player) {
