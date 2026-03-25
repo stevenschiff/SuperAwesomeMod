@@ -17,5 +17,6 @@ public class SuperAwesomeMod implements ModInitializer {
 
         // Register all mod content here, or delegate to registration classes:
         ModEvents.register();
+        ModCommands.register();
     }
 }
