@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "superawesomemod",
+  "version": "${version}",
+
+  "name": "SuperAwesomeMod",
+  "description": "A gameplay mechanics mod for Minecraft 1.21.11.",
+  "authors": [
+    "YourName"
+  ],
+  "contact": {
+    "homepage": "https://example.com",
+    "sources":  "https://github.com/yourname/superawesomemod"
+  },
+
+  "license": "MIT",
+  "icon":    "assets/superawesomemod/icon.png",
+
+  "environment": "*",
+
+  "entrypoints": {
+    "main": [
+      "com.steveplays.superawesomemod.SuperAwesomeMod"
+    ],
+    "client": [
+      "com.steveplays.superawesomemod.SuperAwesomeModClient"
+    ]
+  },
+
+  "mixins": [
+    "superawesomemod.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.18.0",
+    "fabric-api":   "*",
+    "minecraft":    "~1.21.11",
+    "java":         ">=21"
+  }
+}

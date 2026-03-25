@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package":  "com.steveplays.superawesomemod.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ExampleMixin"
+  ],
+  "client": [],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
