@@ -1,5 +1,7 @@
 package com.steveplays.superawesomemod;
 
+import com.steveplays.superawesomemod.network.JumpHeightPayload;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -46,7 +48,7 @@ public class JumpHeightScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal("Reset (1.0)"),
             btn -> {
-                this.sendJumpCommand(1.0f);
+                this.sendJumpPacket(1.0f);
                 this.minecraft.setScreen(this.parent);
             }
         ).bounds(cx + 4, cy + 16, 98, 20).build());
@@ -67,18 +69,15 @@ public class JumpHeightScreen extends Screen {
                     "Value must be " + PlayerJumpData.MIN + " – " + PlayerJumpData.MAX);
                 return;
             }
-            this.sendJumpCommand(value);
+            this.sendJumpPacket(value);
             this.minecraft.setScreen(this.parent);
         } catch (NumberFormatException e) {
             this.errorMessage = Component.literal("Enter a valid number");
         }
     }
 
-    private void sendJumpCommand(float value) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.getConnection() != null) {
-            mc.getConnection().sendCommand("jumpheight " + value);
-        }
+    private void sendJumpPacket(float value) {
+        ClientPlayNetworking.send(new JumpHeightPayload(value));
     }
 
     @Override
