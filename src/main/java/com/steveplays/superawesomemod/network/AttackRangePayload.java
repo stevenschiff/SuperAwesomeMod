@@ -13,7 +13,7 @@ public record AttackRangePayload(float range) implements CustomPacketPayload {
 
     public static final float DEFAULT = 3.0f;  // vanilla survival default
     public static final float MIN     = 1.0f;
-    public static final float MAX     = 20.0f;
+    public static final float MAX     = 64.0f;
 
     public static final CustomPacketPayload.Type<AttackRangePayload> TYPE =
         new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("superawesomemod", "attack_range"));

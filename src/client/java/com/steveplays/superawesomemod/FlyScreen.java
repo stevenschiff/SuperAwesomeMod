@@ -1,5 +1,6 @@
 package com.steveplays.superawesomemod;
 
+import com.steveplays.superawesomemod.network.FlySpeedPayload;
 import com.steveplays.superawesomemod.network.ToggleFlyPayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
@@ -12,6 +13,15 @@ public class FlyScreen extends Screen {
 
     private final Screen parent;
 
+    // Speed preset labels and their values (must stay in sync)
+    private static final String[] SPEED_LABELS  = { "Slow", "Normal", "Fast", "Very Fast" };
+    private static final float[]  SPEED_VALUES  = {
+        FlySpeedPayload.SLOW,
+        FlySpeedPayload.NORMAL,
+        FlySpeedPayload.FAST,
+        FlySpeedPayload.VERY_FAST
+    };
+
     public FlyScreen(Screen parent) {
         super(Component.literal("Flight"));
         this.parent = parent;
@@ -19,10 +29,12 @@ public class FlyScreen extends Screen {
 
     @Override
     protected void init() {
-        int cx = this.width / 2;
-        int cy = this.height / 2;
+        int cx   = this.width  / 2;
+        int cy   = this.height / 2;
+        int btnW = 200;
+        int btnH = 20;
 
-        // Toggle button label reflects current state
+        // Toggle button — label reflects current state
         boolean canFly = isFlightEnabled();
         this.addRenderableWidget(Button.builder(
             Component.literal(canFly ? "Disable Flight" : "Enable Flight"),
@@ -30,12 +42,33 @@ public class FlyScreen extends Screen {
                 ClientPlayNetworking.send(new ToggleFlyPayload());
                 this.minecraft.setScreen(this.parent);
             }
-        ).bounds(cx - 100, cy - 10, 200, 20).build());
+        ).bounds(cx - btnW / 2, cy - 40, btnW, btnH).build());
 
+        // Speed preset buttons — evenly spaced in a single row
+        int totalSpeedW = SPEED_LABELS.length * 48 + (SPEED_LABELS.length - 1) * 4;
+        int speedStartX = cx - totalSpeedW / 2;
+        for (int i = 0; i < SPEED_LABELS.length; i++) {
+            final float speed = SPEED_VALUES[i];
+            this.addRenderableWidget(Button.builder(
+                Component.literal(SPEED_LABELS[i]),
+                btn -> setSpeed(speed)
+            ).bounds(speedStartX + i * 52, cy - 10, 48, btnH).build());
+        }
+
+        // Back
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
             btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, cy + 16, 100, 20).build());
+        ).bounds(cx - 50, cy + 20, 100, btnH).build());
+    }
+
+    private void setSpeed(float speed) {
+        // Apply immediately client-side for zero-latency feel
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null) {
+            mc.player.getAbilities().setFlyingSpeed(speed);
+        }
+        ClientPlayNetworking.send(new FlySpeedPayload(speed));
     }
 
     private boolean isFlightEnabled() {
@@ -50,13 +83,16 @@ public class FlyScreen extends Screen {
         int cx = this.width / 2;
         int cy = this.height / 2;
 
-        graphics.drawCenteredString(this.font, this.title, cx, cy - 50, 0xFFFFFF);
+        graphics.drawCenteredString(this.font, this.title, cx, cy - 70, 0xFFFFFF);
 
         boolean canFly = isFlightEnabled();
-        int statusColor = canFly ? 0x55FF55 : 0xFF5555;
         graphics.drawCenteredString(this.font,
             Component.literal("Status: " + (canFly ? "Enabled" : "Disabled")),
-            cx, cy - 30, statusColor);
+            cx, cy - 58, canFly ? 0x55FF55 : 0xFF5555);
+
+        graphics.drawCenteredString(this.font,
+            Component.literal("Speed:"),
+            cx, cy - 24, 0xAAAAAA);
 
         super.render(graphics, mouseX, mouseY, delta);
     }

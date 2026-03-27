@@ -1,10 +1,14 @@
 package com.steveplays.superawesomemod;
 
 import com.steveplays.superawesomemod.network.AttackRangePayload;
+import com.steveplays.superawesomemod.network.FlySpeedPayload;
 import com.steveplays.superawesomemod.network.JumpHeightPayload;
 import com.steveplays.superawesomemod.network.ToggleFlyPayload;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,7 +20,6 @@ import org.slf4j.LoggerFactory;
 public class SuperAwesomeMod implements ModInitializer {
 
     public static final String MOD_ID = "superawesomemod";
-
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @Override
@@ -24,6 +27,7 @@ public class SuperAwesomeMod implements ModInitializer {
         LOGGER.info("[SuperAwesomeMod] Initializing — MC 1.21.11 / Fabric Loader");
 
         registerPackets();
+        registerFlyReapply();
         ModEvents.register();
         ModCommands.register();
     }
@@ -43,15 +47,22 @@ public class SuperAwesomeMod implements ModInitializer {
         PayloadTypeRegistry.playC2S().register(ToggleFlyPayload.TYPE, ToggleFlyPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(ToggleFlyPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
-            boolean enable = !player.getAbilities().mayfly;
+            boolean enable = !PlayerFlyData.isEnabled(player.getUUID());
+            PlayerFlyData.setEnabled(player.getUUID(), enable);
             player.getAbilities().mayfly = enable;
-            if (!enable) {
-                player.getAbilities().flying = false;  // stop active flight when disabling
-            }
-            player.onUpdateAbilities();  // sends ClientboundPlayerAbilitiesPacket to the client
+            if (!enable) player.getAbilities().flying = false;
+            player.onUpdateAbilities();
             player.sendSystemMessage(Component.literal(
                 "[SuperAwesomeMod] Flight " + (enable ? "enabled" : "disabled")
             ));
+        });
+
+        // --- Fly speed ---
+        PayloadTypeRegistry.playC2S().register(FlySpeedPayload.TYPE, FlySpeedPayload.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(FlySpeedPayload.TYPE, (payload, context) -> {
+            ServerPlayer player = context.player();
+            player.getAbilities().setFlyingSpeed(payload.speed());
+            player.onUpdateAbilities();
         });
 
         // --- Attack range ---
@@ -60,12 +71,31 @@ public class SuperAwesomeMod implements ModInitializer {
             ServerPlayer player = context.player();
             double range = Math.clamp(payload.range(), AttackRangePayload.MIN, AttackRangePayload.MAX);
             AttributeInstance attr = player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
-            if (attr != null) {
-                attr.setBaseValue(range);
-            }
+            if (attr != null) attr.setBaseValue(range);
             player.sendSystemMessage(Component.literal(
                 "[SuperAwesomeMod] Attack range set to " + range + " blocks"
             ));
+        });
+
+        // Clean up fly state when a player disconnects
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
+            PlayerFlyData.remove(handler.player.getUUID())
+        );
+    }
+
+    /**
+     * Every server tick, re-apply mayfly for players who have mod flight enabled.
+     * This corrects any silent reset caused by vanilla respawn or game-mode code
+     * running on survival players.
+     */
+    private static void registerFlyReapply() {
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                if (PlayerFlyData.isEnabled(player.getUUID()) && !player.getAbilities().mayfly) {
+                    player.getAbilities().mayfly = true;
+                    player.onUpdateAbilities();
+                }
+            }
         });
     }
 }
