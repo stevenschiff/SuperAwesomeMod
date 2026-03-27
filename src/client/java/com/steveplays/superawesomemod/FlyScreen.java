@@ -14,7 +14,7 @@ public class FlyScreen extends Screen {
     private final Screen parent;
 
     // Speed preset labels and their values (must stay in sync)
-    private static final String[] SPEED_LABELS  = { "Slow", "Normal", "Fast", "Very Fast" };
+    private static final String[] SPEED_LABELS = { "Slow", "Normal", "Fast", "Very Fast" };
     private static final float[]  SPEED_VALUES  = {
         FlySpeedPayload.SLOW,
         FlySpeedPayload.NORMAL,
@@ -34,14 +34,11 @@ public class FlyScreen extends Screen {
         int btnW = 200;
         int btnH = 20;
 
-        // Toggle button — label reflects current state
+        // Toggle button — label reflects current state from shared PlayerFlyData
         boolean canFly = isFlightEnabled();
         this.addRenderableWidget(Button.builder(
             Component.literal(canFly ? "Disable Flight" : "Enable Flight"),
-            btn -> {
-                ClientPlayNetworking.send(new ToggleFlyPayload());
-                this.minecraft.setScreen(this.parent);
-            }
+            btn -> toggleFlight()
         ).bounds(cx - btnW / 2, cy - 40, btnW, btnH).build());
 
         // Speed preset buttons — evenly spaced in a single row
@@ -62,6 +59,24 @@ public class FlyScreen extends Screen {
         ).bounds(cx - 50, cy + 20, 100, btnH).build());
     }
 
+    private void toggleFlight() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        boolean newState = !PlayerFlyData.isEnabled(mc.player.getUUID());
+
+        // Write to the shared ConcurrentHashMap so the server tick hook picks it up
+        // immediately in singleplayer (same JVM — no packet round-trip needed).
+        PlayerFlyData.setEnabled(mc.player.getUUID(), newState);
+
+        // Also send the packet so dedicated servers (separate JVM) are updated.
+        // The payload now carries explicit state, not a blind toggle, so there is
+        // no race condition if the packet arrives after the tick hook already acted.
+        ClientPlayNetworking.send(new ToggleFlyPayload(newState));
+
+        this.minecraft.setScreen(this.parent);
+    }
+
     private void setSpeed(float speed) {
         // Apply immediately client-side for zero-latency feel
         Minecraft mc = Minecraft.getInstance();
@@ -71,9 +86,14 @@ public class FlyScreen extends Screen {
         ClientPlayNetworking.send(new FlySpeedPayload(speed));
     }
 
+    /**
+     * Reads from PlayerFlyData (the shared ConcurrentHashMap) rather than the
+     * client-side mayfly flag. This gives accurate state even before the server
+     * has had a chance to sync the abilities packet back.
+     */
     private boolean isFlightEnabled() {
         Minecraft mc = Minecraft.getInstance();
-        return mc.player != null && mc.player.getAbilities().mayfly;
+        return mc.player != null && PlayerFlyData.isEnabled(mc.player.getUUID());
     }
 
     @Override

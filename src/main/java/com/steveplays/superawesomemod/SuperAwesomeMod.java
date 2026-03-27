@@ -5,7 +5,6 @@ import com.steveplays.superawesomemod.network.FlySpeedPayload;
 import com.steveplays.superawesomemod.network.JumpHeightPayload;
 import com.steveplays.superawesomemod.network.ToggleFlyPayload;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -27,7 +26,7 @@ public class SuperAwesomeMod implements ModInitializer {
         LOGGER.info("[SuperAwesomeMod] Initializing — MC 1.21.11 / Fabric Loader");
 
         registerPackets();
-        registerFlyReapply();
+        registerTickHooks();
         ModEvents.register();
         ModCommands.register();
     }
@@ -44,13 +43,15 @@ public class SuperAwesomeMod implements ModInitializer {
         });
 
         // --- Flight toggle ---
+        // The payload now carries the explicit intended state (not a blind toggle)
+        // so client and server always agree even if the packet arrives late.
         PayloadTypeRegistry.playC2S().register(ToggleFlyPayload.TYPE, ToggleFlyPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(ToggleFlyPayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
-            boolean enable = !PlayerFlyData.isEnabled(player.getUUID());
+            boolean enable = payload.enabled();
             PlayerFlyData.setEnabled(player.getUUID(), enable);
             player.getAbilities().mayfly = enable;
-            if (!enable) player.getAbilities().flying = false;
+            player.getAbilities().flying = enable;  // start flying immediately when enabling
             player.onUpdateAbilities();
             player.sendSystemMessage(Component.literal(
                 "[SuperAwesomeMod] Flight " + (enable ? "enabled" : "disabled")
@@ -69,7 +70,8 @@ public class SuperAwesomeMod implements ModInitializer {
         PayloadTypeRegistry.playC2S().register(AttackRangePayload.TYPE, AttackRangePayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(AttackRangePayload.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
-            double range = Math.clamp(payload.range(), AttackRangePayload.MIN, AttackRangePayload.MAX);
+            float range = Math.clamp(payload.range(), AttackRangePayload.MIN, AttackRangePayload.MAX);
+            PlayerAttackRangeData.setRange(player.getUUID(), range);
             AttributeInstance attr = player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
             if (attr != null) attr.setBaseValue(range);
             player.sendSystemMessage(Component.literal(
@@ -77,23 +79,42 @@ public class SuperAwesomeMod implements ModInitializer {
             ));
         });
 
-        // Clean up fly state when a player disconnects
-        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
-            PlayerFlyData.remove(handler.player.getUUID())
-        );
+        // Clean up mod state when a player disconnects
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            PlayerFlyData.remove(handler.player.getUUID());
+            PlayerAttackRangeData.remove(handler.player.getUUID());
+        });
     }
 
     /**
-     * Every server tick, re-apply mayfly for players who have mod flight enabled.
-     * This corrects any silent reset caused by vanilla respawn or game-mode code
-     * running on survival players.
+     * Tick hooks re-apply mod state every server tick.
+     *
+     * This serves two purposes:
+     * 1. In singleplayer, the client thread writes to the shared ConcurrentHashMap
+     *    (PlayerFlyData / PlayerAttackRangeData) immediately on button click. The
+     *    server thread reads from that same map here and applies the effect — this
+     *    is the same pattern that makes JumpHeight work without needing the packet.
+     * 2. For any player, if vanilla code silently resets mayfly or the attribute
+     *    (e.g. on respawn), this hook restores it within one tick.
      */
-    private static void registerFlyReapply() {
+    private static void registerTickHooks() {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                if (PlayerFlyData.isEnabled(player.getUUID()) && !player.getAbilities().mayfly) {
-                    player.getAbilities().mayfly = true;
-                    player.onUpdateAbilities();
+                // --- Flight ---
+                if (PlayerFlyData.isEnabled(player.getUUID())) {
+                    if (!player.getAbilities().mayfly) {
+                        player.getAbilities().mayfly = true;
+                        player.onUpdateAbilities();
+                    }
+                }
+
+                // --- Attack range ---
+                if (PlayerAttackRangeData.hasCustomRange(player.getUUID())) {
+                    float desired = PlayerAttackRangeData.getRange(player.getUUID());
+                    AttributeInstance attr = player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
+                    if (attr != null && (float) attr.getBaseValue() != desired) {
+                        attr.setBaseValue(desired);
+                    }
                 }
             }
         });

@@ -56,11 +56,10 @@ public class AttackRangeScreen extends Screen {
         ).bounds(cx - 50, cy + 42, 100, 20).build());
     }
 
-    private double getCurrentRange() {
+    private float getCurrentRange() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
-            AttributeInstance attr = mc.player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
-            if (attr != null) return attr.getBaseValue();
+            return PlayerAttackRangeData.getRange(mc.player.getUUID());
         }
         return AttackRangePayload.DEFAULT;
     }
@@ -82,12 +81,17 @@ public class AttackRangeScreen extends Screen {
     }
 
     private void sendRangePacket(float value) {
-        // Apply immediately client-side so the engine picks it up without a round-trip
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null) {
+            // Write to the shared ConcurrentHashMap so the server tick hook picks it up
+            // immediately in singleplayer (same JVM — no packet round-trip needed).
+            PlayerAttackRangeData.setRange(mc.player.getUUID(), value);
+
+            // Also apply client-side attribute for immediate local feedback.
             AttributeInstance attr = mc.player.getAttribute(Attributes.ENTITY_INTERACTION_RANGE);
             if (attr != null) attr.setBaseValue(value);
         }
+        // Also send the packet so dedicated servers (separate JVM) are updated.
         ClientPlayNetworking.send(new AttackRangePayload(value));
     }
 
