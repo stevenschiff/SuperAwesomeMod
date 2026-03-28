@@ -11,12 +11,21 @@ public class SuperAwesomeModClient implements ClientModInitializer {
 
         ModKeybindings.register();
 
-        // Check the keybind every tick; open the menu when it is pressed.
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            // Open menu on keybind press.
             while (ModKeybindings.openMenu.consumeClick()) {
-                if (client.screen == null) {  // don't stack screens
+                if (client.screen == null) {
                     client.setScreen(new ModMenuScreen());
                 }
+            }
+
+            // Maintain mod flight client-side every tick.
+            // The vanilla server sends mayfly=false once at join for survival
+            // players. Re-setting mayfly=true here overrides that every tick so
+            // the client always permits flight — regardless of whether the server
+            // has the mod installed.
+            if (client.player != null && PlayerFlyData.isEnabled(client.player.getUUID())) {
+                client.player.getAbilities().mayfly = true;
             }
         });
     }

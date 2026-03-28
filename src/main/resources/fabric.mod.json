@@ -28,7 +28,8 @@
   },
 
   "mixins": [
-    "superawesomemod.mixins.json"
+    "superawesomemod.mixins.json",
+    "superawesomemod.client.mixins.json"
   ],
 
   "depends": {

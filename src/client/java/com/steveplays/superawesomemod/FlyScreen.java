@@ -65,13 +65,17 @@ public class FlyScreen extends Screen {
 
         boolean newState = !PlayerFlyData.isEnabled(mc.player.getUUID());
 
-        // Write to the shared ConcurrentHashMap so the server tick hook picks it up
-        // immediately in singleplayer (same JVM — no packet round-trip needed).
+        // Write to the shared ConcurrentHashMap — the client tick hook reads this
+        // every tick to maintain mayfly=true locally (works on any server).
         PlayerFlyData.setEnabled(mc.player.getUUID(), newState);
 
-        // Also send the packet so dedicated servers (separate JVM) are updated.
-        // The payload now carries explicit state, not a blind toggle, so there is
-        // no race condition if the packet arrives after the tick hook already acted.
+        // Apply immediately to this client so flight starts/stops without waiting
+        // for the next tick. This works on any server — no packet round-trip needed.
+        mc.player.getAbilities().mayfly = newState;
+        mc.player.getAbilities().flying = newState;
+
+        // Also send the packet so servers that have the mod installed get updated
+        // server-side as well (for correct physics validation on those servers).
         ClientPlayNetworking.send(new ToggleFlyPayload(newState));
 
         this.minecraft.setScreen(this.parent);
