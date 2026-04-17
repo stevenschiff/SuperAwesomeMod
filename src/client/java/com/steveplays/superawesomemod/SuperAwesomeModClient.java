@@ -3,6 +3,7 @@ package com.steveplays.superawesomemod;
 import com.steveplays.superawesomemod.FreeLookData;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.CameraType;
 
 public class SuperAwesomeModClient implements ClientModInitializer {
 
@@ -11,6 +12,9 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         SuperAwesomeMod.LOGGER.info("[SuperAwesomeMod] Client initialized!");
 
         ModKeybindings.register();
+
+        // Track perspective so we can reset free look when the player switches views.
+        final CameraType[] lastCameraType = { CameraType.FIRST_PERSON };
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             // Open menu on keybind press.
@@ -27,6 +31,14 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             // has the mod installed.
             if (client.player != null && PlayerFlyData.isEnabled(client.player.getUUID())) {
                 client.player.getAbilities().mayfly = true;
+            }
+
+            // Reset free look when the player switches camera perspective (F5).
+            CameraType currentCameraType = client.options.getCameraType();
+            if (currentCameraType != lastCameraType[0]) {
+                lastCameraType[0] = currentCameraType;
+                FreeLookData.setActive(false);
+                FreeLookData.reset();
             }
 
             // Free look: hold mode vs toggle mode.
