@@ -39,6 +39,11 @@ public class ModMenuScreen extends Screen {
             btn -> this.minecraft.setScreen(new AttackRangeScreen(this))
         ).bounds(cx - btnW / 2, cy, btnW, btnH).build());
 
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Free Look"),
+            btn -> this.minecraft.setScreen(new FreeLookScreen(this))
+        ).bounds(cx - btnW / 2, cy + gap, btnW, btnH).build());
+
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),

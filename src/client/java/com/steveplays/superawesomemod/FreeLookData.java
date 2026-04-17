@@ -3,6 +3,8 @@ package com.steveplays.superawesomemod;
 public class FreeLookData {
     private static float yawOffset = 0f;
     private static float pitchOffset = 0f;
+    private static boolean toggleMode = false;
+    private static boolean active = false;
 
     public static void addDelta(float yaw, float pitch) {
         yawOffset += yaw;
@@ -16,4 +18,10 @@ public class FreeLookData {
         yawOffset = 0f;
         pitchOffset = 0f;
     }
+
+    public static boolean isActive()            { return active; }
+    public static void    setActive(boolean a)  { active = a; }
+
+    public static boolean isToggleMode()               { return toggleMode; }
+    public static void    setToggleMode(boolean mode)  { toggleMode = mode; }
 }

@@ -29,9 +29,17 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 client.player.getAbilities().mayfly = true;
             }
 
-            // Reset free look camera offset when key is released.
-            if (!ModKeybindings.freeLook.isDown()) {
-                FreeLookData.reset();
+            // Free look: hold mode vs toggle mode.
+            if (FreeLookData.isToggleMode()) {
+                while (ModKeybindings.freeLook.consumeClick()) {
+                    boolean nowActive = !FreeLookData.isActive();
+                    FreeLookData.setActive(nowActive);
+                    if (!nowActive) FreeLookData.reset();
+                }
+            } else {
+                boolean held = ModKeybindings.freeLook.isDown();
+                FreeLookData.setActive(held);
+                if (!held) FreeLookData.reset();
             }
         });
     }
