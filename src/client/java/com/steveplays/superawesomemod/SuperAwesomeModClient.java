@@ -1,6 +1,5 @@
 package com.steveplays.superawesomemod;
 
-import com.steveplays.superawesomemod.FreeLookData;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.CameraType;
@@ -13,7 +12,6 @@ public class SuperAwesomeModClient implements ClientModInitializer {
 
         ModKeybindings.register();
 
-        // Track perspective so we can reset free look when the player switches views.
         final CameraType[] lastCameraType = { CameraType.FIRST_PERSON };
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -25,34 +23,19 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             }
 
             // Maintain mod flight client-side every tick.
-            // The vanilla server sends mayfly=false once at join for survival
-            // players. Re-setting mayfly=true here overrides that every tick so
-            // the client always permits flight — regardless of whether the server
-            // has the mod installed.
             if (client.player != null && PlayerFlyData.isEnabled(client.player.getUUID())) {
                 client.player.getAbilities().mayfly = true;
             }
 
-            // Reset free look when the player switches camera perspective (F5).
-            CameraType currentCameraType = client.options.getCameraType();
-            if (currentCameraType != lastCameraType[0]) {
-                lastCameraType[0] = currentCameraType;
-                FreeLookData.setActive(false);
+            // Free look: active only when enabled AND in third-person.
+            // Reset offsets whenever the player switches perspective (F5).
+            CameraType currentCamera = client.options.getCameraType();
+            if (currentCamera != lastCameraType[0]) {
+                lastCameraType[0] = currentCamera;
                 FreeLookData.reset();
             }
-
-            // Free look: hold mode vs toggle mode.
-            if (FreeLookData.isToggleMode()) {
-                while (ModKeybindings.freeLook.consumeClick()) {
-                    boolean nowActive = !FreeLookData.isActive();
-                    FreeLookData.setActive(nowActive);
-                    if (!nowActive) FreeLookData.reset();
-                }
-            } else {
-                boolean held = ModKeybindings.freeLook.isDown();
-                FreeLookData.setActive(held);
-                if (!held) FreeLookData.reset();
-            }
+            boolean thirdPerson = currentCamera != CameraType.FIRST_PERSON;
+            FreeLookData.setActive(FreeLookData.isEnabled() && thirdPerson);
         });
     }
 }

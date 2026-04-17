@@ -22,12 +22,11 @@ public class FreeLookScreen extends Screen {
         int btnH = 20;
 
         this.addRenderableWidget(Button.builder(
-            modeLabel(),
+            toggleLabel(),
             btn -> {
-                FreeLookData.setToggleMode(!FreeLookData.isToggleMode());
-                FreeLookData.setActive(false);
+                FreeLookData.setEnabled(!FreeLookData.isEnabled());
                 FreeLookData.reset();
-                btn.setMessage(modeLabel());
+                btn.setMessage(toggleLabel());
             }
         ).bounds(cx - btnW / 2, cy - 20, btnW, btnH).build());
 
@@ -37,8 +36,8 @@ public class FreeLookScreen extends Screen {
         ).bounds(cx - 50, cy + 10, 100, btnH).build());
     }
 
-    private Component modeLabel() {
-        return Component.literal("Mode: " + (FreeLookData.isToggleMode() ? "Toggle" : "Hold"));
+    private Component toggleLabel() {
+        return Component.literal(FreeLookData.isEnabled() ? "Free Look: Enabled" : "Free Look: Disabled");
     }
 
     @Override
@@ -48,7 +47,7 @@ public class FreeLookScreen extends Screen {
         int cy = this.height / 2;
         graphics.drawCenteredString(this.font, this.title, cx, cy - 50, 0xFFFFFF);
         graphics.drawCenteredString(this.font,
-            Component.literal("Key: V  (rebindable in Options \u2192 Controls)"),
+            Component.literal("Only active in third-person view"),
             cx, cy - 36, 0xAAAAAA);
         super.render(graphics, mouseX, mouseY, delta);
     }
