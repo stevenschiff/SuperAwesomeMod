@@ -1,5 +1,6 @@
 package com.steveplays.superawesomemod;
 
+import com.steveplays.superawesomemod.FreeLookData;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
@@ -26,6 +27,11 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             // has the mod installed.
             if (client.player != null && PlayerFlyData.isEnabled(client.player.getUUID())) {
                 client.player.getAbilities().mayfly = true;
+            }
+
+            // Reset free look camera offset when key is released.
+            if (!ModKeybindings.freeLook.isDown()) {
+                FreeLookData.reset();
             }
         });
     }
