@@ -1,66 +1,60 @@
 package com.steveplays.superawesomemod;
 
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 
+@SuppressWarnings("deprecation")
 public final class ArmorHudOverlay {
 
-    private static final Identifier ARMOR_FULL_SPRITE  = Identifier.withDefaultNamespace("hud/armor_full");
-    private static final Identifier ARMOR_HALF_SPRITE  = Identifier.withDefaultNamespace("hud/armor_half");
-    private static final Identifier ARMOR_EMPTY_SPRITE = Identifier.withDefaultNamespace("hud/armor_empty");
+    // Helmet, chestplate, leggings, boots — left to right.
+    private static final EquipmentSlot[] SLOTS = {
+        EquipmentSlot.HEAD,
+        EquipmentSlot.CHEST,
+        EquipmentSlot.LEGS,
+        EquipmentSlot.FEET
+    };
 
-    private static final Identifier ID = Identifier.fromNamespaceAndPath("superawesomemod", "armor_hud");
+    private static final int ICON_SIZE = 16;
+    // Pixels of empty space to leave between the armor row and the hotbar/offhand for the shield slot.
+    private static final int SHIELD_GAP = 32;
 
     private ArmorHudOverlay() {}
 
     public static void register() {
-        HudElementRegistry.attachElementAfter(VanillaHudElements.ARMOR_BAR, ID, (graphics, tickCounter) -> {
-            if (!ArmorHudData.isEnabled()) return;
-
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.options.hideGui) return;
-
-            LocalPlayer player = mc.player;
-            if (player == null) return;
-
-            // Match vanilla: armor bar is hidden in spectator/creative.
-            if (mc.gameMode != null) {
-                GameType type = mc.gameMode.getPlayerMode();
-                if (type == GameType.SPECTATOR || type == GameType.CREATIVE) return;
-            }
-
-            int armor = player.getArmorValue();
-            if (armor <= 0) return;
-
-            renderArmor(graphics, player, armor);
-        });
+        HudRenderCallback.EVENT.register(ArmorHudOverlay::onHudRender);
     }
 
-    private static void renderArmor(GuiGraphics graphics, Player player, int armor) {
+    private static void onHudRender(GuiGraphics graphics, DeltaTracker tickCounter) {
+        if (!ArmorHudData.isEnabled()) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.options.hideGui) return;
+
+        LocalPlayer player = mc.player;
+        if (player == null) return;
+
         int width  = graphics.guiWidth();
         int height = graphics.guiHeight();
-        int leftSide = width / 2 - 91;
-        // Vanilla stacks status bars in 10px rows above the hotbar; armor sits one row above health.
-        int y = height - 39 - 10;
 
-        for (int i = 0; i < 10; i++) {
-            int x = leftSide + i * 8;
-            Identifier sprite;
-            if (i * 2 + 1 < armor) {
-                sprite = ARMOR_FULL_SPRITE;
-            } else if (i * 2 + 1 == armor) {
-                sprite = ARMOR_HALF_SPRITE;
-            } else {
-                sprite = ARMOR_EMPTY_SPRITE;
-            }
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, 9, 9);
+        // Hotbar's left edge is at width/2 - 91. Place the armor row to the left of that,
+        // leaving SHIELD_GAP pixels free for the offhand/shield slot.
+        int rowWidth = SLOTS.length * ICON_SIZE;
+        int xLeft    = width / 2 - 91 - SHIELD_GAP - rowWidth;
+        int yTop     = height - 19; // matches the y of hotbar items
+
+        for (int i = 0; i < SLOTS.length; i++) {
+            ItemStack stack = player.getItemBySlot(SLOTS[i]);
+            if (stack.isEmpty()) continue;
+
+            int x = xLeft + i * ICON_SIZE;
+            graphics.renderItem(stack, x, yTop);
+            // Draws the vanilla durability bar (green/yellow/red) at the bottom of the icon.
+            graphics.renderItemDecorations(mc.font, stack, x, yTop);
         }
     }
 }
