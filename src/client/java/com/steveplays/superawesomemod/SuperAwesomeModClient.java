@@ -11,6 +11,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         SuperAwesomeMod.LOGGER.info("[SuperAwesomeMod] Client initialized!");
 
         ModKeybindings.register();
+        ArmorHudOverlay.register();
 
         final CameraType[] lastCameraType = { CameraType.FIRST_PERSON };
 

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unzip -l /c/Users/steve/.gradle/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-rendering-v1/16.2.10+0290ad933e/2485bb9579abaada1f556258b823dd9fbb1e3b05/fabric-rendering-v1-16.2.10+0290ad933e.jar)",
+      "Bash(unzip -p /c/Users/steve/.gradle/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-rendering-v1/16.2.10+0290ad933e/657de941c907f9b32363371698671e977cd2cec0/fabric-rendering-v1-16.2.10+0290ad933e-sources.jar net/fabricmc/fabric/api/client/rendering/v1/HudRenderCallback.java)",
+      "Bash(unzip -p /c/Users/steve/.gradle/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-rendering-v1/16.2.10+0290ad933e/657de941c907f9b32363371698671e977cd2cec0/fabric-rendering-v1-16.2.10+0290ad933e-sources.jar net/fabricmc/fabric/api/client/rendering/v1/hud/VanillaHudElements.java)",
+      "Bash(javap -p -c /c/Users/steve/.gradle/caches/fabric-loom/1.21.11/minecraft-client-only.jar)",
+      "Bash(javap -classpath /c/Users/steve/.gradle/caches/fabric-loom/1.21.11/minecraft-client-only.jar net.minecraft.client.gui.Gui)",
+      "Bash(/c/Users/steve/.jdks/corretto-21.0.10/bin/javap.exe -p -classpath \"C:/Users/steve/.gradle/caches/fabric-loom/1.21.11/minecraft-client-only.jar\" net.minecraft.client.gui.Gui)",
+      "Bash(/c/Users/steve/.jdks/corretto-21.0.10/bin/javap.exe -p -classpath \"C:\\\\\\\\Users\\\\\\\\steve\\\\\\\\.gradle\\\\\\\\caches\\\\\\\\fabric-loom\\\\\\\\1.21.11\\\\\\\\minecraft-client-only.jar\" net.minecraft.client.gui.Gui)",
+      "Bash(/c/Users/steve/.jdks/corretto-21.0.10/bin/javap.exe -p -classpath \"minecraft-client-only.jar;minecraft-common.jar\" net.minecraft.client.gui.Gui)",
+      "Bash(unzip -l minecraft-client-only.jar)",
+      "Bash(unzip -l minecraft-merged.jar)"
+    ]
+  }
+}
