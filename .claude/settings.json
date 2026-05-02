@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(/c/Users/steve/.jdks/corretto-21.0.10/bin/javap -public -p /tmp/net/minecraft/client/renderer/RenderPipelines.class)",
-      "Bash(unzip -o \"/c/Users/steve/OneDrive/Desktop/SuperAwesomeMod/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-rendering-v1-4abd26ae-client/16.2.10+0290ad933e/fabric-rendering-v1-4abd26ae-client-16.2.10+0290ad933e.jar\")"
+      "Bash(unzip -o \"/c/Users/steve/OneDrive/Desktop/SuperAwesomeMod/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-rendering-v1-4abd26ae-client/16.2.10+0290ad933e/fabric-rendering-v1-4abd26ae-client-16.2.10+0290ad933e.jar\")",
+      "Bash(xargs -I{} bash -c 'unzip -l \"{}\" 2>/dev/null | grep -l \"PipelineRegistration\\\\|RenderPipelineRegistry\\\\|FabricRenderPipeline\" >/dev/null && echo {}')",
+      "Bash(unzip -o \"/c/Users/steve/OneDrive/Desktop/SuperAwesomeMod/.gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-clientOnly-6dd721cd7d/1.21.11-loom.mappings.1_21_11.layered+hash.2198-v2/minecraft-clientOnly-6dd721cd7d-1.21.11-loom.mappings.1_21_11.layered+hash.2198-v2.jar\" 'net/minecraft/resources/Identifier.class')",
+      "Bash(/c/Users/steve/.jdks/corretto-21.0.10/bin/javap -public /tmp/net/minecraft/resources/Identifier.class)",
+      "Bash(unzip -l \"/c/Users/steve/OneDrive/Desktop/SuperAwesomeMod/.gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-common-6dd721cd7d/1.21.11-loom.mappings.1_21_11.layered+hash.2198-v2/minecraft-common-6dd721cd7d-1.21.11-loom.mappings.1_21_11.layered+hash.2198-v2.jar\")",
+      "Bash(unzip -o \"/c/Users/steve/OneDrive/Desktop/SuperAwesomeMod/.gradle/loom-cache/minecraftMaven/net/minecraft/minecraft-common-6dd721cd7d/1.21.11-loom.mappings.1_21_11.layered+hash.2198-v2/minecraft-common-6dd721cd7d-1.21.11-loom.mappings.1_21_11.layered+hash.2198-v2.jar\" 'net/minecraft/resources/Identifier.class')"
     ]
   }
 }
