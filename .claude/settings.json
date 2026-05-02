@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/Users/steve/.jdks/corretto-21.0.10/bin/javap -public -p /tmp/net/minecraft/client/renderer/RenderPipelines.class)",
+      "Bash(unzip -o \"/c/Users/steve/OneDrive/Desktop/SuperAwesomeMod/.gradle/loom-cache/remapped_mods/remapped/net/fabricmc/fabric-api/fabric-rendering-v1-4abd26ae-client/16.2.10+0290ad933e/fabric-rendering-v1-4abd26ae-client-16.2.10+0290ad933e.jar\")"
+    ]
+  }
+}

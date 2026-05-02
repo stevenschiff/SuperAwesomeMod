@@ -23,8 +23,8 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 6 buttons centered vertically around cy: rows -2.5..+2.5 of `gap`.
-        int row0 = cy - (5 * gap) / 2;
+        // 7 buttons centered vertically around cy: rows -3..+3 of `gap`.
+        int row0 = cy - (6 * gap) / 2;
 
         // --- Feature buttons (add more below as the mod grows) ---
         this.addRenderableWidget(Button.builder(
@@ -52,11 +52,16 @@ public class ModMenuScreen extends Screen {
             btn -> this.minecraft.setScreen(new ArmorHudScreen(this))
         ).bounds(cx - btnW / 2, row0 + gap * 4, btnW, btnH).build());
 
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Combat Hitboxes"),
+            btn -> this.minecraft.setScreen(new CombatHitboxScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 5, btnW, btnH).build());
+
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 5, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 6, btnW, btnH).build());
     }
 
     @Override
