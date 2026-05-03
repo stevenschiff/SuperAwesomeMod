@@ -13,6 +13,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         ModKeybindings.register();
         ArmorHudOverlay.register();
         CombatHitboxRenderer.register();
+        PvpDetectorOverlay.register();
         XrayLineRenderType.touch();
 
         final CameraType[] lastCameraType = { CameraType.FIRST_PERSON };

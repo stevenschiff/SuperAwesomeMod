@@ -6,7 +6,8 @@
   "client": [
     "ClientPositionCorrectionMixin",
     "MouseHandlerFreeLookMixin",
-    "CameraFreeLookMixin"
+    "CameraFreeLookMixin",
+    "PvpDetectorDamageMixin"
   ],
   "injectors": {
     "defaultRequire": 1

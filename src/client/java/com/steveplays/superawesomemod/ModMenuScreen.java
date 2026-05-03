@@ -23,8 +23,8 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 7 buttons centered vertically around cy: rows -3..+3 of `gap`.
-        int row0 = cy - (6 * gap) / 2;
+        // 8 buttons centered vertically around cy: rows 0..7 of `gap`.
+        int row0 = cy - (7 * gap) / 2;
 
         // --- Feature buttons (add more below as the mod grows) ---
         this.addRenderableWidget(Button.builder(
@@ -57,11 +57,16 @@ public class ModMenuScreen extends Screen {
             btn -> this.minecraft.setScreen(new CombatHitboxScreen(this))
         ).bounds(cx - btnW / 2, row0 + gap * 5, btnW, btnH).build());
 
+        this.addRenderableWidget(Button.builder(
+            Component.literal("PvP Cheat Detector"),
+            btn -> this.minecraft.setScreen(new PvpDetectorScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 6, btnW, btnH).build());
+
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 6, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 7, btnW, btnH).build());
     }
 
     @Override
