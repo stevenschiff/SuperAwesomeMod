@@ -76,6 +76,10 @@ public final class PvpDetectorTracker {
         }
 
         public int    hitCount()  { return hits.size(); }
+        public int    longReachHits() {
+            double cutoff = VANILLA_REACH + LATENCY_TOLERANCE;
+            return (int) hits.stream().filter(h -> h.reach > cutoff).count();
+        }
         public double maxReach()  { return hits.stream().mapToDouble(h -> h.reach).max().orElse(0.0); }
         public double avgReach()  { return hits.stream().mapToDouble(h -> h.reach).average().orElse(0.0); }
         public double totalScore(){ return hits.stream().mapToDouble(h -> h.score).sum(); }

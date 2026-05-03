@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 /**
  * Top-right HUD listing tracked players and their suspicion stats.
  *
- * Layout per row:  [name]  [ping]  H:[hits]  Max:[reach]  [BAND]
+ * Layout per row:  [name]  [ping]  H:[hits]  LR:[long-range hits]  Max:[reach]  [BAND]
  * Suspicion band is colored:  NONE=gray  LOW=yellow  MED=orange  HIGH=red
  */
 @SuppressWarnings("deprecation")
@@ -21,6 +21,7 @@ public final class PvpDetectorOverlay {
     private static final int ROW_HEIGHT = 11;
     private static final int PADDING    = 4;
     private static final int MAX_ROWS   = 6;
+    private static final float FONT_SCALE = 0.75f;
 
     private static final int COL_NONE = 0xFF888888;
     private static final int COL_LOW  = 0xFFE0C040;
@@ -57,42 +58,51 @@ public final class PvpDetectorOverlay {
         int width  = Math.max(titleW, longestRowWidth(font, rows)) + PADDING * 2;
         int height = (rows.size() + 1) * ROW_HEIGHT + PADDING * 2;
 
-        int x = g.guiWidth() - width - PADDING;
-        int y = PADDING;
+        int realW = Math.round(width  * FONT_SCALE);
+        int realH = Math.round(height * FONT_SCALE);
+        int originX = g.guiWidth() - realW - PADDING;
+        int originY = PADDING;
 
-        // Background panel.
-        g.fill(x, y, x + width, y + height, COL_BG);
+        g.pose().pushMatrix();
+        g.pose().translate((float) originX, (float) originY);
+        g.pose().scale(FONT_SCALE, FONT_SCALE);
+
+        // Background panel (drawn in scaled local space).
+        g.fill(0, 0, width, height, COL_BG);
 
         // Title row.
-        g.drawString(font, Component.literal("PvP Watch"), x + PADDING, y + PADDING, COL_TXT, false);
+        g.drawString(font, Component.literal("PvP Watch"), PADDING, PADDING, COL_TXT, false);
 
-        int rowY = y + PADDING + ROW_HEIGHT;
+        int rowY = PADDING + ROW_HEIGHT;
         for (PvpDetectorTracker.PlayerStats st : rows) {
             String row = formatRow(st);
             int bandColor = bandColor(st.band());
-            g.drawString(font, Component.literal(row), x + PADDING, rowY, COL_TXT, false);
+            g.drawString(font, Component.literal(row), PADDING, rowY, COL_TXT, false);
 
             // Re-draw the trailing band token in band-color so it pops.
             String badge = " " + st.band().name();
-            int badgeX = x + PADDING + font.width(row) - font.width(badge);
+            int badgeX = PADDING + font.width(row) - font.width(badge);
             g.drawString(font, Component.literal(badge), badgeX, rowY, bandColor, false);
 
             // Recolor the ping field.
             int pingColor = pingColor(st.pingMs);
-            String pingTok = " " + (st.pingMs < 0 ? "?" : st.pingMs) + "ms";
-            int pingX = x + PADDING + font.width(st.name) + font.width(" ");
-            g.drawString(font, Component.literal(pingTok.trim()), pingX, rowY, pingColor, false);
+            String pingTok = (st.pingMs < 0 ? "?" : st.pingMs) + "ms";
+            int pingX = PADDING + font.width(st.name) + font.width(" ");
+            g.drawString(font, Component.literal(pingTok), pingX, rowY, pingColor, false);
 
             rowY += ROW_HEIGHT;
         }
+
+        g.pose().popMatrix();
     }
 
     private static String formatRow(PvpDetectorTracker.PlayerStats st) {
         String ping = st.pingMs < 0 ? "?ms" : (st.pingMs + "ms");
-        return String.format("%s %s H:%d Max:%.1f %s",
+        return String.format("%s %s H:%d LR:%d Max:%.1f %s",
             st.name,
             ping,
             st.hitCount(),
+            st.longReachHits(),
             st.maxReach(),
             st.band().name());
     }
@@ -125,11 +135,17 @@ public final class PvpDetectorOverlay {
     private static void drawIdle(GuiGraphics g, Font font) {
         int width  = font.width("PvP Watch — no observed hits") + PADDING * 2;
         int height = ROW_HEIGHT + PADDING * 2;
-        int x = g.guiWidth() - width - PADDING;
-        int y = PADDING;
-        g.fill(x, y, x + width, y + height, COL_BG);
+        int realW = Math.round(width  * FONT_SCALE);
+        int originX = g.guiWidth() - realW - PADDING;
+        int originY = PADDING;
+
+        g.pose().pushMatrix();
+        g.pose().translate((float) originX, (float) originY);
+        g.pose().scale(FONT_SCALE, FONT_SCALE);
+        g.fill(0, 0, width, height, COL_BG);
         g.drawString(font,
             Component.literal("PvP Watch — no observed hits"),
-            x + PADDING, y + PADDING, COL_NONE, false);
+            PADDING, PADDING, COL_NONE, false);
+        g.pose().popMatrix();
     }
 }
