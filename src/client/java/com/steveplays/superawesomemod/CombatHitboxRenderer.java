@@ -11,6 +11,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -43,6 +44,7 @@ public final class CombatHitboxRenderer {
         Vec3 eye = self.getEyePosition();
         double reach = getAttackReach(self);
         double reachSqr = reach * reach;
+        float partialTick = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
 
         PoseStack.Pose pose = ctx.matrices().last();
         Matrix4f matrix = pose.pose();
@@ -50,19 +52,22 @@ public final class CombatHitboxRenderer {
         // Two passes — never cache both buffers at once. The world's MultiBufferSource routes
         // unknown render types through one shared BufferBuilder and ends the previous batch when
         // a new shared type is requested, which would invalidate a held VertexConsumer.
-        drawPass(consumers.getBuffer(RenderTypes.lines()),         level, self, eye, reachSqr, matrix, pose, camPos, false);
-        drawPass(consumers.getBuffer(XrayLineRenderType.LINES_XRAY), level, self, eye, reachSqr, matrix, pose, camPos, true);
+        drawPass(consumers.getBuffer(RenderTypes.lines()),         level, self, eye, reachSqr, matrix, pose, camPos, partialTick, false);
+        drawPass(consumers.getBuffer(XrayLineRenderType.LINES_XRAY), level, self, eye, reachSqr, matrix, pose, camPos, partialTick, true);
     }
 
     private static void drawPass(VertexConsumer buffer, ClientLevel level, LocalPlayer self,
                                  Vec3 eye, double reachSqr, Matrix4f matrix, PoseStack.Pose pose,
-                                 Vec3 camPos, boolean invisOnly) {
+                                 Vec3 camPos, float partialTick, boolean invisOnly) {
         for (Entity entity : level.entitiesForRendering()) {
             if (entity == self) continue;
             if (!entity.isAttackable()) continue;
             if (entity.isInvisible() != invisOnly) continue;
 
-            AABB box = entity.getBoundingBox();
+            double dx = Mth.lerp(partialTick, entity.xo, entity.getX()) - entity.getX();
+            double dy = Mth.lerp(partialTick, entity.yo, entity.getY()) - entity.getY();
+            double dz = Mth.lerp(partialTick, entity.zo, entity.getZ()) - entity.getZ();
+            AABB box = entity.getBoundingBox().move(dx, dy, dz);
             boolean inReach = nearestPointDistanceSqr(eye, box) <= reachSqr;
 
             float r = 1.0f;
