@@ -15,6 +15,6 @@ public abstract class GameRendererZoomMixin {
     private void superawesomemod$applyZoom(Camera camera, float partialTick, boolean useFovSetting,
                                             CallbackInfoReturnable<Float> cir) {
         if (!ZoomData.isActive()) return;
-        cir.setReturnValue(cir.getReturnValueF() * ZoomData.getMultiplier());
+        cir.setReturnValue(cir.getReturnValueF() * ZoomData.getMultiplier(partialTick));
     }
 }
