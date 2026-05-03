@@ -12,7 +12,9 @@ import net.minecraft.network.chat.Component;
 /**
  * Top-right HUD listing tracked players and their suspicion stats.
  *
- * Layout per row:  [name]  [ping]  H:[hits]  LR:[long-range hits]  Max:[reach]  [BAND]
+ * Layout per row:  [name]  [ping]  H:[hits]  Sus:[count]  Max:[reach]  [BAND]
+ * Sus is the cumulative session-wide count of suspicious hits and is colored
+ * by severity: 0=gray, 1-2=yellow, 3-5=orange, 6+=red.
  * Suspicion band is colored:  NONE=gray  LOW=yellow  MED=orange  HIGH=red
  */
 @SuppressWarnings("deprecation")
@@ -90,6 +92,14 @@ public final class PvpDetectorOverlay {
             int pingX = PADDING + font.width(st.name) + font.width(" ");
             g.drawString(font, Component.literal(pingTok), pingX, rowY, pingColor, false);
 
+            // Recolor the suspect-count token so the answer to
+            // "how many times has this user been flagged?" pops at a glance.
+            String susTok  = "Sus:" + st.suspectCount();
+            String prefix  = st.name + " " + pingTok + " "
+                           + "H:" + st.hitCount() + " ";
+            int susX = PADDING + font.width(prefix);
+            g.drawString(font, Component.literal(susTok), susX, rowY, suspectColor(st.suspectCount()), false);
+
             rowY += ROW_HEIGHT;
         }
 
@@ -98,11 +108,11 @@ public final class PvpDetectorOverlay {
 
     private static String formatRow(PvpDetectorTracker.PlayerStats st) {
         String ping = st.pingMs < 0 ? "?ms" : (st.pingMs + "ms");
-        return String.format("%s %s H:%d LR:%d Max:%.1f %s",
+        return String.format("%s %s H:%d Sus:%d Max:%.1f %s",
             st.name,
             ping,
             st.hitCount(),
-            st.longReachHits(),
+            st.suspectCount(),
             st.maxReach(),
             st.band().name());
     }
@@ -130,6 +140,13 @@ public final class PvpDetectorOverlay {
         if (ms < 100)  return COL_PING_OK;
         if (ms < 250)  return COL_PING_WARN;
         return COL_PING_BAD;
+    }
+
+    private static int suspectColor(int count) {
+        if (count <= 0) return COL_NONE;
+        if (count < 3)  return COL_LOW;
+        if (count < 6)  return COL_MED;
+        return COL_HIGH;
     }
 
     private static void drawIdle(GuiGraphics g, Font font) {

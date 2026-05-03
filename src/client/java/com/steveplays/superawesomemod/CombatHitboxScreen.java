@@ -27,12 +27,20 @@ public class CombatHitboxScreen extends Screen {
                 CombatHitboxData.setEnabled(!CombatHitboxData.isEnabled());
                 btn.setMessage(toggleLabel());
             }
-        ).bounds(cx - btnW / 2, cy - 20, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, cy - 30, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
+            xrayLabel(),
+            btn -> {
+                CombatHitboxData.setSeeThroughWalls(!CombatHitboxData.isSeeThroughWalls());
+                btn.setMessage(xrayLabel());
+            }
+        ).bounds(cx - btnW / 2, cy - 5, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
             btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, cy + 10, 100, btnH).build());
+        ).bounds(cx - 50, cy + 25, 100, btnH).build());
     }
 
     private Component toggleLabel() {
@@ -41,15 +49,21 @@ public class CombatHitboxScreen extends Screen {
             : "Combat Hitboxes: Disabled");
     }
 
+    private Component xrayLabel() {
+        return Component.literal(CombatHitboxData.isSeeThroughWalls()
+            ? "See Through Walls: Enabled"
+            : "See Through Walls: Disabled");
+    }
+
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.renderBackground(graphics, mouseX, mouseY, delta);
         int cx = this.width / 2;
         int cy = this.height / 2;
-        graphics.drawCenteredString(this.font, this.title, cx, cy - 50, 0xFFFFFF);
+        graphics.drawCenteredString(this.font, this.title, cx, cy - 60, 0xFFFFFF);
         graphics.drawCenteredString(this.font,
             Component.literal("White when out of reach, red when in attack reach"),
-            cx, cy - 36, 0xAAAAAA);
+            cx, cy - 46, 0xAAAAAA);
         super.render(graphics, mouseX, mouseY, delta);
     }
 

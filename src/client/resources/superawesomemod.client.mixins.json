@@ -7,7 +7,8 @@
     "ClientPositionCorrectionMixin",
     "MouseHandlerFreeLookMixin",
     "CameraFreeLookMixin",
-    "PvpDetectorDamageMixin"
+    "PvpDetectorDamageMixin",
+    "GameRendererZoomMixin"
   ],
   "injectors": {
     "defaultRequire": 1

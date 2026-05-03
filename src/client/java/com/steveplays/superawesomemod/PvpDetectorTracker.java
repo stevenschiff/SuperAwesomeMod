@@ -70,20 +70,26 @@ public final class PvpDetectorTracker {
         public final Deque<HitRecord> hits = new ArrayDeque<>();
         public int    pingMs;
 
+        // Session-wide cumulative count of hits flagged as suspicious (score > 0).
+        // Does NOT decay with the rolling window — it's the answer to
+        // "how many times has this player been suspected this session?"
+        public int    totalSuspectCount;
+        public long   lastSuspectMs;
+
         PlayerStats(UUID uuid, String name) {
             this.uuid = uuid;
             this.name = name;
         }
 
-        public int    hitCount()  { return hits.size(); }
-        public int    longReachHits() {
-            double cutoff = VANILLA_REACH + LATENCY_TOLERANCE;
-            return (int) hits.stream().filter(h -> h.reach > cutoff).count();
-        }
+        public int    hitCount()      { return hits.size(); }
+        public int    suspectCount()  { return totalSuspectCount; }
         public double maxReach()  { return hits.stream().mapToDouble(h -> h.reach).max().orElse(0.0); }
         public double avgReach()  { return hits.stream().mapToDouble(h -> h.reach).average().orElse(0.0); }
         public double totalScore(){ return hits.stream().mapToDouble(h -> h.score).sum(); }
-        public long   lastHitMs() { return hits.isEmpty() ? 0L : hits.peekLast().timestampMs; }
+        public long   lastHitMs() {
+            long h = hits.isEmpty() ? 0L : hits.peekLast().timestampMs;
+            return Math.max(h, lastSuspectMs);
+        }
 
         public Band band() {
             double s = totalScore();
@@ -129,7 +135,12 @@ public final class PvpDetectorTracker {
         PlayerStats st = STATS.computeIfAbsent(attackerPlayer.getUUID(),
             u -> new PlayerStats(u, attackerPlayer.getName().getString()));
         st.pingMs = ping;
-        st.hits.addLast(new HitRecord(System.currentTimeMillis(), reach, losBlocked, ping, score));
+        long now = System.currentTimeMillis();
+        st.hits.addLast(new HitRecord(now, reach, losBlocked, ping, score));
+        if (score > 0) {
+            st.totalSuspectCount++;
+            st.lastSuspectMs = now;
+        }
 
         // Bound memory.
         while (st.hits.size() > MAX_HITS_PER_PLAYER) st.hits.pollFirst();
@@ -144,7 +155,9 @@ public final class PvpDetectorTracker {
             while (!st.hits.isEmpty() && st.hits.peekFirst().timestampMs < cutoff) {
                 st.hits.pollFirst();
             }
-            if (st.hits.isEmpty()) it.remove();
+            // Keep entries that have ever been flagged so the session-wide
+            // suspect counter remains visible after the rolling window expires.
+            if (st.hits.isEmpty() && st.totalSuspectCount == 0) it.remove();
         }
     }
 

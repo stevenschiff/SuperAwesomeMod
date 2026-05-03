@@ -14,12 +14,19 @@ public class ModKeybindings {
     );
 
     public static KeyMapping openMenu;
+    public static KeyMapping zoom;
 
     public static void register() {
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
             "key.superawesomemod.open_menu",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_G,
+            CATEGORY
+        ));
+        zoom = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+            "key.superawesomemod.zoom",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_X,
             CATEGORY
         ));
     }

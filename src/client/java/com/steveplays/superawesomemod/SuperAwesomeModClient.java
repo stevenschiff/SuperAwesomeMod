@@ -26,6 +26,12 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 }
             }
 
+            // Zoom: hold-to-zoom. Drain queued click events so they don't pile up,
+            // then sample the live held state — only active in-game (no screen open).
+            while (ModKeybindings.zoom.consumeClick()) { /* drain */ }
+            ZoomData.setKeyHeld(client.screen == null && ModKeybindings.zoom.isDown());
+            ZoomData.tick();
+
             // Maintain mod flight client-side every tick.
             if (client.player != null && PlayerFlyData.isEnabled(client.player.getUUID())) {
                 client.player.getAbilities().mayfly = true;
