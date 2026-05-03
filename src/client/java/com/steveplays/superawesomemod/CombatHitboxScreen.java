@@ -27,7 +27,7 @@ public class CombatHitboxScreen extends Screen {
                 CombatHitboxData.setEnabled(!CombatHitboxData.isEnabled());
                 btn.setMessage(toggleLabel());
             }
-        ).bounds(cx - btnW / 2, cy - 30, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, cy - 45, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             xrayLabel(),
@@ -35,12 +35,20 @@ public class CombatHitboxScreen extends Screen {
                 CombatHitboxData.setSeeThroughWalls(!CombatHitboxData.isSeeThroughWalls());
                 btn.setMessage(xrayLabel());
             }
-        ).bounds(cx - btnW / 2, cy - 5, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, cy - 20, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
+            scopeLabel(),
+            btn -> {
+                CombatHitboxData.setPlayersOnly(!CombatHitboxData.isPlayersOnly());
+                btn.setMessage(scopeLabel());
+            }
+        ).bounds(cx - btnW / 2, cy + 5, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
             btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, cy + 25, 100, btnH).build());
+        ).bounds(cx - 50, cy + 35, 100, btnH).build());
     }
 
     private Component toggleLabel() {
@@ -53,6 +61,12 @@ public class CombatHitboxScreen extends Screen {
         return Component.literal(CombatHitboxData.isSeeThroughWalls()
             ? "See Through Walls: Enabled"
             : "See Through Walls: Disabled");
+    }
+
+    private Component scopeLabel() {
+        return Component.literal(CombatHitboxData.isPlayersOnly()
+            ? "Show: Players Only"
+            : "Show: All Entities");
     }
 
     @Override
