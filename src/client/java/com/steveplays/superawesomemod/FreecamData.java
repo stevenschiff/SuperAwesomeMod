@@ -1,0 +1,46 @@
+package com.steveplays.superawesomemod;
+
+public final class FreecamData {
+
+    // Per-tick movement speeds in blocks. Tuned to feel similar to vanilla flight presets.
+    public static final float SLOW      = 0.15f;
+    public static final float NORMAL    = 0.40f;
+    public static final float FAST      = 1.00f;
+    public static final float VERY_FAST = 2.00f;
+
+    private static boolean enabled = false;
+    private static double  x, y, z;
+    private static float   yaw, pitch;
+    private static float   speed = NORMAL;
+
+    private FreecamData() {}
+
+    public static boolean isEnabled() { return enabled; }
+    public static void setEnabled(boolean e) { enabled = e; }
+
+    public static double getX() { return x; }
+    public static double getY() { return y; }
+    public static double getZ() { return z; }
+
+    public static void setPos(double nx, double ny, double nz) {
+        x = nx; y = ny; z = nz;
+    }
+
+    public static void translate(double dx, double dy, double dz) {
+        x += dx; y += dy; z += dz;
+    }
+
+    public static float getYaw()   { return yaw; }
+    public static float getPitch() { return pitch; }
+
+    public static void setRot(float y, float p) {
+        yaw = y;
+        pitch = (float) Math.clamp(p, -90f, 90f);
+    }
+
+    public static void addYaw(float dy)   { yaw += dy; }
+    public static void addPitch(float dp) { pitch = (float) Math.clamp(pitch + dp, -90f, 90f); }
+
+    public static float getSpeed()           { return speed; }
+    public static void  setSpeed(float s)    { speed = s; }
+}

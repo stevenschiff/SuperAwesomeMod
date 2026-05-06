@@ -1,8 +1,10 @@
 package com.steveplays.superawesomemod;
 
+import com.steveplays.superawesomemod.mixin.MinecraftAutoclickerInvoker;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.CameraType;
+import net.minecraft.client.Options;
 
 public class SuperAwesomeModClient implements ClientModInitializer {
 
@@ -14,6 +16,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         ArmorHudOverlay.register();
         CombatHitboxRenderer.register();
         PvpDetectorOverlay.register();
+        AppleSkinOverlay.register();
         XrayLineRenderType.touch();
 
         final CameraType[] lastCameraType = { CameraType.FIRST_PERSON };
@@ -46,6 +49,39 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             }
             boolean thirdPerson = currentCamera != CameraType.FIRST_PERSON;
             FreeLookData.setActive(FreeLookData.isEnabled() && thirdPerson);
+
+            // Freecam movement: WASD/Space/Shift translates the freecam position.
+            if (FreecamData.isEnabled() && client.screen == null && client.player != null) {
+                Options o = client.options;
+                float forward = (o.keyUp.isDown()    ? 1f : 0f) - (o.keyDown.isDown()  ? 1f : 0f);
+                float strafeR = (o.keyRight.isDown() ? 1f : 0f) - (o.keyLeft.isDown()  ? 1f : 0f);
+                float vert    = (o.keyJump.isDown()  ? 1f : 0f) - (o.keyShift.isDown() ? 1f : 0f);
+                if (forward != 0f || strafeR != 0f || vert != 0f) {
+                    float yawRad = (float) Math.toRadians(FreecamData.getYaw());
+                    double sinY = Math.sin(yawRad);
+                    double cosY = Math.cos(yawRad);
+                    double dx = -forward * sinY + strafeR * cosY;
+                    double dz =  forward * cosY + strafeR * sinY;
+                    double horiz = Math.sqrt(dx * dx + dz * dz);
+                    if (horiz > 1.0) { dx /= horiz; dz /= horiz; }
+                    float speed = FreecamData.getSpeed();
+                    FreecamData.translate(dx * speed, vert * speed, dz * speed);
+                }
+            }
+
+            // Autoclicker: fire as many simulated clicks as elapsed wall-clock allows.
+            if (AutoclickerData.isEnabled() && client.screen == null
+                && client.player != null && client.level != null) {
+                int n = AutoclickerData.clicksToFire(System.nanoTime());
+                if (n > 0) {
+                    MinecraftAutoclickerInvoker inv = (MinecraftAutoclickerInvoker)(Object) client;
+                    if (AutoclickerData.getButton() == AutoclickerData.Button.LEFT) {
+                        for (int i = 0; i < n; i++) inv.superawesomemod$startAttack();
+                    } else {
+                        for (int i = 0; i < n; i++) inv.superawesomemod$startUseItem();
+                    }
+                }
+            }
         });
     }
 }

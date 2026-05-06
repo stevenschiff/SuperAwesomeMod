@@ -7,6 +7,9 @@
     "ClientPositionCorrectionMixin",
     "MouseHandlerFreeLookMixin",
     "CameraFreeLookMixin",
+    "CameraFreecamMixin",
+    "KeyboardInputFreecamMixin",
+    "MinecraftAutoclickerInvoker",
     "PvpDetectorDamageMixin",
     "GameRendererZoomMixin"
   ],

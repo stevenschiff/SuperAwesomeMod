@@ -23,8 +23,8 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 8 buttons centered vertically around cy: rows 0..7 of `gap`.
-        int row0 = cy - (7 * gap) / 2;
+        // 11 buttons centered vertically around cy: rows 0..10 of `gap`.
+        int row0 = cy - (10 * gap) / 2;
 
         // --- Feature buttons (add more below as the mod grows) ---
         this.addRenderableWidget(Button.builder(
@@ -62,18 +62,33 @@ public class ModMenuScreen extends Screen {
             btn -> this.minecraft.setScreen(new PvpDetectorScreen(this))
         ).bounds(cx - btnW / 2, row0 + gap * 6, btnW, btnH).build());
 
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Autoclicker"),
+            btn -> this.minecraft.setScreen(new AutoclickerScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 7, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Freecam"),
+            btn -> this.minecraft.setScreen(new FreecamScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 8, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("AppleSkin"),
+            btn -> this.minecraft.setScreen(new AppleSkinScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 9, btnW, btnH).build());
+
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 7, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 10, btnW, btnH).build());
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.renderBackground(graphics, mouseX, mouseY, delta);
         graphics.drawCenteredString(this.font, this.title,
-            this.width / 2, this.height / 2 - 80, 0xFFFFFF);
+            this.width / 2, this.height / 2 - 132, 0xFFFFFF);
         super.render(graphics, mouseX, mouseY, delta);
     }
 
