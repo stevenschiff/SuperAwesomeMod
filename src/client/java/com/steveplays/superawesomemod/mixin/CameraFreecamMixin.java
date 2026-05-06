@@ -23,7 +23,13 @@ public abstract class CameraFreecamMixin {
     private void superawesomemod$applyFreecam(Level level, Entity entity, boolean detached,
                                               boolean mirror, float partialTick, CallbackInfo ci) {
         if (!FreecamData.isEnabled()) return;
-        setPosition(new Vec3(FreecamData.getX(), FreecamData.getY(), FreecamData.getZ()));
+        // Position is updated at tick rate (20 Hz) — interpolate to render rate so
+        // the camera glides between ticks instead of stepping. Rotation is already
+        // sampled per-frame inside MouseHandler.turnPlayer, so use it raw.
+        setPosition(new Vec3(
+            FreecamData.getInterpolatedX(partialTick),
+            FreecamData.getInterpolatedY(partialTick),
+            FreecamData.getInterpolatedZ(partialTick)));
         setRotation(FreecamData.getYaw(), FreecamData.getPitch());
     }
 }

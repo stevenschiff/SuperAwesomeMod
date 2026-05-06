@@ -51,7 +51,10 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             FreeLookData.setActive(FreeLookData.isEnabled() && thirdPerson);
 
             // Freecam movement: WASD/Space/Shift translates the freecam position.
+            // Snapshot prev BEFORE applying input so the camera mixin can lerp from
+            // last tick's position across the frames between ticks.
             if (FreecamData.isEnabled() && client.screen == null && client.player != null) {
+                FreecamData.beginTick();
                 Options o = client.options;
                 float forward = (o.keyUp.isDown()    ? 1f : 0f) - (o.keyDown.isDown()  ? 1f : 0f);
                 float strafeR = (o.keyRight.isDown() ? 1f : 0f) - (o.keyLeft.isDown()  ? 1f : 0f);

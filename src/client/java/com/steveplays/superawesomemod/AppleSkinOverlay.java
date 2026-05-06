@@ -5,24 +5,25 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.food.FoodData;
 
-/**
- * Renders an AppleSkin-style saturation overlay on the vanilla hunger bar.
- * Each food icon gets a gold-tinted highlight proportional to how much
- * saturation is currently backing that slice of the hunger meter.
- */
 @SuppressWarnings("deprecation")
 public final class AppleSkinOverlay {
 
-    // Hunger icon geometry (matches vanilla Gui.renderHunger)
     private static final int ICON_W = 9;
+    private static final int ICON_H = 9;
     private static final int ICON_GAP = 8;
     private static final int RIGHT_OFFSET = 91;
     private static final int Y_FROM_BOTTOM = 39;
 
-    // Translucent saturation overlay color (gold). Top byte is alpha.
-    private static final int OVERLAY_COLOR = 0xC0FFC840;
+    private static final Identifier FOOD_FULL_SPRITE = Identifier.withDefaultNamespace("hud/food_full");
+    private static final Identifier FOOD_HALF_SPRITE = Identifier.withDefaultNamespace("hud/food_half");
+
+    // ARGB tint applied to the re-drawn hunger sprite to mark saturation backing.
+    // Bright yellow at ~70% alpha — reads as a glow on top of the meat icon.
+    private static final int SATURATION_TINT = 0xB0FFE040;
 
     private AppleSkinOverlay() {}
 
@@ -38,7 +39,6 @@ public final class AppleSkinOverlay {
 
         LocalPlayer p = mc.player;
         if (p == null) return;
-        // Vanilla hides the hunger bar in creative/spectator — match that.
         if (p.isCreative() || p.isSpectator()) return;
 
         FoodData fd = p.getFoodData();
@@ -50,19 +50,17 @@ public final class AppleSkinOverlay {
         int top = guiH - Y_FROM_BOTTOM;
         int rightEdge = guiW / 2 + RIGHT_OFFSET;
 
+        // Mirror vanilla half/full icon convention: each icon represents 2 saturation
+        // points, right-to-left. Re-render the actual hunger sprite (full or half)
+        // with a yellow tint so the saturation overlay reads as a meat-shaped glow
+        // instead of a flat gold rectangle.
         for (int i = 0; i < 10; i++) {
-            float satOverIcon = (float) Math.clamp(sat - i * 2f, 0f, 2f);
+            float satOverIcon = sat - i * 2f;
             if (satOverIcon <= 0f) break;
 
             int iconX = rightEdge - i * ICON_GAP - ICON_W;
-            // Width 0..9 px, right-aligned within the icon to match vanilla's
-            // half-icon convention (the empty side of a half-icon is the left).
-            int fillW = Math.round(satOverIcon * (ICON_W / 2f));
-            int x0 = iconX + ICON_W - fillW;
-
-            // 7-pixel-tall band, inset by 1px top/bottom so the icon outline
-            // still reads through.
-            g.fill(x0, top + 1, iconX + ICON_W, top + 8, OVERLAY_COLOR);
+            Identifier sprite = satOverIcon >= 2f ? FOOD_FULL_SPRITE : FOOD_HALF_SPRITE;
+            g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, iconX, top, ICON_W, ICON_H, SATURATION_TINT);
         }
     }
 }

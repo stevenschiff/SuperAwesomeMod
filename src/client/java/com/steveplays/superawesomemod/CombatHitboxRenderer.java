@@ -65,10 +65,12 @@ public final class CombatHitboxRenderer {
                                  Vec3 eye, double reachSqr, Matrix4f matrix, PoseStack.Pose pose,
                                  Vec3 camPos, float partialTick, boolean invisOnly, boolean includeAll) {
         boolean playersOnly = CombatHitboxData.isPlayersOnly();
+        boolean showInvisible = CombatHitboxData.isShowInvisible();
         for (Entity entity : level.entitiesForRendering()) {
             if (entity == self) continue;
             if (!entity.isAttackable()) continue;
             if (playersOnly && !(entity instanceof Player)) continue;
+            if (!showInvisible && entity.isInvisible()) continue;
             if (!includeAll && entity.isInvisible() != invisOnly) continue;
 
             double dx = Mth.lerp(partialTick, entity.xo, entity.getX()) - entity.getX();

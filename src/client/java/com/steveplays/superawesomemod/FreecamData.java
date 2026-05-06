@@ -1,5 +1,7 @@
 package com.steveplays.superawesomemod;
 
+import net.minecraft.util.Mth;
+
 public final class FreecamData {
 
     // Per-tick movement speeds in blocks. Tuned to feel similar to vanilla flight presets.
@@ -10,6 +12,7 @@ public final class FreecamData {
 
     private static boolean enabled = false;
     private static double  x, y, z;
+    private static double  prevX, prevY, prevZ;
     private static float   yaw, pitch;
     private static float   speed = NORMAL;
 
@@ -23,12 +26,25 @@ public final class FreecamData {
     public static double getZ() { return z; }
 
     public static void setPos(double nx, double ny, double nz) {
+        // Seed prev to match current so the first interpolated frame doesn't lerp
+        // in from a stale position when freecam (re)starts.
+        prevX = nx; prevY = ny; prevZ = nz;
         x = nx; y = ny; z = nz;
     }
 
     public static void translate(double dx, double dy, double dz) {
         x += dx; y += dy; z += dz;
     }
+
+    // Snapshots current position into prev. Call once per client tick BEFORE input
+    // is applied so render-time interpolation has a stable origin to lerp from.
+    public static void beginTick() {
+        prevX = x; prevY = y; prevZ = z;
+    }
+
+    public static double getInterpolatedX(float partialTick) { return Mth.lerp(partialTick, prevX, x); }
+    public static double getInterpolatedY(float partialTick) { return Mth.lerp(partialTick, prevY, y); }
+    public static double getInterpolatedZ(float partialTick) { return Mth.lerp(partialTick, prevZ, z); }
 
     public static float getYaw()   { return yaw; }
     public static float getPitch() { return pitch; }
