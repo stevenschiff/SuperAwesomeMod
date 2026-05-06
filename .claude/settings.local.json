@@ -10,7 +10,9 @@
       "Bash(/c/Users/steve/.jdks/corretto-21.0.10/bin/javap.exe -p -classpath \"C:\\\\\\\\Users\\\\\\\\steve\\\\\\\\.gradle\\\\\\\\caches\\\\\\\\fabric-loom\\\\\\\\1.21.11\\\\\\\\minecraft-client-only.jar\" net.minecraft.client.gui.Gui)",
       "Bash(/c/Users/steve/.jdks/corretto-21.0.10/bin/javap.exe -p -classpath \"minecraft-client-only.jar;minecraft-common.jar\" net.minecraft.client.gui.Gui)",
       "Bash(unzip -l minecraft-client-only.jar)",
-      "Bash(unzip -l minecraft-merged.jar)"
+      "Bash(unzip -l minecraft-merged.jar)",
+      "Bash(./gradlew.bat build *)",
+      "Bash(\"C:\\\\Users\\\\steve\\\\.jdks\\\\corretto-21.0.10\\\\bin\\\\javap.exe\" -p -s -classpath /tmp/mcjar net.minecraft.client.player.KeyboardInput)"
     ]
   }
 }
