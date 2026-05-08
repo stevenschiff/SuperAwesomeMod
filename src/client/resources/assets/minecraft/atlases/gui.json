@@ -1,0 +1,12 @@
+{
+  "sources": [
+    {
+      "type": "single",
+      "resource": "superawesomemod:hud/saturation_full"
+    },
+    {
+      "type": "single",
+      "resource": "superawesomemod:hud/saturation_half"
+    }
+  ]
+}

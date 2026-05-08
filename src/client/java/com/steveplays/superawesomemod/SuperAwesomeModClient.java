@@ -15,6 +15,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         ModKeybindings.register();
         ArmorHudOverlay.register();
         CombatHitboxRenderer.register();
+        CombatCrosshairOverlay.register();
         PvpDetectorOverlay.register();
         AppleSkinOverlay.register();
         XrayLineRenderType.touch();
@@ -59,17 +60,15 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 float forward = (o.keyUp.isDown()    ? 1f : 0f) - (o.keyDown.isDown()  ? 1f : 0f);
                 float strafeR = (o.keyRight.isDown() ? 1f : 0f) - (o.keyLeft.isDown()  ? 1f : 0f);
                 float vert    = (o.keyJump.isDown()  ? 1f : 0f) - (o.keyShift.isDown() ? 1f : 0f);
-                if (forward != 0f || strafeR != 0f || vert != 0f) {
-                    float yawRad = (float) Math.toRadians(FreecamData.getYaw());
-                    double sinY = Math.sin(yawRad);
-                    double cosY = Math.cos(yawRad);
-                    double dx = -forward * sinY + strafeR * cosY;
-                    double dz =  forward * cosY + strafeR * sinY;
-                    double horiz = Math.sqrt(dx * dx + dz * dz);
-                    if (horiz > 1.0) { dx /= horiz; dz /= horiz; }
-                    float speed = FreecamData.getSpeed();
-                    FreecamData.translate(dx * speed, vert * speed, dz * speed);
-                }
+                float yawRad = (float) Math.toRadians(FreecamData.getYaw());
+                double sinY = Math.sin(yawRad);
+                double cosY = Math.cos(yawRad);
+                double dx = -forward * sinY - strafeR * cosY;
+                double dz =  forward * cosY - strafeR * sinY;
+                double horiz = Math.sqrt(dx * dx + dz * dz);
+                if (horiz > 1.0) { dx /= horiz; dz /= horiz; }
+                float speed = FreecamData.getSpeed();
+                FreecamData.smoothMove(dx * speed, vert * speed, dz * speed);
             }
 
             // Autoclicker: fire as many simulated clicks as elapsed wall-clock allows.

@@ -16,6 +16,11 @@ public final class FreecamData {
     private static float   yaw, pitch;
     private static float   speed = NORMAL;
 
+    // Velocity smoothing — camera accelerates/decelerates instead of moving instantly.
+    private static double velX, velY, velZ;
+    private static final double SMOOTHING = 0.3;
+    private static final double VELOCITY_CUTOFF = 0.001;
+
     private FreecamData() {}
 
     public static boolean isEnabled() { return enabled; }
@@ -30,10 +35,26 @@ public final class FreecamData {
         // in from a stale position when freecam (re)starts.
         prevX = nx; prevY = ny; prevZ = nz;
         x = nx; y = ny; z = nz;
+        resetVelocity();
     }
 
     public static void translate(double dx, double dy, double dz) {
         x += dx; y += dy; z += dz;
+    }
+
+    /** Smoothly accelerate/decelerate towards the target velocity each tick. */
+    public static void smoothMove(double targetDx, double targetDy, double targetDz) {
+        velX += (targetDx - velX) * SMOOTHING;
+        velY += (targetDy - velY) * SMOOTHING;
+        velZ += (targetDz - velZ) * SMOOTHING;
+        if (Math.abs(velX) < VELOCITY_CUTOFF) velX = 0;
+        if (Math.abs(velY) < VELOCITY_CUTOFF) velY = 0;
+        if (Math.abs(velZ) < VELOCITY_CUTOFF) velZ = 0;
+        x += velX; y += velY; z += velZ;
+    }
+
+    public static void resetVelocity() {
+        velX = velY = velZ = 0;
     }
 
     // Snapshots current position into prev. Call once per client tick BEFORE input

@@ -18,12 +18,10 @@ public final class AppleSkinOverlay {
     private static final int RIGHT_OFFSET = 91;
     private static final int Y_FROM_BOTTOM = 39;
 
-    private static final Identifier FOOD_FULL_SPRITE = Identifier.withDefaultNamespace("hud/food_full");
-    private static final Identifier FOOD_HALF_SPRITE = Identifier.withDefaultNamespace("hud/food_half");
-
-    // ARGB tint applied to the re-drawn hunger sprite to mark saturation backing.
-    // Bright yellow at ~70% alpha — reads as a glow on top of the meat icon.
-    private static final int SATURATION_TINT = 0xB0FFE040;
+    private static final Identifier SAT_FULL_SPRITE =
+        Identifier.fromNamespaceAndPath("superawesomemod", "hud/saturation_full");
+    private static final Identifier SAT_HALF_SPRITE =
+        Identifier.fromNamespaceAndPath("superawesomemod", "hud/saturation_half");
 
     private AppleSkinOverlay() {}
 
@@ -51,16 +49,15 @@ public final class AppleSkinOverlay {
         int rightEdge = guiW / 2 + RIGHT_OFFSET;
 
         // Mirror vanilla half/full icon convention: each icon represents 2 saturation
-        // points, right-to-left. Re-render the actual hunger sprite (full or half)
-        // with a yellow tint so the saturation overlay reads as a meat-shaped glow
-        // instead of a flat gold rectangle.
+        // points, right-to-left. Renders golden drumstick sprites on top of the
+        // vanilla food bar to indicate saturation backing.
         for (int i = 0; i < 10; i++) {
             float satOverIcon = sat - i * 2f;
             if (satOverIcon <= 0f) break;
 
             int iconX = rightEdge - i * ICON_GAP - ICON_W;
-            Identifier sprite = satOverIcon >= 2f ? FOOD_FULL_SPRITE : FOOD_HALF_SPRITE;
-            g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, iconX, top, ICON_W, ICON_H, SATURATION_TINT);
+            Identifier sprite = satOverIcon >= 2f ? SAT_FULL_SPRITE : SAT_HALF_SPRITE;
+            g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, iconX, top, ICON_W, ICON_H, 0xFFFFFFFF);
         }
     }
 }
