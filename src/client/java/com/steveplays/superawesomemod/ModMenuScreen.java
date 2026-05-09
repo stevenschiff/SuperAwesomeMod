@@ -23,8 +23,8 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 12 buttons centered vertically around cy: rows 0..11 of `gap`.
-        int row0 = cy - (11 * gap) / 2;
+        // 13 buttons centered vertically around cy: rows 0..12 of `gap`.
+        int row0 = cy - (12 * gap) / 2;
 
         // --- Feature buttons (add more below as the mod grows) ---
         this.addRenderableWidget(Button.builder(
@@ -82,11 +82,16 @@ public class ModMenuScreen extends Screen {
             btn -> this.minecraft.setScreen(new AppleSkinScreen(this))
         ).bounds(cx - btnW / 2, row0 + gap * 10, btnW, btnH).build());
 
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Shulker Tooltips"),
+            btn -> this.minecraft.setScreen(new ShulkerTooltipScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 11, btnW, btnH).build());
+
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 11, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 12, btnW, btnH).build());
     }
 
     @Override

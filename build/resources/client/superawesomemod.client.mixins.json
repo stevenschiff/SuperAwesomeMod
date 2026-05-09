@@ -11,7 +11,8 @@
     "KeyboardInputFreecamMixin",
     "MinecraftAutoclickerInvoker",
     "PvpDetectorDamageMixin",
-    "GameRendererZoomMixin"
+    "GameRendererZoomMixin",
+    "ContainerScreenShulkerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
