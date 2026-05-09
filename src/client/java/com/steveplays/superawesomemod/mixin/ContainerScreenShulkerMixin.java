@@ -33,26 +33,41 @@ public abstract class ContainerScreenShulkerMixin {
     @Unique private static final int PADDING      = 7;
     @Unique private static final int TITLE_HEIGHT = 12;
 
+    /**
+     * Returns true when the shulker preview should be active: feature enabled,
+     * shift held, and hovering a shulker box item.
+     */
+    @Unique
+    private boolean superawesomemod$shouldShowPreview() {
+        if (!ShulkerTooltipData.isEnabled()) return false;
+        long handle = GLFW.glfwGetCurrentContext();
+        boolean shiftHeld = GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_LEFT_SHIFT) == GLFW.GLFW_PRESS
+                         || GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_RIGHT_SHIFT) == GLFW.GLFW_PRESS;
+        if (!shiftHeld) return false;
+        if (this.hoveredSlot == null || !this.hoveredSlot.hasItem()) return false;
+        ItemStack stack = this.hoveredSlot.getItem();
+        if (!(stack.getItem() instanceof BlockItem blockItem)) return false;
+        return blockItem.getBlock() instanceof ShulkerBoxBlock;
+    }
+
+    /**
+     * Suppress the vanilla tooltip when our shulker preview is showing.
+     */
+    @Inject(method = "renderTooltip", at = @At("HEAD"), cancellable = true)
+    private void superawesomemod$hideVanillaTooltip(GuiGraphics graphics, int mouseX, int mouseY, CallbackInfo ci) {
+        if (superawesomemod$shouldShowPreview()) {
+            ci.cancel();
+        }
+    }
+
     @Inject(method = "render", at = @At("TAIL"))
     private void superawesomemod$renderShulkerPreview(
             GuiGraphics graphics, int mouseX, int mouseY, float partialTick,
             CallbackInfo ci) {
 
-        if (!ShulkerTooltipData.isEnabled()) return;
-
-        // Check if either shift key is held via GLFW
-        long handle = GLFW.glfwGetCurrentContext();
-        boolean shiftHeld = GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_LEFT_SHIFT) == GLFW.GLFW_PRESS
-                         || GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_RIGHT_SHIFT) == GLFW.GLFW_PRESS;
-        if (!shiftHeld) return;
-
-        if (this.hoveredSlot == null || !this.hoveredSlot.hasItem()) return;
+        if (!superawesomemod$shouldShowPreview()) return;
 
         ItemStack stack = this.hoveredSlot.getItem();
-
-        // Check if the item is any shulker box variant
-        if (!(stack.getItem() instanceof BlockItem blockItem)) return;
-        if (!(blockItem.getBlock() instanceof ShulkerBoxBlock)) return;
 
         // Read shulker contents via 1.21.x component API
         ItemContainerContents contents = stack.get(DataComponents.CONTAINER);
