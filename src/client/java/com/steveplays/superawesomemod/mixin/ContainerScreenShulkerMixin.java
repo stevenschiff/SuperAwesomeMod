@@ -51,21 +51,17 @@ public abstract class ContainerScreenShulkerMixin {
     }
 
     /**
-     * Suppress the vanilla tooltip when our shulker preview is showing.
+     * Replace the vanilla tooltip with our shulker preview grid.
+     *
+     * renderTooltip is called by both ContainerScreen.render() (for chests,
+     * barrels, etc.) and AbstractRecipeBookScreen.render() (for the player
+     * inventory), so this single injection covers all container screens.
      */
     @Inject(method = "renderTooltip", at = @At("HEAD"), cancellable = true)
-    private void superawesomemod$hideVanillaTooltip(GuiGraphics graphics, int mouseX, int mouseY, CallbackInfo ci) {
-        if (superawesomemod$shouldShowPreview()) {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "render", at = @At("TAIL"))
-    private void superawesomemod$renderShulkerPreview(
-            GuiGraphics graphics, int mouseX, int mouseY, float partialTick,
-            CallbackInfo ci) {
-
+    private void superawesomemod$renderShulkerPreview(GuiGraphics graphics, int mouseX, int mouseY, CallbackInfo ci) {
         if (!superawesomemod$shouldShowPreview()) return;
+
+        ci.cancel();
 
         ItemStack stack = this.hoveredSlot.getItem();
 
