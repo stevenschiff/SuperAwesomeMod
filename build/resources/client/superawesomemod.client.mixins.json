@@ -12,7 +12,8 @@
     "MinecraftAutoclickerInvoker",
     "PvpDetectorDamageMixin",
     "GameRendererZoomMixin",
-    "ContainerScreenShulkerMixin"
+    "ContainerScreenShulkerMixin",
+    "OptionInstanceAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,6 +1,7 @@
 package com.steveplays.superawesomemod;
 
 import com.steveplays.superawesomemod.mixin.MinecraftAutoclickerInvoker;
+import com.steveplays.superawesomemod.mixin.OptionInstanceAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.CameraType;
@@ -16,6 +17,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         ArmorHudOverlay.register();
         CombatHitboxRenderer.register();
         CombatCrosshairOverlay.register();
+        CombatPotionEffectsOverlay.register();
         PvpDetectorOverlay.register();
         AppleSkinOverlay.register();
         XrayLineRenderType.touch();
@@ -69,6 +71,16 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 if (horiz > 1.0) { dx /= horiz; dz /= horiz; }
                 float speed = FreecamData.getSpeed();
                 FreecamData.smoothMove(dx * speed, vert * speed, dz * speed);
+            }
+
+            // Render distance override: force the client's render distance value
+            // beyond vanilla limits using the accessor mixin.
+            if (RenderDistanceData.isEnabled() && client.player != null) {
+                int dist = RenderDistanceData.getDistance();
+                @SuppressWarnings("unchecked")
+                OptionInstanceAccessor<Integer> accessor =
+                    (OptionInstanceAccessor<Integer>)(Object) client.options.renderDistance();
+                accessor.superawesomemod$setValue(dist);
             }
 
             // Autoclicker: fire as many simulated clicks as elapsed wall-clock allows.

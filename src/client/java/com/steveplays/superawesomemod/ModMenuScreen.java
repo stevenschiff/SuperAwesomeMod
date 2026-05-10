@@ -23,8 +23,8 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 13 buttons centered vertically around cy: rows 0..12 of `gap`.
-        int row0 = cy - (12 * gap) / 2;
+        // 15 buttons centered vertically around cy: rows 0..14 of `gap`.
+        int row0 = cy - (14 * gap) / 2;
 
         // --- Feature buttons (add more below as the mod grows) ---
         this.addRenderableWidget(Button.builder(
@@ -63,35 +63,45 @@ public class ModMenuScreen extends Screen {
         ).bounds(cx - btnW / 2, row0 + gap * 6, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
+            Component.literal("Combat Potion Effects"),
+            btn -> this.minecraft.setScreen(new CombatPotionEffectsScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 7, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
             Component.literal("PvP Cheat Detector"),
             btn -> this.minecraft.setScreen(new PvpDetectorScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 7, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 8, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Autoclicker"),
             btn -> this.minecraft.setScreen(new AutoclickerScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 8, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 9, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Freecam"),
             btn -> this.minecraft.setScreen(new FreecamScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 9, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 10, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("AppleSkin"),
             btn -> this.minecraft.setScreen(new AppleSkinScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 10, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 11, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Shulker Tooltips"),
             btn -> this.minecraft.setScreen(new ShulkerTooltipScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 11, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 12, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Render Distance"),
+            btn -> this.minecraft.setScreen(new RenderDistanceScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 13, btnW, btnH).build());
 
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 12, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 14, btnW, btnH).build());
     }
 
     @Override
