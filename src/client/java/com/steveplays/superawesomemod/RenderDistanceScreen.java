@@ -1,5 +1,6 @@
 package com.steveplays.superawesomemod;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
@@ -24,6 +25,8 @@ public class RenderDistanceScreen extends Screen {
         int btnW = 200;
         int btnH = 20;
 
+        boolean singleplayer = Minecraft.getInstance().getSingleplayerServer() != null;
+
         // Toggle on/off
         this.addRenderableWidget(Button.builder(
             toggleLabel(),
@@ -33,36 +36,38 @@ public class RenderDistanceScreen extends Screen {
             }
         ).bounds(cx - btnW / 2, cy - 60, btnW, btnH).build());
 
-        // Distance slider 32..128
+        // Distance slider 2..256
         this.addRenderableWidget(new DistanceSlider(
             cx - btnW / 2, cy - 34, btnW, btnH,
             RenderDistanceData.getDistance()
         ));
 
-        // Seed input
-        seedBox = new EditBox(this.font, cx - btnW / 2, cy - 6, btnW, btnH, Component.literal("Seed"));
-        seedBox.setHint(Component.literal("World seed (auto in singleplayer)"));
-        if (RenderDistanceData.isSeedSet()) {
-            seedBox.setValue(String.valueOf(RenderDistanceData.getSeed()));
-        }
-        this.addRenderableWidget(seedBox);
+        if (singleplayer) {
+            // No seed controls needed — auto-detected from the world.
+        } else {
+            // Multiplayer: show seed input for LOD terrain generation.
+            seedBox = new EditBox(this.font, cx - btnW / 2, cy - 6, btnW, btnH, Component.literal("Seed"));
+            seedBox.setHint(Component.literal("World seed (needed for LOD terrain)"));
+            if (RenderDistanceData.isSeedSet()) {
+                seedBox.setValue(String.valueOf(RenderDistanceData.getSeed()));
+            }
+            this.addRenderableWidget(seedBox);
 
-        // Apply seed button
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Apply Seed"),
-            btn -> {
-                String text = seedBox.getValue().trim();
-                if (!text.isEmpty()) {
-                    try {
-                        long seed = Long.parseLong(text);
-                        RenderDistanceData.setSeed(seed);
-                    } catch (NumberFormatException e) {
-                        // Use string hash as seed (same as MC world creation).
-                        RenderDistanceData.setSeed(text.hashCode());
+            this.addRenderableWidget(Button.builder(
+                Component.literal("Apply Seed"),
+                btn -> {
+                    String text = seedBox.getValue().trim();
+                    if (!text.isEmpty()) {
+                        try {
+                            long seed = Long.parseLong(text);
+                            RenderDistanceData.setSeed(seed);
+                        } catch (NumberFormatException e) {
+                            RenderDistanceData.setSeed(text.hashCode());
+                        }
                     }
                 }
-            }
-        ).bounds(cx - btnW / 2, cy + 20, btnW, btnH).build());
+            ).bounds(cx - btnW / 2, cy + 20, btnW, btnH).build());
+        }
 
         // Back
         this.addRenderableWidget(Button.builder(
@@ -83,9 +88,13 @@ public class RenderDistanceScreen extends Screen {
         int cx = this.width / 2;
         int cy = this.height / 2;
         graphics.drawCenteredString(this.font, this.title, cx, cy - 86, 0xFFFFFF);
-        graphics.drawCenteredString(this.font,
-            Component.literal("LOD terrain + extended render (32-128 chunks)"),
-            cx, cy - 74, 0xAAAAAA);
+
+        boolean singleplayer = Minecraft.getInstance().getSingleplayerServer() != null;
+        String subtitle = singleplayer
+            ? "Extends real render distance (2-256 chunks)"
+            : "Real chunks + LOD terrain beyond server view (seed required)";
+        graphics.drawCenteredString(this.font, Component.literal(subtitle), cx, cy - 74, 0xAAAAAA);
+
         super.render(graphics, mouseX, mouseY, delta);
     }
 

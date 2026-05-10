@@ -111,9 +111,9 @@ public final class LODHeightmapGenerator {
                 }
 
                 int generated = 0;
-                for (int r = skipRadius; r <= radius && generated < 32 && running; r++) {
-                    for (int dx = -r; dx <= r && generated < 32 && running; dx++) {
-                        for (int dz = -r; dz <= r && generated < 32 && running; dz++) {
+                for (int r = skipRadius; r <= radius && generated < 128 && running; r++) {
+                    for (int dx = -r; dx <= r && generated < 128 && running; dx++) {
+                        for (int dz = -r; dz <= r && generated < 128 && running; dz++) {
                             // Only process the ring edge at distance r.
                             if (Math.abs(dx) != r && Math.abs(dz) != r) continue;
 

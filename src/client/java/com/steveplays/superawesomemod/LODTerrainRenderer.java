@@ -1,12 +1,16 @@
 package com.steveplays.superawesomemod;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
@@ -14,10 +18,21 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * Renders LOD terrain as colored wireframe grid in world space.
- * Each height sample becomes a flat square outline at the correct elevation.
+ * Renders LOD terrain as solid colored quads in world space.
+ * Each height sample becomes a flat filled square at the correct elevation.
  */
 public final class LODTerrainRenderer {
+
+    private static final RenderPipeline PIPELINE = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+            .withLocation(Identifier.fromNamespaceAndPath("superawesomemod", "lod_terrain"))
+            .withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
+            .withCull(false)
+            .build();
+
+    private static final RenderType LOD_TERRAIN = RenderType.create(
+            "lod_terrain",
+            RenderSetup.builder(PIPELINE).createRenderSetup()
+    );
 
     private LODTerrainRenderer() {}
 
@@ -35,15 +50,14 @@ public final class LODTerrainRenderer {
         Camera camera = ctx.gameRenderer().getMainCamera();
         Vec3 camPos = camera.position();
 
-        PoseStack.Pose pose = ctx.matrices().last();
-        Matrix4f matrix = pose.pose();
+        Matrix4f matrix = ctx.matrices().last().pose();
 
-        int viewDist = 12; // skip chunks within server view distance
+        int skipDist = LODChunkData.getSkipRadius();
         int pcx = LODChunkData.getPlayerChunkX();
         int pcz = LODChunkData.getPlayerChunkZ();
         int lodRadius = LODChunkData.getLodRadius();
 
-        VertexConsumer buf = consumers.getBuffer(RenderTypes.lines());
+        VertexConsumer buf = consumers.getBuffer(LOD_TERRAIN);
 
         // Collect entries to avoid concurrent modification.
         var entries = new ArrayList<Map.Entry<Long, int[]>>();
@@ -55,8 +69,8 @@ public final class LODTerrainRenderer {
 
             int dx = cx - pcx;
             int dz = cz - pcz;
-            // Skip chunks within server's normal render distance.
-            if (Math.abs(dx) <= viewDist && Math.abs(dz) <= viewDist) continue;
+            // Skip chunks within real chunk range.
+            if (Math.abs(dx) <= skipDist && Math.abs(dz) <= skipDist) continue;
 
             int[] heights = entry.getValue();
             int baseBlockX = cx * 16;
@@ -80,23 +94,14 @@ public final class LODTerrainRenderer {
                     float g = ((color >> 8) & 0xFF) / 255f;
                     float b = (color & 0xFF) / 255f;
 
-                    // Draw 4 edges of a flat square at the sample height.
-                    edge(buf, matrix, pose, x0, y, z0, x1, y, z0, r, g, b, alpha, 1, 0, 0);
-                    edge(buf, matrix, pose, x1, y, z0, x1, y, z1, r, g, b, alpha, 0, 0, 1);
-                    edge(buf, matrix, pose, x1, y, z1, x0, y, z1, r, g, b, alpha, -1, 0, 0);
-                    edge(buf, matrix, pose, x0, y, z1, x0, y, z0, r, g, b, alpha, 0, 0, -1);
+                    // Filled quad (counter-clockwise winding for upward face).
+                    buf.addVertex(matrix, x0, y, z0).setColor(r, g, b, alpha);
+                    buf.addVertex(matrix, x0, y, z1).setColor(r, g, b, alpha);
+                    buf.addVertex(matrix, x1, y, z1).setColor(r, g, b, alpha);
+                    buf.addVertex(matrix, x1, y, z0).setColor(r, g, b, alpha);
                 }
             }
         }
-    }
-
-    private static void edge(VertexConsumer buf, Matrix4f mat, PoseStack.Pose pose,
-                             float x1, float y1, float z1,
-                             float x2, float y2, float z2,
-                             float r, float g, float b, float a,
-                             float nx, float ny, float nz) {
-        buf.addVertex(mat, x1, y1, z1).setColor(r, g, b, a).setNormal(pose, nx, ny, nz);
-        buf.addVertex(mat, x2, y2, z2).setColor(r, g, b, a).setNormal(pose, nx, ny, nz);
     }
 
     private static int getColorForHeight(int height) {

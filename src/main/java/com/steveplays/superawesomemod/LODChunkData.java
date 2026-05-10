@@ -18,6 +18,7 @@ public final class LODChunkData {
     private static volatile int playerChunkX;
     private static volatile int playerChunkZ;
     private static volatile int lodRadius = 64;
+    private static volatile int skipRadius = 12;
 
     private LODChunkData() {}
 
@@ -70,4 +71,7 @@ public final class LODChunkData {
 
     public static int getLodRadius() { return lodRadius; }
     public static void setLodRadius(int r) { lodRadius = r; }
+
+    public static int getSkipRadius() { return skipRadius; }
+    public static void setSkipRadius(int r) { skipRadius = r; }
 }

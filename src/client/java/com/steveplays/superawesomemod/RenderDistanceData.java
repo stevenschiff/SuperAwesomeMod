@@ -2,8 +2,8 @@ package com.steveplays.superawesomemod;
 
 public final class RenderDistanceData {
 
-    public static final int MIN_DISTANCE = 32;
-    public static final int MAX_DISTANCE = 128;
+    public static final int MIN_DISTANCE = 2;
+    public static final int MAX_DISTANCE = 256;
 
     private static boolean enabled  = false;
     private static int     distance = MIN_DISTANCE;

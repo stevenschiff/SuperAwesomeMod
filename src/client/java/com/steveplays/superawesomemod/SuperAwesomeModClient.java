@@ -78,6 +78,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             // beyond vanilla limits using the accessor mixin.
             if (RenderDistanceData.isEnabled() && client.player != null) {
                 int dist = RenderDistanceData.getDistance();
+                boolean singleplayer = client.getSingleplayerServer() != null;
                 int current = client.options.renderDistance().get();
                 if (current != dist) {
                     @SuppressWarnings("unchecked")
@@ -87,7 +88,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                     // Trigger chunk rebuild so the renderer uses the new distance.
                     client.levelRenderer.allChanged();
                     // Update integrated server view distance in singleplayer.
-                    if (client.getSingleplayerServer() != null) {
+                    if (singleplayer) {
                         client.getSingleplayerServer().getPlayerList().setViewDistance(dist);
                     }
                 }
@@ -98,14 +99,26 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 LODChunkData.setPlayerPos(pcx, pcz);
                 LODChunkData.setLodRadius(dist);
 
+                // In singleplayer the server sends real chunks at the full
+                // distance, so skip LOD rendering everywhere. In multiplayer
+                // skip only the server's actual view distance (real chunks).
+                if (singleplayer) {
+                    LODChunkData.setSkipRadius(dist);
+                } else {
+                    LODChunkData.setSkipRadius(12);
+                }
+
                 // Auto-detect seed in singleplayer.
-                if (!RenderDistanceData.isSeedSet() && client.getSingleplayerServer() != null) {
+                if (!RenderDistanceData.isSeedSet() && singleplayer) {
                     long seed = client.getSingleplayerServer().overworld().getSeed();
                     RenderDistanceData.setSeed(seed);
                 }
 
-                // Start LOD generator if seed is available and not already running.
-                if (RenderDistanceData.isSeedSet() && !LODHeightmapGenerator.isRunning()
+                // In multiplayer, start LOD generator if seed is available.
+                // In singleplayer, LOD is not needed (real chunks cover full
+                // distance) so don't start the generator.
+                if (!singleplayer && RenderDistanceData.isSeedSet()
+                        && !LODHeightmapGenerator.isRunning()
                         && client.level != null) {
                     LODHeightmapGenerator.start(
                         RenderDistanceData.getSeed(),
