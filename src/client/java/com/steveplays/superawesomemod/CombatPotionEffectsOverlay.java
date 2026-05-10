@@ -5,13 +5,15 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
+@SuppressWarnings("deprecation")
 public final class CombatPotionEffectsOverlay {
 
     private CombatPotionEffectsOverlay() {}
@@ -29,34 +31,47 @@ public final class CombatPotionEffectsOverlay {
         LocalPlayer player = mc.player;
         if (player == null) return;
 
-        Collection<MobEffectInstance> effects = player.getActiveEffects();
+        List<MobEffectInstance> effects = new ArrayList<>(player.getActiveEffects());
         if (effects.isEmpty()) return;
 
-        // Sort effects the same way vanilla does: beneficial first, then by duration descending.
-        List<MobEffectInstance> sorted = new ArrayList<>(effects);
-        sorted.sort(Comparator.comparingInt(MobEffectInstance::getDuration));
+        // Sort by duration descending (longest first).
+        effects.sort(Comparator.comparingInt(MobEffectInstance::getDuration).reversed());
 
         int screenWidth = graphics.guiWidth();
+        int lineHeight = 11;
+        // Render below vanilla's effect icon area (starts around y=52 to be safe).
+        int startY = 52;
+        int padding = 2;
 
-        // Vanilla renders effect icons starting at x = screenWidth - 25 for the first icon,
-        // then moving left by 25 for each subsequent icon. Icons are at y = 1.
-        // The icon is 24x24 pixels. We render the timer text centered below each icon.
-        int iconSize = 25;
-        int iconY = 1;
-        int textY = iconY + 26; // Just below the 24px icon
-
-        for (int i = 0; i < sorted.size(); i++) {
-            MobEffectInstance effect = sorted.get(i);
+        for (int i = 0; i < effects.size(); i++) {
+            MobEffectInstance effect = effects.get(i);
             int duration = effect.getDuration();
-            if (duration <= 0) continue;
+            // Skip infinite or expired effects.
+            if (duration <= 0 || duration == MobEffectInstance.INFINITE_DURATION) continue;
 
+            Holder<MobEffect> effectType = effect.getEffect();
+            String name = effectType.value().getDisplayName().getString();
+            int amplifier = effect.getAmplifier();
+            if (amplifier > 0) {
+                name += " " + toRoman(amplifier + 1);
+            }
             String timeStr = formatDuration(duration);
-            int iconX = screenWidth - iconSize * (i + 1);
-            int textWidth = mc.font.width(timeStr);
-            int textX = iconX + (iconSize - textWidth) / 2;
+            String line = name + " " + timeStr;
 
-            // Draw with shadow for readability
-            graphics.drawString(mc.font, timeStr, textX, textY, 0xFFFFFF, true);
+            int textWidth = mc.font.width(line);
+            int x = screenWidth - textWidth - padding;
+            int y = startY + i * lineHeight;
+
+            // Color based on remaining time: white normally, yellow < 30s, red < 10s.
+            int color = 0xFFFFFF;
+            int seconds = duration / 20;
+            if (seconds < 10) {
+                color = 0xFF5555;
+            } else if (seconds < 30) {
+                color = 0xFFFF55;
+            }
+
+            graphics.drawString(mc.font, line, x, y, color, true);
         }
     }
 
@@ -64,9 +79,16 @@ public final class CombatPotionEffectsOverlay {
         int totalSeconds = ticks / 20;
         int minutes = totalSeconds / 60;
         int seconds = totalSeconds % 60;
-        if (minutes > 0) {
-            return String.format("%d:%02d", minutes, seconds);
-        }
-        return String.format("0:%02d", seconds);
+        return String.format("%d:%02d", minutes, seconds);
+    }
+
+    private static String toRoman(int num) {
+        return switch (num) {
+            case 2 -> "II";
+            case 3 -> "III";
+            case 4 -> "IV";
+            case 5 -> "V";
+            default -> String.valueOf(num);
+        };
     }
 }
