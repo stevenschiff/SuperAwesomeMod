@@ -38,7 +38,7 @@ public final class CombatPotionEffectsOverlay {
         // Debug: always show when enabled to confirm rendering works.
         String debugLine = "Time: " + effects.size() + "s";
         int debugWidth = mc.font.width(debugLine);
-        graphics.drawString(mc.font, debugLine, screenWidth - debugWidth - padding, startY, 0x55FF55, true);
+        graphics.drawString(mc.font, debugLine, screenWidth - debugWidth - padding, startY, 0xFF55FF55);
 
         int rendered = 1;
         for (MobEffectInstance effect : effects) {
@@ -63,14 +63,15 @@ public final class CombatPotionEffectsOverlay {
             int x = screenWidth - textWidth - padding;
             int y = startY + rendered * lineHeight;
 
-            int color = 0xFFFFFF;
+            // ARGB colors with full alpha (0xFF prefix).
+            int color = 0xFFFFFFFF; // white
             if (seconds < 10) {
-                color = 0xFF5555;
+                color = 0xFFFF5555; // red
             } else if (seconds < 30) {
-                color = 0xFFFF55;
+                color = 0xFFFFFF55; // yellow
             }
 
-            graphics.drawString(mc.font, line, x, y, color, true);
+            graphics.drawString(mc.font, line, x, y, color);
             rendered++;
         }
     }
