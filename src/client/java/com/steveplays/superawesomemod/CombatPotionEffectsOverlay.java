@@ -20,71 +20,59 @@ public final class CombatPotionEffectsOverlay {
     }
 
     private static void onHudRender(GuiGraphics graphics, DeltaTracker tickCounter) {
-        try {
-            if (!CombatPotionEffectsData.isEnabled()) return;
+        if (!CombatPotionEffectsData.isEnabled()) return;
 
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.options.hideGui) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.options.hideGui) return;
 
-            LocalPlayer player = mc.player;
-            if (player == null) return;
+        LocalPlayer player = mc.player;
+        if (player == null) return;
 
-            List<MobEffectInstance> effects = new ArrayList<>(player.getActiveEffects());
-            if (effects.isEmpty()) return;
+        int screenWidth = graphics.guiWidth();
+        int lineHeight = 11;
+        int startY = 52;
+        int padding = 4;
 
-            int screenWidth = graphics.guiWidth();
-            int lineHeight = 11;
-            // Render below vanilla's effect icon area.
-            int startY = 52;
-            int padding = 4;
-            int rendered = 0;
+        List<MobEffectInstance> effects = new ArrayList<>(player.getActiveEffects());
 
-            for (MobEffectInstance effect : effects) {
-                int duration = effect.getDuration();
-                // Show all effects that have a positive, finite duration.
-                if (duration <= 0) continue;
+        // Debug: always show when enabled to confirm rendering works.
+        String debugLine = "Time: " + effects.size() + "s";
+        int debugWidth = mc.font.width(debugLine);
+        graphics.drawString(mc.font, debugLine, screenWidth - debugWidth - padding, startY, 0x55FF55, true);
 
-                String name;
-                try {
-                    name = effect.getEffect().value().getDisplayName().getString();
-                } catch (Exception e) {
-                    name = "Effect";
-                }
+        int rendered = 1;
+        for (MobEffectInstance effect : effects) {
+            int duration = effect.getDuration();
+            int seconds = duration / 20;
 
-                int amplifier = effect.getAmplifier();
-                if (amplifier > 0) {
-                    name += " " + toRoman(amplifier + 1);
-                }
-
-                String timeStr = formatDuration(duration);
-                String line = name + " " + timeStr;
-
-                int textWidth = mc.font.width(line);
-                int x = screenWidth - textWidth - padding;
-                int y = startY + rendered * lineHeight;
-
-                // Color based on remaining time: white normally, yellow < 30s, red < 10s.
-                int color = 0xFFFFFF;
-                int seconds = duration / 20;
-                if (seconds < 10) {
-                    color = 0xFF5555;
-                } else if (seconds < 30) {
-                    color = 0xFFFF55;
-                }
-
-                graphics.drawString(mc.font, line, x, y, color, true);
-                rendered++;
+            String name;
+            try {
+                name = effect.getEffect().value().getDisplayName().getString();
+            } catch (Exception e) {
+                name = "Effect";
             }
-        } catch (Exception ignored) {
-            // Prevent any exception from crashing the game.
-        }
-    }
 
-    private static String formatDuration(int ticks) {
-        int totalSeconds = ticks / 20;
-        int minutes = totalSeconds / 60;
-        int seconds = totalSeconds % 60;
-        return String.format("%d:%02d", minutes, seconds);
+            int amplifier = effect.getAmplifier();
+            if (amplifier > 0) {
+                name += " " + toRoman(amplifier + 1);
+            }
+
+            String line = name + " Time: " + seconds + "s";
+
+            int textWidth = mc.font.width(line);
+            int x = screenWidth - textWidth - padding;
+            int y = startY + rendered * lineHeight;
+
+            int color = 0xFFFFFF;
+            if (seconds < 10) {
+                color = 0xFF5555;
+            } else if (seconds < 30) {
+                color = 0xFFFF55;
+            }
+
+            graphics.drawString(mc.font, line, x, y, color, true);
+            rendered++;
+        }
     }
 
     private static String toRoman(int num) {
