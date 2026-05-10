@@ -20,6 +20,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         CombatPotionEffectsOverlay.register();
         PvpDetectorOverlay.register();
         AppleSkinOverlay.register();
+        LODTerrainRenderer.register();
         XrayLineRenderType.touch();
 
         final CameraType[] lastCameraType = { CameraType.FIRST_PERSON };
@@ -77,10 +78,42 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             // beyond vanilla limits using the accessor mixin.
             if (RenderDistanceData.isEnabled() && client.player != null) {
                 int dist = RenderDistanceData.getDistance();
-                @SuppressWarnings("unchecked")
-                OptionInstanceAccessor<Integer> accessor =
-                    (OptionInstanceAccessor<Integer>)(Object) client.options.renderDistance();
-                accessor.superawesomemod$setValue(dist);
+                int current = client.options.renderDistance().get();
+                if (current != dist) {
+                    @SuppressWarnings("unchecked")
+                    OptionInstanceAccessor<Integer> accessor =
+                        (OptionInstanceAccessor<Integer>)(Object) client.options.renderDistance();
+                    accessor.superawesomemod$setValue(dist);
+                    // Trigger chunk rebuild so the renderer uses the new distance.
+                    client.levelRenderer.allChanged();
+                    // Update integrated server view distance in singleplayer.
+                    if (client.getSingleplayerServer() != null) {
+                        client.getSingleplayerServer().getPlayerList().setViewDistance(dist);
+                    }
+                }
+
+                // LOD terrain: update player position for the generator.
+                int pcx = (int) Math.floor(client.player.getX()) >> 4;
+                int pcz = (int) Math.floor(client.player.getZ()) >> 4;
+                LODChunkData.setPlayerPos(pcx, pcz);
+                LODChunkData.setLodRadius(dist);
+
+                // Auto-detect seed in singleplayer.
+                if (!RenderDistanceData.isSeedSet() && client.getSingleplayerServer() != null) {
+                    long seed = client.getSingleplayerServer().overworld().getSeed();
+                    RenderDistanceData.setSeed(seed);
+                }
+
+                // Start LOD generator if seed is available and not already running.
+                if (RenderDistanceData.isSeedSet() && !LODHeightmapGenerator.isRunning()
+                        && client.level != null) {
+                    LODHeightmapGenerator.start(
+                        RenderDistanceData.getSeed(),
+                        client.level.registryAccess()
+                    );
+                }
+            } else if (!RenderDistanceData.isEnabled() && LODHeightmapGenerator.isRunning()) {
+                LODHeightmapGenerator.stop();
             }
 
             // Autoclicker: fire as many simulated clicks as elapsed wall-clock allows.

@@ -7,6 +7,8 @@ public final class RenderDistanceData {
 
     private static boolean enabled  = false;
     private static int     distance = MIN_DISTANCE;
+    private static long    seed     = 0;
+    private static boolean seedSet  = false;
 
     private RenderDistanceData() {}
 
@@ -15,4 +17,9 @@ public final class RenderDistanceData {
 
     public static int  getDistance()      { return distance; }
     public static void setDistance(int d) { distance = Math.clamp(d, MIN_DISTANCE, MAX_DISTANCE); }
+
+    public static long    getSeed()        { return seed; }
+    public static boolean isSeedSet()      { return seedSet; }
+    public static void    setSeed(long s)  { seed = s; seedSet = true; }
+    public static void    clearSeed()      { seed = 0; seedSet = false; }
 }

@@ -3,12 +3,14 @@ package com.steveplays.superawesomemod;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class RenderDistanceScreen extends Screen {
 
     private final Screen parent;
+    private EditBox seedBox;
 
     public RenderDistanceScreen(Screen parent) {
         super(Component.literal("Render Distance"));
@@ -29,19 +31,44 @@ public class RenderDistanceScreen extends Screen {
                 RenderDistanceData.setEnabled(!RenderDistanceData.isEnabled());
                 btn.setMessage(toggleLabel());
             }
-        ).bounds(cx - btnW / 2, cy - 40, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, cy - 60, btnW, btnH).build());
 
         // Distance slider 32..128
         this.addRenderableWidget(new DistanceSlider(
-            cx - btnW / 2, cy - 14, btnW, btnH,
+            cx - btnW / 2, cy - 34, btnW, btnH,
             RenderDistanceData.getDistance()
         ));
+
+        // Seed input
+        seedBox = new EditBox(this.font, cx - btnW / 2, cy - 6, btnW, btnH, Component.literal("Seed"));
+        seedBox.setHint(Component.literal("World seed (auto in singleplayer)"));
+        if (RenderDistanceData.isSeedSet()) {
+            seedBox.setValue(String.valueOf(RenderDistanceData.getSeed()));
+        }
+        this.addRenderableWidget(seedBox);
+
+        // Apply seed button
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Apply Seed"),
+            btn -> {
+                String text = seedBox.getValue().trim();
+                if (!text.isEmpty()) {
+                    try {
+                        long seed = Long.parseLong(text);
+                        RenderDistanceData.setSeed(seed);
+                    } catch (NumberFormatException e) {
+                        // Use string hash as seed (same as MC world creation).
+                        RenderDistanceData.setSeed(text.hashCode());
+                    }
+                }
+            }
+        ).bounds(cx - btnW / 2, cy + 20, btnW, btnH).build());
 
         // Back
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
             btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, cy + 16, 100, btnH).build());
+        ).bounds(cx - 50, cy + 48, 100, btnH).build());
     }
 
     private Component toggleLabel() {
@@ -55,10 +82,10 @@ public class RenderDistanceScreen extends Screen {
         this.renderBackground(graphics, mouseX, mouseY, delta);
         int cx = this.width / 2;
         int cy = this.height / 2;
-        graphics.drawCenteredString(this.font, this.title, cx, cy - 68, 0xFFFFFF);
+        graphics.drawCenteredString(this.font, this.title, cx, cy - 86, 0xFFFFFF);
         graphics.drawCenteredString(this.font,
-            Component.literal("Extends chunk render distance (32-128 chunks)"),
-            cx, cy - 56, 0xAAAAAA);
+            Component.literal("LOD terrain + extended render (32-128 chunks)"),
+            cx, cy - 74, 0xAAAAAA);
         super.render(graphics, mouseX, mouseY, delta);
     }
 
