@@ -5,6 +5,7 @@ import com.steveplays.superawesomemod.network.FlySpeedPayload;
 import com.steveplays.superawesomemod.network.JumpHeightPayload;
 import com.steveplays.superawesomemod.network.ToggleFlyPayload;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -29,6 +30,10 @@ public class SuperAwesomeMod implements ModInitializer {
         registerTickHooks();
         ModEvents.register();
         ModCommands.register();
+
+        // Remove all fake players when the server stops so they aren't
+        // persisted to disk or left in a broken state on world reload.
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> FakePlayerManager.removeAll());
     }
 
     private static void registerPackets() {
