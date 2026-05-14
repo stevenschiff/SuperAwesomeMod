@@ -1,6 +1,7 @@
 package com.steveplays.superawesomemod;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -100,6 +101,15 @@ public class ModCommands {
                                 .executes(ctx -> npcUse(ctx, InteractionHand.MAIN_HAND)))
                             .then(Commands.literal("offhand")
                                 .executes(ctx -> npcUse(ctx, InteractionHand.OFF_HAND)))))
+
+                    // /npc shielddelay <name> [ticks]
+                    .then(Commands.literal("shielddelay")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                            .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                FakePlayerManager.getNames(), builder))
+                            .executes(ModCommands::npcShieldDelayGet)
+                            .then(Commands.argument("ticks", IntegerArgumentType.integer(0))
+                                .executes(ModCommands::npcShieldDelaySet))))
             );
         });
     }
@@ -183,6 +193,35 @@ public class ModCommands {
         ctx.getSource().sendSuccess(() -> Component.literal(
             "[NPC] Gave " + stack.getDisplayName().getString() + " to " + name +
             " (" + handName + ")"), true);
+        return 1;
+    }
+
+    private static int npcShieldDelayGet(CommandContext<CommandSourceStack> ctx) {
+        String name = StringArgumentType.getString(ctx, "name");
+        FakePlayer npc = FakePlayerManager.get(name);
+        if (npc == null) {
+            ctx.getSource().sendFailure(Component.literal("[NPC] '" + name + "' not found"));
+            return 0;
+        }
+        int ticks = npc.getShieldDisableDuration();
+        ctx.getSource().sendSuccess(() -> Component.literal(
+            "[NPC] " + name + " shield disable delay: " + ticks + " ticks (" +
+            String.format("%.1f", ticks / 20.0) + "s)"), false);
+        return 1;
+    }
+
+    private static int npcShieldDelaySet(CommandContext<CommandSourceStack> ctx) {
+        String name = StringArgumentType.getString(ctx, "name");
+        FakePlayer npc = FakePlayerManager.get(name);
+        if (npc == null) {
+            ctx.getSource().sendFailure(Component.literal("[NPC] '" + name + "' not found"));
+            return 0;
+        }
+        int ticks = IntegerArgumentType.getInteger(ctx, "ticks");
+        npc.setShieldDisableDuration(ticks);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+            "[NPC] " + name + " shield disable delay set to " + ticks + " ticks (" +
+            String.format("%.1f", ticks / 20.0) + "s)"), true);
         return 1;
     }
 

@@ -21,6 +21,11 @@ public class FakePlayer extends ServerPlayer {
     private boolean continuousUseMainHand = false;
     private boolean continuousUseOffHand = false;
 
+    /** How many ticks to wait before re-raising the shield after it gets disabled. */
+    private int shieldDisableDuration = 100; // 5 seconds (vanilla default)
+    /** Ticks remaining before the shield can be re-raised. */
+    private int shieldDisableTicksRemaining = 0;
+
     private FakePlayer(MinecraftServer server, ServerLevel level, GameProfile profile) {
         super(server, level, profile, ClientInformation.createDefault());
     }
@@ -69,6 +74,31 @@ public class FakePlayer extends ServerPlayer {
     }
 
     // ------------------------------------------------------------------
+    // Shield disable delay
+    // ------------------------------------------------------------------
+
+    public void setShieldDisableDuration(int ticks) {
+        this.shieldDisableDuration = ticks;
+    }
+
+    public int getShieldDisableDuration() {
+        return shieldDisableDuration;
+    }
+
+    @Override
+    public void stopUsingItem() {
+        // If continuous use is still enabled for this hand, the stop was caused
+        // externally (e.g. axe hit disabling the shield), so start the cooldown.
+        if (isUsingItem()) {
+            InteractionHand hand = getUsedItemHand();
+            if (isContinuousUse(hand)) {
+                shieldDisableTicksRemaining = shieldDisableDuration;
+            }
+        }
+        super.stopUsingItem();
+    }
+
+    // ------------------------------------------------------------------
     // Tick
     // ------------------------------------------------------------------
 
@@ -92,6 +122,10 @@ public class FakePlayer extends ServerPlayer {
     }
 
     private void tickContinuousItemUse() {
+        if (shieldDisableTicksRemaining > 0) {
+            shieldDisableTicksRemaining--;
+            return;
+        }
         if (continuousUseMainHand) {
             ItemStack main = getItemInHand(InteractionHand.MAIN_HAND);
             if (!main.isEmpty() && !isUsingItem()) {
