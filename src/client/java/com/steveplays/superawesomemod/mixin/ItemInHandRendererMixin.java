@@ -26,7 +26,9 @@ public abstract class ItemInHandRendererMixin {
     @Shadow @Final private Minecraft minecraft;
 
     @Shadow
-    protected abstract void applyItemArmTransform(PoseStack poseStack, HumanoidArm arm, float equipProgress);
+    private void applyItemArmTransform(PoseStack poseStack, HumanoidArm arm, float equipProgress) {
+        throw new AssertionError();
+    }
 
     @Shadow
     public abstract void renderItem(LivingEntity entity, ItemStack stack,

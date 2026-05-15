@@ -36,24 +36,19 @@ public abstract class ItemEntityRendererMixin {
         poseStack.pushPose();
 
         AABB bounds = state.item.getModelBoundingBox();
-        float depth = (float) bounds.getZsize();
-        boolean isFlatItem = depth < 0.0625f;
 
         // Stable random Y rotation per entity so items don't all face the same way
         random.setSeed(state.seed);
         float yRot = random.nextFloat() * 360.0f;
 
-        if (isFlatItem) {
-            // Flat sprite item (sword, stick, etc.): lay face-up on the ground
-            poseStack.translate(0.0f, 0.003f, 0.0f);
-            poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
-            poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
-        } else {
-            // 3D block item (cobblestone, chest, etc.): sit on ground, no bob/spin
-            float groundY = (float) (-bounds.minY);
-            poseStack.translate(0.0f, groundY, 0.0f);
-            poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
-        }
+        // All items lay flat on the ground. Translate up slightly to sit on
+        // the surface without z-fighting, then rotate 90 degrees around X so
+        // the item face points upward. The random Y rotation is applied first
+        // (innermost transform) so the item faces a random compass direction.
+        float modelHeight = (float) bounds.getYsize();
+        poseStack.translate(0.0f, modelHeight * 0.5f + 0.01f, 0.0f);
+        poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
 
         // Render item model(s) using the public static helper
         ItemEntityRenderer.submitMultipleFromCount(
