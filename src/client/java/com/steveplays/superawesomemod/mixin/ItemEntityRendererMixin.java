@@ -41,13 +41,21 @@ public abstract class ItemEntityRendererMixin {
         random.setSeed(state.seed);
         float yRot = random.nextFloat() * 360.0f;
 
-        // All items lay flat on the ground. Translate up slightly to sit on
-        // the surface without z-fighting, then rotate 90 degrees around X so
-        // the item face points upward. The random Y rotation is applied first
-        // (innermost transform) so the item faces a random compass direction.
-        float modelHeight = (float) bounds.getYsize();
-        poseStack.translate(0.0f, modelHeight * 0.5f + 0.01f, 0.0f);
-        poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
+        float zSize = (float) bounds.getZsize();
+        boolean isFlat = zSize < 0.125f;
+
+        if (isFlat) {
+            // Flat items (tools, food, ingots, etc.): lay face-up on the ground.
+            // -90 degrees around X maps the item face (+Z) to point upward (+Y).
+            // Use the model's Z thickness (not Y height) for the offset since
+            // that becomes the vertical extent after rotation.
+            poseStack.translate(0.0f, zSize * 0.5f + 0.005f, 0.0f);
+            poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
+        } else {
+            // 3D items (blocks): sit upright on the ground, no bob or spin.
+            float modelHeight = (float) bounds.getYsize();
+            poseStack.translate(0.0f, modelHeight * 0.5f + 0.005f, 0.0f);
+        }
         poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
 
         // Render item model(s) using the public static helper
