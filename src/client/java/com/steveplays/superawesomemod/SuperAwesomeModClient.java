@@ -6,6 +6,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Options;
+import net.minecraft.tags.ItemTags;
 
 public class SuperAwesomeModClient implements ClientModInitializer {
 
@@ -127,6 +128,17 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 }
             } else if (!RenderDistanceData.isEnabled() && LODHeightmapGenerator.isRunning()) {
                 LODHeightmapGenerator.stop();
+            }
+
+            // 1.7 sword blocking: track whether the player is holding a sword
+            // with the use key held (custom blocking state for animation).
+            if (client.player != null && OldPvpData.isBlockingEnabled()) {
+                boolean holdsSword = client.player.getMainHandItem().is(ItemTags.SWORDS);
+                boolean useKeyHeld = client.options.keyUse.isDown();
+                boolean notActuallyUsing = !client.player.isUsingItem();
+                OldPvpData.setCustomBlocking(holdsSword && useKeyHeld && notActuallyUsing);
+            } else {
+                OldPvpData.setCustomBlocking(false);
             }
 
             // Autoclicker: fire as many simulated clicks as elapsed wall-clock allows.

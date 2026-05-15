@@ -13,7 +13,10 @@
     "PvpDetectorDamageMixin",
     "GameRendererZoomMixin",
     "ContainerScreenShulkerMixin",
-    "OptionInstanceAccessor"
+    "OptionInstanceAccessor",
+    "ItemEntityRendererMixin",
+    "ItemInHandRendererMixin",
+    "MinecraftSwingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

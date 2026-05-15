@@ -23,8 +23,8 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 15 buttons centered vertically around cy: rows 0..14 of `gap`.
-        int row0 = cy - (14 * gap) / 2;
+        // 17 buttons centered vertically around cy: rows 0..16 of `gap`.
+        int row0 = cy - (16 * gap) / 2;
 
         // --- Feature buttons (add more below as the mod grows) ---
         this.addRenderableWidget(Button.builder(
@@ -97,11 +97,21 @@ public class ModMenuScreen extends Screen {
             btn -> this.minecraft.setScreen(new RenderDistanceScreen(this))
         ).bounds(cx - btnW / 2, row0 + gap * 13, btnW, btnH).build());
 
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Item Physics"),
+            btn -> this.minecraft.setScreen(new ItemPhysicsScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 14, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("1.7 PvP Animations"),
+            btn -> this.minecraft.setScreen(new OldPvpScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 15, btnW, btnH).build());
+
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 14, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 16, btnW, btnH).build());
     }
 
     @Override
