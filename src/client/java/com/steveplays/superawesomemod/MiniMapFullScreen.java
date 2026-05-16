@@ -7,6 +7,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -107,7 +108,7 @@ public class MiniMapFullScreen extends Screen {
             fsNeedsUpdate = false;
         }
 
-        graphics.blit(fsTextureId, 0, 0, 0, 0, w, h, w, h);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, fsTextureId, 0, 0, 0.0f, 0.0f, w, h, w, h);
 
         // Draw waypoints
         for (MiniMapWaypoint wp : MiniMapData.getWaypoints()) {

@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
@@ -137,7 +138,7 @@ public final class MiniMapOverlay {
         }
 
         // Render terrain as single texture blit
-        graphics.blit(mapTextureId, ox, oy, 0, 0, size, size, size, size);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, mapTextureId, ox, oy, 0.0f, 0.0f, size, size, size, size);
 
         // Draw waypoint markers (few fill calls, no performance issue)
         LocalPlayer player = mc.player;
