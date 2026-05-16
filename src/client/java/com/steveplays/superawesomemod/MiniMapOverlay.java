@@ -46,9 +46,9 @@ public final class MiniMapOverlay {
             mapTextureId = null;
         }
 
-        // Create new
-        mapImage = new NativeImage(NativeImage.Format.RGBA, size, size, false);
-        mapTexture = new DynamicTexture(() -> "superawesomemod_minimap_hud", mapImage);
+        // Create new — use size constructor so getPixels() returns the internal image
+        mapTexture = new DynamicTexture(() -> "superawesomemod_minimap_hud", size, size, false);
+        mapImage = mapTexture.getPixels();
         mapTextureId = Identifier.fromNamespaceAndPath("superawesomemod", "minimap_hud");
         Minecraft.getInstance().getTextureManager().register(mapTextureId, mapTexture);
         currentTextureSize = size;

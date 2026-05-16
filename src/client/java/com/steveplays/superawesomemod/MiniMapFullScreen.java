@@ -220,8 +220,9 @@ public class MiniMapFullScreen extends Screen {
             fsTextureId = null;
         }
 
-        fsImage = new NativeImage(NativeImage.Format.RGBA, w, h, false);
-        fsTexture = new DynamicTexture(() -> "superawesomemod_minimap_fs", fsImage);
+        // Use size constructor so getPixels() returns the internal image
+        fsTexture = new DynamicTexture(() -> "superawesomemod_minimap_fs", w, h, false);
+        fsImage = fsTexture.getPixels();
         fsTextureId = Identifier.fromNamespaceAndPath("superawesomemod", "minimap_fs");
         Minecraft.getInstance().getTextureManager().register(fsTextureId, fsTexture);
         fsTexW = w;
