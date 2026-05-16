@@ -4,7 +4,9 @@ import com.steveplays.superawesomemod.mixin.MinecraftAutoclickerInvoker;
 import com.steveplays.superawesomemod.mixin.OptionInstanceAccessor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.tags.ItemTags;
 
@@ -24,6 +26,17 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         LODTerrainRenderer.register();
         XrayRenderer.register();
         XrayLineRenderType.touch();
+        MiniMapOverlay.register();
+        MiniMapChunkScanner.register();
+        MiniMapWaypointRenderer.register();
+
+        // Mini Map: world join/leave persistence hooks
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            MiniMapPersistence.onWorldJoin(Minecraft.getInstance());
+        });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            MiniMapPersistence.onWorldLeave();
+        });
 
         final CameraType[] lastCameraType = { CameraType.FIRST_PERSON };
 
@@ -33,6 +46,20 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 if (client.screen == null) {
                     client.setScreen(new ModMenuScreen());
                 }
+            }
+
+            // Mini Map: C key toggles full-screen map
+            while (ModKeybindings.miniMapToggle.consumeClick()) {
+                if (MiniMapData.isEnabled() && client.screen == null) {
+                    client.setScreen(new MiniMapFullScreen());
+                } else if (client.screen instanceof MiniMapFullScreen) {
+                    client.setScreen(null);
+                }
+            }
+
+            // Mini Map persistence auto-save tick
+            if (MiniMapData.isEnabled()) {
+                MiniMapPersistence.tick();
             }
 
             // Zoom: hold-to-zoom. Drain queued click events so they don't pile up,

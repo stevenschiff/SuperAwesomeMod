@@ -15,6 +15,7 @@ public class ModKeybindings {
 
     public static KeyMapping openMenu;
     public static KeyMapping zoom;
+    public static KeyMapping miniMapToggle;
 
     public static void register() {
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
@@ -27,6 +28,12 @@ public class ModKeybindings {
             "key.superawesomemod.zoom",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_X,
+            CATEGORY
+        ));
+        miniMapToggle = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+            "key.superawesomemod.minimap_toggle",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_C,
             CATEGORY
         ));
     }
