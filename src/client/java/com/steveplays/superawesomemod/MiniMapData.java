@@ -15,10 +15,16 @@ public final class MiniMapData {
     private static boolean hudVisible = true;
 
     // HUD minimap size in pixels (64-256)
-    private static int minimapSize = 128;
+    private static int minimapSize = 192;
 
     // Corner position: 0=TL, 1=TR, 2=BL, 3=BR
     private static int corner = 1;
+
+    // Entity display mode: 0=None, 1=Players Only, 2=All Entities
+    private static int entityMode = 1;
+
+    // Specific waypoints mode: when true, only show waypoints marked visible
+    private static boolean specificWaypoints = false;
 
     // Waypoints (thread-safe for render access)
     private static final CopyOnWriteArrayList<MiniMapWaypoint> waypoints = new CopyOnWriteArrayList<>();
@@ -54,9 +60,37 @@ public final class MiniMapData {
         };
     }
 
+    // --- Entity display mode ---
+    public static int getEntityMode() { return entityMode; }
+    public static void setEntityMode(int mode) { entityMode = Math.max(0, Math.min(2, mode)); }
+
+    public static String getEntityModeName() {
+        return switch (entityMode) {
+            case 0 -> "None";
+            case 1 -> "Players Only";
+            case 2 -> "All Entities";
+            default -> "Players Only";
+        };
+    }
+
+    // --- Specific waypoints mode ---
+    public static boolean isSpecificWaypoints() { return specificWaypoints; }
+    public static void setSpecificWaypoints(boolean s) { specificWaypoints = s; }
+
     // --- Waypoints ---
     public static List<MiniMapWaypoint> getWaypoints() {
         return Collections.unmodifiableList(waypoints);
+    }
+
+    public static List<MiniMapWaypoint> getVisibleWaypoints() {
+        if (!specificWaypoints) return Collections.unmodifiableList(waypoints);
+        return waypoints.stream().filter(MiniMapWaypoint::visible).toList();
+    }
+
+    public static void setWaypointVisible(int index, boolean visible) {
+        if (index >= 0 && index < waypoints.size()) {
+            waypoints.set(index, waypoints.get(index).withVisible(visible));
+        }
     }
 
     public static void addWaypoint(MiniMapWaypoint wp) {

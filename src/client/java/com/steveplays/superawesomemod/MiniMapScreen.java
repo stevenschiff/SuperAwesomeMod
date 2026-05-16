@@ -62,17 +62,27 @@ public class MiniMapScreen extends Screen {
             }
         ).bounds(cx - BTN_W / 2, topY + gap * 3, BTN_W, BTN_H).build());
 
+        // Entity display mode
+        this.addRenderableWidget(Button.builder(
+            entityLabel(),
+            btn -> {
+                int mode = (MiniMapData.getEntityMode() + 1) % 3;
+                MiniMapData.setEntityMode(mode);
+                btn.setMessage(entityLabel());
+            }
+        ).bounds(cx - BTN_W / 2, topY + gap * 4, BTN_W, BTN_H).build());
+
         // Manage Waypoints button
         this.addRenderableWidget(Button.builder(
             Component.literal("Manage Waypoints (" + MiniMapData.getWaypoints().size() + ")"),
             btn -> this.minecraft.setScreen(new MiniMapWaypointListScreen(this))
-        ).bounds(cx - BTN_W / 2, topY + gap * 4, BTN_W, BTN_H).build());
+        ).bounds(cx - BTN_W / 2, topY + gap * 5, BTN_W, BTN_H).build());
 
         // Back button
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
             btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, topY + gap * 5 + 8, 100, BTN_H).build());
+        ).bounds(cx - 50, topY + gap * 6 + 8, 100, BTN_H).build());
     }
 
     private Component enabledLabel() {
@@ -91,6 +101,10 @@ public class MiniMapScreen extends Screen {
 
     private Component cornerLabel() {
         return Component.literal("Corner: " + MiniMapData.getCornerName());
+    }
+
+    private Component entityLabel() {
+        return Component.literal("Entities: " + MiniMapData.getEntityModeName());
     }
 
     @Override

@@ -38,7 +38,7 @@ public final class MiniMapWaypointRenderer {
 
         VertexConsumer buf = consumers.getBuffer(XrayLineRenderType.LINES_XRAY);
 
-        for (MiniMapWaypoint wp : MiniMapData.getWaypoints()) {
+        for (MiniMapWaypoint wp : MiniMapData.getVisibleWaypoints()) {
             renderWaypoint(ctx, buf, matrix, pose, camera, camPos, player, wp, mc);
         }
     }

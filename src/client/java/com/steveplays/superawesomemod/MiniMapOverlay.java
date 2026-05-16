@@ -10,6 +10,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 public final class MiniMapOverlay {
@@ -140,32 +142,59 @@ public final class MiniMapOverlay {
         // Render terrain as single texture blit
         graphics.blit(RenderPipelines.GUI_TEXTURED, mapTextureId, ox, oy, 0.0f, 0.0f, size, size, size, size);
 
-        // Draw waypoint markers (few fill calls, no performance issue)
+        // Draw waypoint markers
         LocalPlayer player = mc.player;
         int halfSize = size / 2;
 
-        for (MiniMapWaypoint wp : MiniMapData.getWaypoints()) {
+        for (MiniMapWaypoint wp : MiniMapData.getVisibleWaypoints()) {
             int wpPx = halfSize + (int) (wp.x() - playerX);
             int wpPy = halfSize + (int) (wp.z() - playerZ);
             if (wpPx >= 0 && wpPx < size && wpPy >= 0 && wpPy < size) {
                 int c = wp.color() | 0xFF000000;
-                graphics.fill(ox + wpPx - 1, oy + wpPy, ox + wpPx + 2, oy + wpPy + 1, c);
-                graphics.fill(ox + wpPx, oy + wpPy - 1, ox + wpPx + 1, oy + wpPy + 2, c);
+                // Diamond shape
+                graphics.fill(ox + wpPx - 2, oy + wpPy, ox + wpPx + 3, oy + wpPy + 1, c);
+                graphics.fill(ox + wpPx - 1, oy + wpPy - 1, ox + wpPx + 2, oy + wpPy + 2, c);
+                graphics.fill(ox + wpPx, oy + wpPy - 2, ox + wpPx + 1, oy + wpPy + 3, c);
             }
         }
 
-        // Draw other players as white dots
+        // Draw entities based on entity mode setting
         ClientLevel level = mc.level;
-        for (Player p : level.players()) {
-            if (p == player) continue;
-            int pPx = halfSize + (int) (p.getX() - playerX);
-            int pPy = halfSize + (int) (p.getZ() - playerZ);
-            if (pPx >= 1 && pPx < size - 1 && pPy >= 1 && pPy < size - 1) {
-                graphics.fill(ox + pPx - 1, oy + pPy - 1, ox + pPx + 2, oy + pPy + 2, 0xFFFFFFFF);
+        int entityMode = MiniMapData.getEntityMode();
+
+        if (entityMode >= 1) {
+            // Draw players (cyan diamond shape)
+            for (Player p : level.players()) {
+                if (p == player) continue;
+                int pPx = halfSize + (int) (p.getX() - playerX);
+                int pPy = halfSize + (int) (p.getZ() - playerZ);
+                if (pPx >= 2 && pPx < size - 2 && pPy >= 2 && pPy < size - 2) {
+                    // Cyan filled diamond for players
+                    graphics.fill(ox + pPx - 1, oy + pPy, ox + pPx + 2, oy + pPy + 1, 0xFF00FFFF);
+                    graphics.fill(ox + pPx, oy + pPy - 1, ox + pPx + 1, oy + pPy + 2, 0xFF00FFFF);
+                    // White outline
+                    graphics.fill(ox + pPx - 2, oy + pPy, ox + pPx - 1, oy + pPy + 1, 0xFFFFFFFF);
+                    graphics.fill(ox + pPx + 2, oy + pPy, ox + pPx + 3, oy + pPy + 1, 0xFFFFFFFF);
+                    graphics.fill(ox + pPx, oy + pPy - 2, ox + pPx + 1, oy + pPy - 1, 0xFFFFFFFF);
+                    graphics.fill(ox + pPx, oy + pPy + 2, ox + pPx + 1, oy + pPy + 3, 0xFFFFFFFF);
+                }
             }
         }
 
-        // Self marker (center green dot)
+        if (entityMode >= 2) {
+            // Draw other living entities (small orange dot)
+            for (Entity entity : level.entitiesForRendering()) {
+                if (entity instanceof Player) continue;
+                if (!(entity instanceof LivingEntity)) continue;
+                int ePx = halfSize + (int) (entity.getX() - playerX);
+                int ePy = halfSize + (int) (entity.getZ() - playerZ);
+                if (ePx >= 0 && ePx < size && ePy >= 0 && ePy < size) {
+                    graphics.fill(ox + ePx, oy + ePy, ox + ePx + 1, oy + ePy + 1, 0xFFFF8800);
+                }
+            }
+        }
+
+        // Self marker (center green dot with direction arrow)
         int cx = ox + halfSize;
         int cy = oy + halfSize;
         graphics.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFF00FF00);
@@ -188,6 +217,12 @@ public final class MiniMapOverlay {
         graphics.drawString(mc.font, "S", cx - 2, oy + size - 10, 0xFFFFFF, false);
         graphics.drawString(mc.font, "W", ox + 2, cy - 4, 0xFFFFFF, false);
         graphics.drawString(mc.font, "E", ox + size - 8, cy - 4, 0xFFFFFF, false);
+
+        // Player coordinates below the minimap
+        String coordText = String.format("X: %d  Z: %d", (int) playerX, (int) playerZ);
+        int textX = ox + size / 2 - mc.font.width(coordText) / 2;
+        int textY = oy + size + 2;
+        graphics.drawString(mc.font, coordText, textX, textY, 0xDDDDDD, false);
     }
 
     private static void drawLine(GuiGraphics graphics, int x0, int y0, int x1, int y1, int color) {

@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.lwjgl.glfw.GLFW;
 
@@ -111,7 +113,7 @@ public class MiniMapFullScreen extends Screen {
         graphics.blit(RenderPipelines.GUI_TEXTURED, fsTextureId, 0, 0, 0.0f, 0.0f, w, h, w, h);
 
         // Draw waypoints
-        for (MiniMapWaypoint wp : MiniMapData.getWaypoints()) {
+        for (MiniMapWaypoint wp : MiniMapData.getVisibleWaypoints()) {
             int sx = worldToScreenX(wp.x());
             int sy = worldToScreenZ(wp.z());
 
@@ -119,28 +121,54 @@ public class MiniMapFullScreen extends Screen {
 
             int c = wp.color() | 0xFF000000;
 
-            // Diamond marker (5x5)
-            graphics.fill(sx - 2, sy, sx + 3, sy + 1, c);
-            graphics.fill(sx - 1, sy - 1, sx + 2, sy + 2, c);
-            graphics.fill(sx, sy - 2, sx + 1, sy + 3, c);
+            // Diamond marker (7x7)
+            graphics.fill(sx - 3, sy, sx + 4, sy + 1, c);
+            graphics.fill(sx - 2, sy - 1, sx + 3, sy + 2, c);
+            graphics.fill(sx - 1, sy - 2, sx + 2, sy + 3, c);
+            graphics.fill(sx, sy - 3, sx + 1, sy + 4, c);
 
             // Name label
-            graphics.drawString(this.font, wp.name(), sx + 5, sy - 4, 0xFFFFFF, true);
+            graphics.drawString(this.font, wp.name(), sx + 6, sy - 4, 0xFFFFFF, true);
         }
 
-        // Draw other players
+        // Draw entities based on mode
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null && mc.player != null) {
             ClientLevel level = mc.level;
-            for (Player p : level.players()) {
-                if (p == mc.player) continue;
-                int sx = worldToScreenX((int) p.getX());
-                int sy = worldToScreenZ((int) p.getZ());
+            int entityMode = MiniMapData.getEntityMode();
 
-                if (sx < 0 || sx > this.width || sy < 0 || sy > this.height) continue;
+            if (entityMode >= 2) {
+                // Draw living entities (orange small dot)
+                for (Entity entity : level.entitiesForRendering()) {
+                    if (entity instanceof Player) continue;
+                    if (!(entity instanceof LivingEntity)) continue;
+                    int sx = worldToScreenX((int) entity.getX());
+                    int sy = worldToScreenZ((int) entity.getZ());
+                    if (sx < 0 || sx > this.width || sy < 0 || sy > this.height) continue;
+                    graphics.fill(sx - 1, sy - 1, sx + 2, sy + 2, 0xFFFF8800);
+                }
+            }
 
-                graphics.fill(sx - 2, sy - 2, sx + 3, sy + 3, 0xFFFFFFFF);
-                graphics.drawString(this.font, p.getName().getString(), sx + 5, sy - 4, 0xFFFFFF, true);
+            if (entityMode >= 1) {
+                // Draw players (cyan diamond + name)
+                for (Player p : level.players()) {
+                    if (p == mc.player) continue;
+                    int sx = worldToScreenX((int) p.getX());
+                    int sy = worldToScreenZ((int) p.getZ());
+                    if (sx < 0 || sx > this.width || sy < 0 || sy > this.height) continue;
+
+                    // Cyan filled diamond
+                    graphics.fill(sx - 2, sy, sx + 3, sy + 1, 0xFF00FFFF);
+                    graphics.fill(sx - 1, sy - 1, sx + 2, sy + 2, 0xFF00FFFF);
+                    graphics.fill(sx, sy - 2, sx + 1, sy + 3, 0xFF00FFFF);
+                    // White border
+                    graphics.fill(sx - 3, sy, sx - 2, sy + 1, 0xFFFFFFFF);
+                    graphics.fill(sx + 3, sy, sx + 4, sy + 1, 0xFFFFFFFF);
+                    graphics.fill(sx, sy - 3, sx + 1, sy - 2, 0xFFFFFFFF);
+                    graphics.fill(sx, sy + 3, sx + 1, sy + 4, 0xFFFFFFFF);
+                    // Name tag
+                    graphics.drawString(this.font, p.getName().getString(), sx + 6, sy - 4, 0xFF00FFFF, true);
+                }
             }
 
             // Draw self marker (green arrow)
@@ -161,11 +189,13 @@ public class MiniMapFullScreen extends Screen {
         double mouseWorldX = screenToWorldX(mouseX);
         double mouseWorldZ = screenToWorldZ(mouseY);
         String coords = String.format("X: %d, Z: %d", (int) Math.floor(mouseWorldX), (int) Math.floor(mouseWorldZ));
-        graphics.drawCenteredString(this.font, coords, this.width / 2, 6, 0xFFFFFF);
+        graphics.fill(this.width / 2 - 60, 2, this.width / 2 + 60, 16, 0xAA000000);
+        graphics.drawCenteredString(this.font, coords, this.width / 2, 5, 0xFFFFFF);
 
         // Zoom indicator
         String zoomText = String.format("Zoom: %.1fx", zoom);
-        graphics.drawString(this.font, zoomText, 4, 6, 0xAAAAAA, false);
+        graphics.fill(2, 2, 62, 16, 0xAA000000);
+        graphics.drawString(this.font, zoomText, 4, 5, 0xAAAAAA, false);
 
         // Legend panel
         if (showLegend) {
