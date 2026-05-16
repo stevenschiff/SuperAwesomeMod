@@ -1,12 +1,15 @@
 package com.steveplays.superawesomemod;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.lwjgl.glfw.GLFW;
 
@@ -23,6 +26,15 @@ public class MiniMapFullScreen extends Screen {
     // Mouse drag tracking
     private boolean dragging = false;
     private double lastMouseX, lastMouseY;
+
+    // Texture-based rendering for performance
+    private static DynamicTexture fsTexture;
+    private static NativeImage fsImage;
+    private static Identifier fsTextureId;
+    private static int fsTexW, fsTexH;
+    private static double lastFsPanX = Double.NaN, lastFsPanZ = Double.NaN;
+    private static float lastFsZoom = Float.NaN;
+    private static boolean fsNeedsUpdate = true;
 
     public MiniMapFullScreen() {
         super(Component.literal("Map"));
@@ -79,75 +91,23 @@ public class MiniMapFullScreen extends Screen {
         lastMouseX = mouseX;
         lastMouseY = mouseY;
 
-        // Black background for unexplored areas
-        graphics.fill(0, 0, this.width, this.height, 0xFF000000);
+        // Texture-based terrain rendering
+        int w = this.width;
+        int h = this.height;
+        ensureFullscreenTexture(w, h);
 
-        // Calculate visible world range
-        double halfWorldW = (this.width / 2.0) / zoom;
-        double halfWorldH = (this.height / 2.0) / zoom;
-
-        int minBlockX = (int) Math.floor(panX - halfWorldW);
-        int maxBlockX = (int) Math.ceil(panX + halfWorldW);
-        int minBlockZ = (int) Math.floor(panZ - halfWorldH);
-        int maxBlockZ = (int) Math.ceil(panZ + halfWorldH);
-
-        int minChunkX = minBlockX >> 4;
-        int maxChunkX = maxBlockX >> 4;
-        int minChunkZ = minBlockZ >> 4;
-        int maxChunkZ = maxBlockZ >> 4;
-
-        // Render chunks
-        int blockSize = Math.max(1, (int) Math.ceil(zoom));
-
-        if (zoom >= 0.5f) {
-            // Render individual blocks
-            for (int cx = minChunkX; cx <= maxChunkX; cx++) {
-                for (int cz = minChunkZ; cz <= maxChunkZ; cz++) {
-                    int[] colors = MiniMapChunkCache.get(cx, cz);
-                    if (colors == null) continue;
-
-                    for (int lx = 0; lx < 16; lx++) {
-                        for (int lz = 0; lz < 16; lz++) {
-                            double worldX = cx * 16 + lx;
-                            double worldZ = cz * 16 + lz;
-
-                            if (worldX < minBlockX || worldX > maxBlockX) continue;
-                            if (worldZ < minBlockZ || worldZ > maxBlockZ) continue;
-
-                            int screenX = (int) ((worldX - panX) * zoom + this.width / 2.0);
-                            int screenY = (int) ((worldZ - panZ) * zoom + this.height / 2.0);
-
-                            int color = colors[lx * 16 + lz];
-                            if (color != 0xFF000000) {
-                                graphics.fill(screenX, screenY,
-                                    screenX + blockSize, screenY + blockSize, color);
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            // Zoomed out: render one color per chunk (average or center sample)
-            for (int cx = minChunkX; cx <= maxChunkX; cx++) {
-                for (int cz = minChunkZ; cz <= maxChunkZ; cz++) {
-                    int[] colors = MiniMapChunkCache.get(cx, cz);
-                    if (colors == null) continue;
-
-                    // Use center block color as representative
-                    int color = colors[8 * 16 + 8];
-                    if (color == 0xFF000000) continue;
-
-                    double worldX = cx * 16 + 8;
-                    double worldZ = cz * 16 + 8;
-                    int screenX = (int) ((worldX - panX) * zoom + this.width / 2.0);
-                    int screenY = (int) ((worldZ - panZ) * zoom + this.height / 2.0);
-                    int chunkPixelSize = Math.max(1, (int) (16 * zoom));
-
-                    graphics.fill(screenX - chunkPixelSize / 2, screenY - chunkPixelSize / 2,
-                        screenX + chunkPixelSize / 2, screenY + chunkPixelSize / 2, color);
-                }
-            }
+        boolean viewChanged = Double.isNaN(lastFsPanX)
+            || panX != lastFsPanX || panZ != lastFsPanZ || zoom != lastFsZoom;
+        if (viewChanged || fsNeedsUpdate) {
+            regenerateFullscreenImage(w, h);
+            fsTexture.upload();
+            lastFsPanX = panX;
+            lastFsPanZ = panZ;
+            lastFsZoom = zoom;
+            fsNeedsUpdate = false;
         }
+
+        graphics.blit(fsTextureId, 0, 0, 0, 0, w, h, w, h);
 
         // Draw waypoints
         for (MiniMapWaypoint wp : MiniMapData.getWaypoints()) {
@@ -245,6 +205,72 @@ public class MiniMapFullScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    // --- Texture helpers ---
+
+    private static void ensureFullscreenTexture(int w, int h) {
+        if (fsImage != null && fsTexW == w && fsTexH == h) return;
+
+        if (fsTexture != null) {
+            fsTexture.close();
+        }
+        if (fsTextureId != null) {
+            Minecraft.getInstance().getTextureManager().release(fsTextureId);
+            fsTextureId = null;
+        }
+
+        fsImage = new NativeImage(NativeImage.Format.RGBA, w, h, false);
+        fsTexture = new DynamicTexture(() -> "superawesomemod_minimap_fs", fsImage);
+        fsTextureId = Identifier.fromNamespaceAndPath("superawesomemod", "minimap_fs");
+        Minecraft.getInstance().getTextureManager().register(fsTextureId, fsTexture);
+        fsTexW = w;
+        fsTexH = h;
+        fsNeedsUpdate = true;
+    }
+
+    private void regenerateFullscreenImage(int w, int h) {
+        double halfW = w / 2.0;
+        double halfH = h / 2.0;
+        double invZoom = 1.0 / zoom;
+
+        for (int px = 0; px < w; px++) {
+            double worldX = panX + (px - halfW) * invZoom;
+            int bx = (int) Math.floor(worldX);
+            int chunkX = bx >> 4;
+            int lx = bx & 15;
+
+            int lastChunkZ = Integer.MIN_VALUE;
+            int[] colors = null;
+
+            for (int py = 0; py < h; py++) {
+                double worldZ = panZ + (py - halfH) * invZoom;
+                int bz = (int) Math.floor(worldZ);
+                int cz = bz >> 4;
+
+                if (cz != lastChunkZ) {
+                    colors = MiniMapChunkCache.get(chunkX, cz);
+                    lastChunkZ = cz;
+                }
+
+                int color;
+                if (colors != null) {
+                    int lz = bz & 15;
+                    color = colors[lx * 16 + lz];
+                } else {
+                    color = 0xFF000000;
+                }
+                fsImage.setPixelABGR(px, py, argbToAbgr(color));
+            }
+        }
+    }
+
+    private static int argbToAbgr(int argb) {
+        int a = (argb >> 24) & 0xFF;
+        int r = (argb >> 16) & 0xFF;
+        int g = (argb >> 8) & 0xFF;
+        int b = argb & 0xFF;
+        return (a << 24) | (b << 16) | (g << 8) | r;
     }
 
     // --- Coordinate conversion helpers ---

@@ -1,11 +1,14 @@
 package com.steveplays.superawesomemod;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
 public final class MiniMapOverlay {
@@ -13,23 +16,97 @@ public final class MiniMapOverlay {
     private MiniMapOverlay() {}
 
     private static final int BORDER_COLOR = 0xFF333333;
-    private static final int BG_COLOR = 0xFF000000;
+
+    // Texture-based rendering for performance
+    private static DynamicTexture mapTexture;
+    private static NativeImage mapImage;
+    private static Identifier mapTextureId;
+    private static int currentTextureSize = 0;
+
+    // Update throttling: only regenerate terrain every N ticks
+    private static int tickCounter = 0;
+    private static final int UPDATE_INTERVAL = 5; // ~4 times per second
+    private static double lastPlayerX = Double.NaN;
+    private static double lastPlayerZ = Double.NaN;
+    private static boolean needsUpdate = true;
 
     public static void register() {
         HudRenderCallback.EVENT.register(MiniMapOverlay::onHudRender);
     }
 
-    private static void onHudRender(GuiGraphics graphics, DeltaTracker tickCounter) {
+    private static void ensureTexture(int size) {
+        if (mapImage != null && currentTextureSize == size) return;
+
+        // Clean up old texture
+        if (mapTexture != null) {
+            mapTexture.close();
+        }
+        if (mapTextureId != null) {
+            Minecraft.getInstance().getTextureManager().release(mapTextureId);
+            mapTextureId = null;
+        }
+
+        // Create new
+        mapImage = new NativeImage(NativeImage.Format.RGBA, size, size, false);
+        mapTexture = new DynamicTexture(() -> "superawesomemod_minimap_hud", mapImage);
+        mapTextureId = Identifier.fromNamespaceAndPath("superawesomemod", "minimap_hud");
+        Minecraft.getInstance().getTextureManager().register(mapTextureId, mapTexture);
+        currentTextureSize = size;
+        needsUpdate = true;
+    }
+
+    private static void regenerateImage(Minecraft mc, int size) {
+        LocalPlayer player = mc.player;
+        if (player == null) return;
+
+        double playerX = player.getX();
+        double playerZ = player.getZ();
+        int halfSize = size / 2;
+
+        for (int px = 0; px < size; px++) {
+            for (int py = 0; py < size; py++) {
+                double worldX = playerX + (px - halfSize);
+                double worldZ = playerZ + (py - halfSize);
+
+                int chunkX = (int) Math.floor(worldX) >> 4;
+                int chunkZ = (int) Math.floor(worldZ) >> 4;
+
+                int[] colors = MiniMapChunkCache.get(chunkX, chunkZ);
+                int color = 0xFF000000; // black = unexplored
+                if (colors != null) {
+                    int lx = ((int) Math.floor(worldX)) & 15;
+                    int lz = ((int) Math.floor(worldZ)) & 15;
+                    color = colors[lx * 16 + lz];
+                }
+                // NativeImage uses ABGR format, convert from ARGB
+                mapImage.setPixelABGR(px, py, argbToAbgr(color));
+            }
+        }
+
+        lastPlayerX = playerX;
+        lastPlayerZ = playerZ;
+    }
+
+    private static int argbToAbgr(int argb) {
+        int a = (argb >> 24) & 0xFF;
+        int r = (argb >> 16) & 0xFF;
+        int g = (argb >> 8) & 0xFF;
+        int b = argb & 0xFF;
+        return (a << 24) | (b << 16) | (g << 8) | r;
+    }
+
+    private static void onHudRender(GuiGraphics graphics, DeltaTracker tickCounter_) {
         if (!MiniMapData.isEnabled()) return;
         if (!MiniMapData.isHudVisible()) return;
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.options.hideGui) return;
         if (mc.player == null || mc.level == null) return;
-        // Don't draw when full-screen map is open
         if (mc.screen instanceof MiniMapFullScreen) return;
 
         int size = MiniMapData.getMinimapSize();
+        ensureTexture(size);
+
         int guiW = graphics.guiWidth();
         int guiH = graphics.guiHeight();
 
@@ -37,51 +114,39 @@ public final class MiniMapOverlay {
         int ox, oy;
         int margin = 4;
         switch (MiniMapData.getCorner()) {
-            case 0 -> { ox = margin; oy = margin; } // top-left
-            case 1 -> { ox = guiW - size - margin; oy = margin; } // top-right
-            case 2 -> { ox = margin; oy = guiH - size - margin; } // bottom-left
-            case 3 -> { ox = guiW - size - margin; oy = guiH - size - margin; } // bottom-right
+            case 0 -> { ox = margin; oy = margin; }
+            case 1 -> { ox = guiW - size - margin; oy = margin; }
+            case 2 -> { ox = margin; oy = guiH - size - margin; }
+            case 3 -> { ox = guiW - size - margin; oy = guiH - size - margin; }
             default -> { ox = guiW - size - margin; oy = margin; }
         }
 
-        // Background
-        graphics.fill(ox, oy, ox + size, oy + size, BG_COLOR);
+        // Check if terrain texture needs regenerating
+        tickCounter++;
+        double playerX = mc.player.getX();
+        double playerZ = mc.player.getZ();
+        boolean playerMoved = Double.isNaN(lastPlayerX)
+            || Math.abs(playerX - lastPlayerX) > 1
+            || Math.abs(playerZ - lastPlayerZ) > 1;
 
-        // Render terrain
-        LocalPlayer player = mc.player;
-        double playerX = player.getX();
-        double playerZ = player.getZ();
-
-        // Each pixel represents ~1 block at default scale
-        float blocksPerPixel = 1.0f;
-        int halfSize = size / 2;
-
-        for (int px = 0; px < size; px++) {
-            for (int py = 0; py < size; py++) {
-                double worldX = playerX + (px - halfSize) * blocksPerPixel;
-                double worldZ = playerZ + (py - halfSize) * blocksPerPixel;
-
-                int chunkX = (int) Math.floor(worldX) >> 4;
-                int chunkZ = (int) Math.floor(worldZ) >> 4;
-
-                int[] colors = MiniMapChunkCache.get(chunkX, chunkZ);
-                if (colors != null) {
-                    int lx = ((int) Math.floor(worldX)) & 15;
-                    int lz = ((int) Math.floor(worldZ)) & 15;
-                    int color = colors[lx * 16 + lz];
-                    if (color != 0xFF000000) {
-                        graphics.fill(ox + px, oy + py, ox + px + 1, oy + py + 1, color);
-                    }
-                }
-            }
+        if (needsUpdate || (tickCounter >= UPDATE_INTERVAL && playerMoved)) {
+            regenerateImage(mc, size);
+            mapTexture.upload();
+            tickCounter = 0;
+            needsUpdate = false;
         }
 
-        // Draw waypoint markers
+        // Render terrain as single texture blit
+        graphics.blit(mapTextureId, ox, oy, 0, 0, size, size, size, size);
+
+        // Draw waypoint markers (few fill calls, no performance issue)
+        LocalPlayer player = mc.player;
+        int halfSize = size / 2;
+
         for (MiniMapWaypoint wp : MiniMapData.getWaypoints()) {
             int wpPx = halfSize + (int) (wp.x() - playerX);
             int wpPy = halfSize + (int) (wp.z() - playerZ);
             if (wpPx >= 0 && wpPx < size && wpPy >= 0 && wpPy < size) {
-                // Draw a 3x3 colored diamond
                 int c = wp.color() | 0xFF000000;
                 graphics.fill(ox + wpPx - 1, oy + wpPy, ox + wpPx + 2, oy + wpPy + 1, c);
                 graphics.fill(ox + wpPx, oy + wpPy - 1, ox + wpPx + 1, oy + wpPy + 2, c);
@@ -99,20 +164,19 @@ public final class MiniMapOverlay {
             }
         }
 
-        // Draw self marker (center dot + direction indicator)
+        // Self marker (center green dot)
         int cx = ox + halfSize;
         int cy = oy + halfSize;
         graphics.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFF00FF00);
 
-        // Direction arrow based on player yaw
+        // Direction arrow
         float yawRad = (float) Math.toRadians(player.getYRot());
         int arrowLen = 4;
         int ax = (int) (-Math.sin(yawRad) * arrowLen);
         int ay = (int) (Math.cos(yawRad) * arrowLen);
-        // Draw a small line for direction
         drawLine(graphics, cx, cy, cx + ax, cy + ay, 0xFF00FF00);
 
-        // Border (2px)
+        // Border
         graphics.fill(ox, oy, ox + size, oy + 1, BORDER_COLOR);
         graphics.fill(ox, oy + size - 1, ox + size, oy + size, BORDER_COLOR);
         graphics.fill(ox, oy, ox + 1, oy + size, BORDER_COLOR);
@@ -126,7 +190,6 @@ public final class MiniMapOverlay {
     }
 
     private static void drawLine(GuiGraphics graphics, int x0, int y0, int x1, int y1, int color) {
-        // Bresenham's line algorithm (simple version)
         int dx = Math.abs(x1 - x0);
         int dy = Math.abs(y1 - y0);
         int sx = x0 < x1 ? 1 : -1;
