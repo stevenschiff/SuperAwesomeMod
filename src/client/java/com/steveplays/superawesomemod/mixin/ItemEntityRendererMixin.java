@@ -52,7 +52,7 @@ public abstract class ItemEntityRendererMixin {
             poseStack.translate(0.0f, zSize * 0.5f + 0.005f, 0.0f);
             poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
             poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
-            poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
+            poseStack.mulPose(Axis.YP.rotationDegrees(90.0f));
         } else {
             // 3D items (blocks): sit upright on the ground, no bob or spin.
             float modelHeight = (float) bounds.getYsize();
