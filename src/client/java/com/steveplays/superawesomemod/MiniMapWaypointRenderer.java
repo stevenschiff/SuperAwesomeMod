@@ -22,25 +22,27 @@ public final class MiniMapWaypointRenderer {
 
     private static void onAfterEntities(WorldRenderContext ctx) {
         if (!MiniMapData.isEnabled()) return;
-        if (MiniMapData.getWaypoints().isEmpty()) return;
+        if (MiniMapData.getVisibleWaypoints().isEmpty()) return;
 
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.level == null) return;
-
-        MultiBufferSource consumers = ctx.consumers();
-        if (consumers == null) return;
 
         Camera camera = ctx.gameRenderer().getMainCamera();
         Vec3 camPos = camera.position();
         PoseStack.Pose pose = ctx.matrices().last();
         Matrix4f matrix = pose.pose();
 
-        VertexConsumer buf = consumers.getBuffer(XrayLineRenderType.LINES_XRAY);
+        // Use our own buffer source so we control the build lifecycle
+        MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
+        VertexConsumer buf = bufferSource.getBuffer(XrayLineRenderType.LINES_XRAY);
 
         for (MiniMapWaypoint wp : MiniMapData.getVisibleWaypoints()) {
             renderWaypoint(ctx, buf, matrix, pose, camera, camPos, player, wp, mc);
         }
+
+        // Flush our render type so the lines actually draw
+        bufferSource.endBatch(XrayLineRenderType.LINES_XRAY);
     }
 
     private static void renderWaypoint(WorldRenderContext ctx, VertexConsumer buf,
@@ -108,20 +110,20 @@ public final class MiniMapWaypointRenderer {
         int textColor = 0xFF000000 | wp.color();
         Matrix4f textMatrix = poseStack.last().pose();
 
-        MultiBufferSource consumers = ctx.consumers();
-        if (consumers != null) {
-            mc.font.drawInBatch(
-                Component.literal(label),
-                -mc.font.width(label) / 2f, 0,
-                textColor,
-                false,
-                textMatrix,
-                consumers,
-                net.minecraft.client.gui.Font.DisplayMode.SEE_THROUGH,
-                0x40000000,
-                15728880
-            );
-        }
+        // Use our own buffer source for text rendering
+        MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
+        mc.font.drawInBatch(
+            Component.literal(label),
+            -mc.font.width(label) / 2f, 0,
+            textColor,
+            false,
+            textMatrix,
+            bufferSource,
+            net.minecraft.client.gui.Font.DisplayMode.SEE_THROUGH,
+            0x40000000,
+            15728880
+        );
+        bufferSource.endBatch();
 
         poseStack.popPose();
     }
@@ -131,7 +133,7 @@ public final class MiniMapWaypointRenderer {
                               float x2, float y2, float z2,
                               float r, float g, float b, float a,
                               float nx, float ny, float nz) {
-        buf.addVertex(mat, x1, y1, z1).setColor(r, g, b, a).setNormal(pose, nx, ny, nz).setLineWidth(2.0f);
-        buf.addVertex(mat, x2, y2, z2).setColor(r, g, b, a).setNormal(pose, nx, ny, nz).setLineWidth(2.0f);
+        buf.addVertex(mat, x1, y1, z1).setColor(r, g, b, a).setNormal(pose, nx, ny, nz);
+        buf.addVertex(mat, x2, y2, z2).setColor(r, g, b, a).setNormal(pose, nx, ny, nz);
     }
 }
