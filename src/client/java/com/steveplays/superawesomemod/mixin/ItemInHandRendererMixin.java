@@ -16,10 +16,8 @@ import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemInHandRenderer.class)
@@ -42,8 +40,10 @@ public abstract class ItemInHandRendererMixin {
         throw new AssertionError();
     }
 
-    @Unique
-    private float superawesomemod$currentSwingProgress;
+    @Shadow
+    private void applyItemArmAttackTransform(PoseStack poseStack, HumanoidArm arm, float swingProgress) {
+        throw new AssertionError();
+    }
 
     @Inject(method = "renderArmWithItem", at = @At("HEAD"), cancellable = true)
     private void superawesomemod$swordBlockingVisual(
@@ -52,9 +52,6 @@ public abstract class ItemInHandRendererMixin {
             float equipProgress, PoseStack poseStack,
             SubmitNodeCollector collector, int combinedLight,
             CallbackInfo ci) {
-        // Capture swing progress for the @Redirect below
-        this.superawesomemod$currentSwingProgress = swingProgress;
-
         if (!OldPvpData.isBlockingEnabled()) return;
         if (itemStack.isEmpty() || !itemStack.is(ItemTags.SWORDS)) return;
         if (player.isScoping()) return;
@@ -112,19 +109,32 @@ public abstract class ItemInHandRendererMixin {
     }
 
     /**
-     * Redirect the second isUsingItem() call in renderArmWithItem so that
-     * when the player is mid-swing, the renderer takes the idle+swing branch
-     * instead of the eating-only branch. This makes the swing animation
-     * briefly play over the eating animation, matching 1.7 behavior.
+     * 1.7-style swing while using items: overlays the arm swing animation on top
+     * of item-use animations (eating, drinking, bow, etc.) by applying the attack
+     * transform after the base arm transform in the use-animation branches.
+     * Matches Animatium's itemUsageSwinging behavior.
+     *
+     * This inject fires after every applyItemArmTransform call in renderArmWithItem.
+     * The isUsingItem() guard ensures it only takes effect inside the use-animation
+     * branches (eating, drinking, bow, etc.), not in the idle branch where vanilla
+     * already calls applyItemArmAttackTransform.
      */
-    @Redirect(method = "renderArmWithItem",
+    @Inject(method = "renderArmWithItem",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/player/AbstractClientPlayer;isUsingItem()Z",
-                    ordinal = 1))
-    private boolean superawesomemod$allowSwingWhileUsing(AbstractClientPlayer player) {
-        if (OldPvpData.isSwingWhileUsingEnabled() && this.superawesomemod$currentSwingProgress > 0.0f) {
-            return false;
-        }
-        return player.isUsingItem();
+                    target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;applyItemArmTransform(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V",
+                    shift = At.Shift.AFTER))
+    private void superawesomemod$itemUsageSwinging(
+            AbstractClientPlayer player, float partialTicks, float pitch,
+            InteractionHand hand, float swingProgress, ItemStack itemStack,
+            float equipProgress, PoseStack poseStack,
+            SubmitNodeCollector collector, int combinedLight,
+            CallbackInfo ci) {
+        if (!OldPvpData.isSwingWhileUsingEnabled()) return;
+        if (!player.isUsingItem()) return;
+
+        HumanoidArm arm = (hand == InteractionHand.MAIN_HAND)
+                ? player.getMainArm()
+                : player.getMainArm().getOpposite();
+        this.applyItemArmAttackTransform(poseStack, arm, swingProgress);
     }
 }
