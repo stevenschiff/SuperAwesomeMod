@@ -49,7 +49,7 @@ public abstract class ItemEntityRendererMixin {
             // -90 degrees around X maps the item face (+Z) to point upward (+Y).
             // Use the model's Z thickness (not Y height) for the offset since
             // that becomes the vertical extent after rotation.
-            poseStack.translate(0.0f, zSize * 0.5f + 0.005f, 0.0f);
+            poseStack.translate(0.0f, zSize * 0.5f + 0.005f + 0.1f, 0.0f);
             poseStack.mulPose(Axis.XP.rotationDegrees(-10.0f));
             poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
         } else {
