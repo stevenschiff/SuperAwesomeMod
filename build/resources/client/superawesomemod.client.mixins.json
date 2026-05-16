@@ -12,6 +12,7 @@
     "MinecraftAutoclickerInvoker",
     "PvpDetectorDamageMixin",
     "GameRendererZoomMixin",
+    "MouseHandlerZoomScrollMixin",
     "ContainerScreenShulkerMixin",
     "OptionInstanceAccessor",
     "ItemEntityRendererMixin",
