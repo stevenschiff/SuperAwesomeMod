@@ -33,13 +33,29 @@ public final class MiniMapWaypointRenderer {
         PoseStack.Pose pose = ctx.matrices().last();
         Matrix4f matrix = pose.pose();
 
+        // Maximum distance to render geometry (stay within the frustum far plane).
+        // Use 80% of render distance in blocks so we're safely inside the clip plane.
+        float maxRenderDist = mc.options.renderDistance().get() * 16 * 0.8f;
+
         // --- Pass 1: Render all line geometry ---
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
         VertexConsumer buf = bufferSource.getBuffer(XrayLineRenderType.LINES_XRAY);
 
         for (MiniMapWaypoint wp : MiniMapData.getVisibleWaypoints()) {
-            float wx = (float) (wp.x() + 0.5 - camPos.x);
-            float wz = (float) (wp.z() + 0.5 - camPos.z);
+            float rawX = (float) (wp.x() + 0.5 - camPos.x);
+            float rawZ = (float) (wp.z() + 0.5 - camPos.z);
+
+            // Clamp distant waypoints to maxRenderDist while preserving direction
+            float dist = (float) Math.sqrt(rawX * rawX + rawZ * rawZ);
+            float wx, wz;
+            if (dist > maxRenderDist && dist > 0) {
+                float scale = maxRenderDist / dist;
+                wx = rawX * scale;
+                wz = rawZ * scale;
+            } else {
+                wx = rawX;
+                wz = rawZ;
+            }
 
             float yBot = (float) (64 - camPos.y);
             float yTop = (float) (320 - camPos.y);
@@ -67,20 +83,33 @@ public final class MiniMapWaypointRenderer {
                 Math.pow(wp.x() + 0.5 - player.getX(), 2) +
                 Math.pow(wp.z() + 0.5 - player.getZ(), 2)
             );
-            renderLabel(ctx, camera, camPos, wp, distXZ, mc);
+            renderLabel(ctx, camera, camPos, wp, distXZ, mc, maxRenderDist);
         }
     }
 
     private static void renderLabel(WorldRenderContext ctx, Camera camera, Vec3 camPos,
-                                     MiniMapWaypoint wp, double distance, Minecraft mc) {
+                                     MiniMapWaypoint wp, double distance, Minecraft mc,
+                                     float maxRenderDist) {
         PoseStack poseStack = ctx.matrices();
         poseStack.pushPose();
 
         // Position the label above the waypoint at player eye level + 20
         double labelY = mc.player.getY() + 20;
-        float wx = (float) (wp.x() + 0.5 - camPos.x);
+        float rawX = (float) (wp.x() + 0.5 - camPos.x);
+        float rawZ = (float) (wp.z() + 0.5 - camPos.z);
+
+        // Clamp distant labels to maxRenderDist while preserving direction
+        float dist = (float) Math.sqrt(rawX * rawX + rawZ * rawZ);
+        float wx, wz;
+        if (dist > maxRenderDist && dist > 0) {
+            float scale = maxRenderDist / dist;
+            wx = rawX * scale;
+            wz = rawZ * scale;
+        } else {
+            wx = rawX;
+            wz = rawZ;
+        }
         float wy = (float) (labelY - camPos.y);
-        float wz = (float) (wp.z() + 0.5 - camPos.z);
 
         poseStack.translate(wx, wy + 1.5, wz);
 
