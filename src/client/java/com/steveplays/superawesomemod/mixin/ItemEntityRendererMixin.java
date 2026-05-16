@@ -50,7 +50,7 @@ public abstract class ItemEntityRendererMixin {
             // Use the model's Z thickness (not Y height) for the offset since
             // that becomes the vertical extent after rotation.
             poseStack.translate(0.0f, zSize * 0.5f + 0.005f, 0.0f);
-            poseStack.mulPose(Axis.XP.rotationDegrees(10.0f));
+            poseStack.mulPose(Axis.XP.rotationDegrees(-5.0f));
             poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
         } else {
             // 3D items (blocks): sit upright on the ground, no bob or spin.
