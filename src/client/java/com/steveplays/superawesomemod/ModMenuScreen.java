@@ -23,8 +23,8 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 17 buttons centered vertically around cy: rows 0..16 of `gap`.
-        int row0 = cy - (16 * gap) / 2;
+        // 18 buttons centered vertically around cy: rows 0..17 of `gap`.
+        int row0 = cy - (17 * gap) / 2;
 
         // --- Feature buttons (add more below as the mod grows) ---
         this.addRenderableWidget(Button.builder(
@@ -107,11 +107,16 @@ public class ModMenuScreen extends Screen {
             btn -> this.minecraft.setScreen(new OldPvpScreen(this))
         ).bounds(cx - btnW / 2, row0 + gap * 15, btnW, btnH).build());
 
+        this.addRenderableWidget(Button.builder(
+            Component.literal("X-Ray"),
+            btn -> this.minecraft.setScreen(new XrayScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 16, btnW, btnH).build());
+
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 16, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 17, btnW, btnH).build());
     }
 
     @Override

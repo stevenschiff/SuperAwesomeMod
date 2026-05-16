@@ -22,6 +22,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         PvpDetectorOverlay.register();
         AppleSkinOverlay.register();
         LODTerrainRenderer.register();
+        XrayRenderer.register();
         XrayLineRenderType.touch();
 
         final CameraType[] lastCameraType = { CameraType.FIRST_PERSON };
