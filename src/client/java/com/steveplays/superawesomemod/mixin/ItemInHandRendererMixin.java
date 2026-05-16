@@ -37,6 +37,11 @@ public abstract class ItemInHandRendererMixin {
             ItemDisplayContext context, PoseStack poseStack,
             SubmitNodeCollector collector, int light);
 
+    @Shadow
+    private void swingArm(float swingProgress, PoseStack poseStack, int direction, HumanoidArm arm) {
+        throw new AssertionError();
+    }
+
     @Unique
     private float superawesomemod$currentSwingProgress;
 
@@ -71,14 +76,30 @@ public abstract class ItemInHandRendererMixin {
 
         poseStack.pushPose();
 
-        // Apply standard arm positioning
+        // Base arm positioning (modern equivalent of 1.8 transformFirstPersonItem)
         applyItemArmTransform(poseStack, arm, equipProgress);
 
-        // Apply 1.7 sword blocking transforms (classic diagonal block pose)
-        poseStack.translate(side * -0.14142136f, 0.08f, 0.14142136f);
-        poseStack.mulPose(Axis.XP.rotationDegrees(-102.25f));
-        poseStack.mulPose(Axis.YP.rotationDegrees(side * 13.365f));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(side * 78.05f));
+        // Enter legacy (1.8) coordinate space — the blocking transforms were
+        // designed for the old system where transformFirstPersonItem applied
+        // rotateY(45) and scale(0.4). This wrapper converts between modern
+        // and legacy coordinate systems (same technique as Animatium).
+        poseStack.mulPose(Axis.YP.rotationDegrees(side * 45.0f));
+        poseStack.scale(0.4f, 0.4f, 0.4f);
+
+        // Block-hitting: apply swing animation in legacy space
+        if (swingProgress > 0.0f) {
+            swingArm(swingProgress, poseStack, side, arm);
+        }
+
+        // 1.8 blocking pose (vanilla func_178103_d)
+        poseStack.translate(side * -0.5f, 0.2f, 0.0f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(side * 30.0f));
+        poseStack.mulPose(Axis.XP.rotationDegrees(-80.0f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(side * 60.0f));
+
+        // Exit legacy coordinate space
+        poseStack.scale(2.5f, 2.5f, 2.5f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(side * -45.0f));
 
         // Render the sword in the blocking pose
         ItemDisplayContext ctx = isRight
@@ -93,8 +114,8 @@ public abstract class ItemInHandRendererMixin {
     /**
      * Redirect the second isUsingItem() call in renderArmWithItem so that
      * when the player is mid-swing, the renderer takes the idle+swing branch
-     * (which calls applyItemArmAttackTransform) instead of the eating-only
-     * branch. This makes the 1.7 swing-while-eating animation visible.
+     * instead of the eating-only branch. This makes the swing animation
+     * briefly play over the eating animation, matching 1.7 behavior.
      */
     @Redirect(method = "renderArmWithItem",
             at = @At(value = "INVOKE",
