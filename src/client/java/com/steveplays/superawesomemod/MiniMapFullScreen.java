@@ -11,10 +11,14 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MiniMapFullScreen extends Screen {
 
@@ -22,7 +26,7 @@ public class MiniMapFullScreen extends Screen {
     private float zoom = 1.0f; // pixels per block
     private boolean showLegend = false;
 
-    private static final float MIN_ZOOM = 0.25f;
+    private static final float MIN_ZOOM = 0.0001f; // effectively no cap
     private static final float MAX_ZOOM = 8.0f;
     private static final float PAN_SPEED = 10.0f;
 
@@ -150,11 +154,12 @@ public class MiniMapFullScreen extends Screen {
             }
 
             if (entityMode >= 1) {
-                // Draw players (cyan diamond + name)
-                for (Player p : level.players()) {
-                    if (p == mc.player) continue;
-                    int sx = worldToScreenX((int) p.getX());
-                    int sy = worldToScreenZ((int) p.getZ());
+                // Get all players - use server player list in singleplayer for unlimited range
+                List<PlayerPos> playerPositions = getAllPlayerPositions(mc);
+
+                for (PlayerPos pp : playerPositions) {
+                    int sx = worldToScreenX((int) pp.x);
+                    int sy = worldToScreenZ((int) pp.z);
                     if (sx < 0 || sx > this.width || sy < 0 || sy > this.height) continue;
 
                     // Cyan filled diamond
@@ -167,7 +172,7 @@ public class MiniMapFullScreen extends Screen {
                     graphics.fill(sx, sy - 3, sx + 1, sy - 2, 0xFFFFFFFF);
                     graphics.fill(sx, sy + 3, sx + 1, sy + 4, 0xFFFFFFFF);
                     // Name tag
-                    graphics.drawString(this.font, p.getName().getString(), sx + 6, sy - 4, 0xFF00FFFF, true);
+                    graphics.drawString(this.font, pp.name, sx + 6, sy - 4, 0xFF00FFFF, true);
                 }
             }
 
@@ -193,8 +198,10 @@ public class MiniMapFullScreen extends Screen {
         graphics.drawCenteredString(this.font, coords, this.width / 2, 5, 0xFFFFFF);
 
         // Zoom indicator
-        String zoomText = String.format("Zoom: %.1fx", zoom);
-        graphics.fill(2, 2, 62, 16, 0xAA000000);
+        String zoomText = zoom >= 0.1f ? String.format("Zoom: %.1fx", zoom)
+                                       : String.format("Zoom: %.3fx", zoom);
+        int zoomW = this.font.width(zoomText) + 6;
+        graphics.fill(2, 2, zoomW + 2, 16, 0xAA000000);
         graphics.drawString(this.font, zoomText, 4, 5, 0xAAAAAA, false);
 
         // Legend panel
@@ -321,6 +328,30 @@ public class MiniMapFullScreen extends Screen {
 
     private int worldToScreenZ(double worldZ) {
         return (int) ((worldZ - panZ) * zoom + this.height / 2.0);
+    }
+
+    // --- Player position helpers (for showing players from any distance) ---
+
+    private record PlayerPos(String name, double x, double z) {}
+
+    private static List<PlayerPos> getAllPlayerPositions(Minecraft mc) {
+        List<PlayerPos> positions = new ArrayList<>();
+
+        // In singleplayer, access the integrated server's player list for all player positions
+        if (mc.getSingleplayerServer() != null) {
+            for (ServerPlayer sp : mc.getSingleplayerServer().getPlayerList().getPlayers()) {
+                if (sp.getUUID().equals(mc.player.getUUID())) continue;
+                positions.add(new PlayerPos(sp.getName().getString(), sp.getX(), sp.getZ()));
+            }
+        } else {
+            // Multiplayer: use loaded players from client level (limited to server tracking range)
+            for (Player p : mc.level.players()) {
+                if (p == mc.player) continue;
+                positions.add(new PlayerPos(p.getName().getString(), p.getX(), p.getZ()));
+            }
+        }
+
+        return positions;
     }
 
     private static void drawLine(GuiGraphics graphics, int x0, int y0, int x1, int y1, int color) {
