@@ -62,6 +62,20 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 MiniMapPersistence.tick();
             }
 
+            // Track current dimension for waypoint filtering
+            if (client.level != null) {
+                net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim = client.level.dimension();
+                if (dim == net.minecraft.world.level.Level.OVERWORLD) {
+                    MiniMapData.setCurrentDimension("overworld");
+                } else if (dim == net.minecraft.world.level.Level.NETHER) {
+                    MiniMapData.setCurrentDimension("the_nether");
+                } else if (dim == net.minecraft.world.level.Level.END) {
+                    MiniMapData.setCurrentDimension("the_end");
+                } else {
+                    MiniMapData.setCurrentDimension(dim.toString());
+                }
+            }
+
             // Zoom: hold-to-zoom. Drain queued click events so they don't pile up,
             // then sample the live held state — only active in-game (no screen open).
             while (ModKeybindings.zoom.consumeClick()) { /* drain */ }

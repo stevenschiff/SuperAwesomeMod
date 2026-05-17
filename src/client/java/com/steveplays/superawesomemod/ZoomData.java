@@ -20,10 +20,10 @@ public class ZoomData {
     /** Called when scroll wheel moves while zoom key is held. */
     public static void onScroll(double scrollDelta) {
         if (scrollDelta > 0) {
-            // Scroll up = zoom in more (smaller multiplier)
-            zoomTarget = Math.max(MIN_ZOOM, zoomTarget * SCROLL_FACTOR);
+            // Scroll up = zoom in more (smaller multiplier, no limit)
+            zoomTarget *= SCROLL_FACTOR;
         } else if (scrollDelta < 0) {
-            // Scroll down = zoom out (larger multiplier)
+            // Scroll down = zoom out (capped at 1.0 = normal FOV)
             zoomTarget = Math.min(MAX_ZOOM, zoomTarget / SCROLL_FACTOR);
         }
     }

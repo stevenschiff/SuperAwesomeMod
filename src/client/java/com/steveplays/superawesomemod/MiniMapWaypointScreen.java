@@ -118,7 +118,8 @@ public class MiniMapWaypointScreen extends Screen {
         }
 
         int color = (colorR << 16) | (colorG << 8) | colorB;
-        MiniMapData.addWaypoint(new MiniMapWaypoint(name, x, z, color));
+        String dimension = MiniMapData.getCurrentDimension();
+        MiniMapData.addWaypoint(new MiniMapWaypoint(name, x, z, color, true, dimension));
         MiniMapPersistence.markDirty();
     }
 

@@ -32,6 +32,9 @@ public final class MiniMapData {
     // World identification for persistence
     private static String currentWorldId = "";
 
+    // Current dimension (e.g. "minecraft:overworld", "minecraft:the_nether", "minecraft:the_end")
+    private static String currentDimension = "";
+
     // --- Master toggle ---
     public static boolean isEnabled() { return enabled; }
     public static void setEnabled(boolean e) { enabled = e; }
@@ -83,8 +86,18 @@ public final class MiniMapData {
     }
 
     public static List<MiniMapWaypoint> getVisibleWaypoints() {
-        if (!specificWaypoints) return Collections.unmodifiableList(waypoints);
-        return waypoints.stream().filter(MiniMapWaypoint::visible).toList();
+        return waypoints.stream()
+            .filter(wp -> {
+                // Filter by dimension: show only waypoints in the current dimension
+                // Legacy waypoints with empty dimension are shown everywhere
+                if (!wp.dimension().isEmpty() && !currentDimension.isEmpty()
+                        && !wp.dimension().equals(currentDimension)) {
+                    return false;
+                }
+                // Filter by visibility if specific waypoints mode is on
+                return !specificWaypoints || wp.visible();
+            })
+            .toList();
     }
 
     public static void setWaypointVisible(int index, boolean visible) {
@@ -115,4 +128,8 @@ public final class MiniMapData {
     // --- World ID ---
     public static String getCurrentWorldId() { return currentWorldId; }
     public static void setCurrentWorldId(String id) { currentWorldId = id; }
+
+    // --- Dimension ---
+    public static String getCurrentDimension() { return currentDimension; }
+    public static void setCurrentDimension(String dim) { currentDimension = dim; }
 }

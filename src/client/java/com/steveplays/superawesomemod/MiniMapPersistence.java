@@ -173,6 +173,7 @@ public final class MiniMapPersistence {
                 obj.addProperty("z", wp.z());
                 obj.addProperty("color", wp.color());
                 obj.addProperty("visible", wp.visible());
+                obj.addProperty("dimension", wp.dimension());
                 arr.add(obj);
             }
 
@@ -200,7 +201,8 @@ public final class MiniMapPersistence {
                 int z = obj.get("z").getAsInt();
                 int color = obj.get("color").getAsInt();
                 boolean visible = obj.has("visible") ? obj.get("visible").getAsBoolean() : true;
-                wps.add(new MiniMapWaypoint(name, x, z, color, visible));
+                String dimension = obj.has("dimension") ? obj.get("dimension").getAsString() : "";
+                wps.add(new MiniMapWaypoint(name, x, z, color, visible, dimension));
             }
             MiniMapData.setWaypoints(wps);
 
