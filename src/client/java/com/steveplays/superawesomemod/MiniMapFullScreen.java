@@ -116,6 +116,24 @@ public class MiniMapFullScreen extends Screen {
 
         graphics.blit(RenderPipelines.GUI_TEXTURED, fsTextureId, 0, 0, 0.0f, 0.0f, w, h, w, h);
 
+        // Draw world border (15000x15000 box, overworld only)
+        if ("overworld".equals(MiniMapData.getCurrentDimension())) {
+            int borderHalf = 7500;
+            int bx1 = worldToScreenX(-borderHalf);
+            int bz1 = worldToScreenZ(-borderHalf);
+            int bx2 = worldToScreenX(borderHalf);
+            int bz2 = worldToScreenZ(borderHalf);
+            int borderColor = 0xFFFF0000;
+            // Top edge
+            if (bz1 >= 0 && bz1 < this.height) graphics.fill(Math.max(0, bx1), bz1, Math.min(this.width, bx2), bz1 + 1, borderColor);
+            // Bottom edge
+            if (bz2 >= 0 && bz2 < this.height) graphics.fill(Math.max(0, bx1), bz2, Math.min(this.width, bx2), bz2 + 1, borderColor);
+            // Left edge
+            if (bx1 >= 0 && bx1 < this.width) graphics.fill(bx1, Math.max(0, bz1), bx1 + 1, Math.min(this.height, bz2), borderColor);
+            // Right edge
+            if (bx2 >= 0 && bx2 < this.width) graphics.fill(bx2, Math.max(0, bz1), bx2 + 1, Math.min(this.height, bz2), borderColor);
+        }
+
         // Draw waypoints
         for (MiniMapWaypoint wp : MiniMapData.getVisibleWaypoints()) {
             int sx = worldToScreenX(wp.x());
