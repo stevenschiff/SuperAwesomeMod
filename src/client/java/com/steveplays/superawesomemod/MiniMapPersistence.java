@@ -11,16 +11,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class MiniMapPersistence {
 
     private MiniMapPersistence() {}
 
-    private static boolean dirty = false;
+    private static volatile boolean dirty = false;
     private static int ticksSinceLastSave = 0;
     private static final int SAVE_INTERVAL_TICKS = 600; // 30 seconds
+    private static volatile boolean saving = false;
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+    private static final ExecutorService SAVE_EXECUTOR =
+        Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "MiniMap-Save");
+            t.setDaemon(true);
+            return t;
+        });
 
     public static void markDirty() {
         dirty = true;
@@ -30,10 +40,22 @@ public final class MiniMapPersistence {
         if (!dirty) return;
         ticksSinceLastSave++;
         if (ticksSinceLastSave >= SAVE_INTERVAL_TICKS) {
-            save();
+            saveAsync();
             dirty = false;
             ticksSinceLastSave = 0;
         }
+    }
+
+    private static void saveAsync() {
+        if (saving) return; // don't queue multiple saves
+        saving = true;
+        SAVE_EXECUTOR.execute(() -> {
+            try {
+                save();
+            } finally {
+                saving = false;
+            }
+        });
     }
 
     // --- World lifecycle ---

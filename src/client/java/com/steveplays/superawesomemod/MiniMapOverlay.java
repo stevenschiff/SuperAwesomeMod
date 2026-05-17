@@ -73,23 +73,33 @@ public final class MiniMapOverlay {
         double playerX = player.getX();
         double playerZ = player.getZ();
         int halfSize = size / 2;
+        int startBX = (int) Math.floor(playerX) - halfSize;
+        int startBZ = (int) Math.floor(playerZ) - halfSize;
 
         for (int px = 0; px < size; px++) {
+            int bx = startBX + px;
+            int chunkX = bx >> 4;
+            int lx = bx & 15;
+
+            // Cache chunk lookup per column — only changes when chunkZ changes
+            int lastChunkZ = Integer.MIN_VALUE;
+            int[] colors = null;
+
             for (int py = 0; py < size; py++) {
-                double worldX = playerX + (px - halfSize);
-                double worldZ = playerZ + (py - halfSize);
+                int bz = startBZ + py;
+                int cz = bz >> 4;
 
-                int chunkX = (int) Math.floor(worldX) >> 4;
-                int chunkZ = (int) Math.floor(worldZ) >> 4;
-
-                int[] colors = MiniMapChunkCache.get(chunkX, chunkZ);
-                int color = 0xFF000000; // black = unexplored
-                if (colors != null) {
-                    int lx = ((int) Math.floor(worldX)) & 15;
-                    int lz = ((int) Math.floor(worldZ)) & 15;
-                    color = colors[lx * 16 + lz];
+                if (cz != lastChunkZ) {
+                    colors = MiniMapChunkCache.get(chunkX, cz);
+                    lastChunkZ = cz;
                 }
-                // NativeImage uses ABGR format, convert from ARGB
+
+                int color;
+                if (colors != null) {
+                    color = colors[lx * 16 + (bz & 15)];
+                } else {
+                    color = 0xFF000000;
+                }
                 mapImage.setPixelABGR(px, py, argbToAbgr(color));
             }
         }
