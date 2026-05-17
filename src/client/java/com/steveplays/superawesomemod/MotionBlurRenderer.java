@@ -32,6 +32,16 @@ public final class MotionBlurRenderer {
             return;
         }
 
+        try {
+            applyMotionBlurInternal();
+        } catch (Exception e) {
+            SuperAwesomeMod.LOGGER.error("[SuperAwesomeMod] Motion blur rendering failed, disabling feature", e);
+            MotionBlurData.setEnabled(false);
+            cleanup();
+        }
+    }
+
+    private static void applyMotionBlurInternal() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.getWindow() == null) return;
 
@@ -46,6 +56,7 @@ public final class MotionBlurRenderer {
         if (accumFbo == -1 || texWidth != width || texHeight != height) {
             cleanup();
             createAccumBuffer(width, height);
+            if (accumFbo == -1) return; // creation failed
         }
 
         if (hasAccumFrame) {
@@ -89,8 +100,12 @@ public final class MotionBlurRenderer {
     }
 
     private static void drawFullscreenQuad(int textureId, int width, int height, float alpha) {
-        // Save current state
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        // Save state that we'll modify. Never use glPushAttrib/glPopAttrib — it
+        // restores GL state behind GlStateManager's back, desyncing the cache and
+        // crashing Minecraft's renderer on subsequent draw calls.
+        int previousTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
+        boolean depthWasEnabled = GL11.glIsEnabled(GL11.GL_DEPTH_TEST);
+        boolean tex2dWasEnabled = GL11.glIsEnabled(GL11.GL_TEXTURE_2D);
 
         // Set up orthographic projection for fullscreen quad
         GL11.glMatrixMode(GL11.GL_PROJECTION);
@@ -102,8 +117,8 @@ public final class MotionBlurRenderer {
         GL11.glPushMatrix();
         GL11.glLoadIdentity();
 
-        // Disable depth test for fullscreen overlay
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
+        // Disable depth test for fullscreen overlay (use GlStateManager to keep cache in sync)
+        GlStateManager._disableDepthTest();
 
         // Bind the accumulation texture
         GlStateManager._bindTexture(textureId);
@@ -120,13 +135,23 @@ public final class MotionBlurRenderer {
         GL11.glTexCoord2f(0.0f, 0.0f); GL11.glVertex2f(0, height);
         GL11.glEnd();
 
-        // Restore state
+        // Restore matrices
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glPopMatrix();
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glPopMatrix();
 
-        GL11.glPopAttrib();
+        // Restore all modified state through GlStateManager to keep its cache in sync
+        if (depthWasEnabled) {
+            GlStateManager._enableDepthTest();
+        }
+        GlStateManager._bindTexture(previousTexture);
+        if (!tex2dWasEnabled) {
+            GL11.glDisable(GL11.GL_TEXTURE_2D);
+        }
+
+        // Reset color to white to avoid tinting subsequent renders
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     private static void createAccumBuffer(int width, int height) {
@@ -146,6 +171,16 @@ public final class MotionBlurRenderer {
             GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0,
             GL11.GL_TEXTURE_2D, accumTexture, 0
         );
+
+        // Verify framebuffer is complete
+        int status = GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER);
+        if (status != GL30.GL_FRAMEBUFFER_COMPLETE) {
+            SuperAwesomeMod.LOGGER.warn("[SuperAwesomeMod] Motion blur framebuffer incomplete (status {}), disabling", status);
+            GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+            cleanup();
+            return;
+        }
+
         GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 
         texWidth = width;
