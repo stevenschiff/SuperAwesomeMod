@@ -116,9 +116,9 @@ public class MiniMapFullScreen extends Screen {
 
         graphics.blit(RenderPipelines.GUI_TEXTURED, fsTextureId, 0, 0, 0.0f, 0.0f, w, h, w, h);
 
-        // Draw world border (15000x15000 box, overworld only)
+        // Draw world border (30000x30000 box, overworld only)
         if ("overworld".equals(MiniMapData.getCurrentDimension())) {
-            int borderHalf = 7500;
+            int borderHalf = 15000;
             int bx1 = worldToScreenX(-borderHalf);
             int bz1 = worldToScreenZ(-borderHalf);
             int bx2 = worldToScreenX(borderHalf);
