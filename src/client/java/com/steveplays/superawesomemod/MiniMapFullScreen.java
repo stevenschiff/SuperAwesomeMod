@@ -194,8 +194,10 @@ public class MiniMapFullScreen extends Screen {
         double mouseWorldX = screenToWorldX(mouseX);
         double mouseWorldZ = screenToWorldZ(mouseY);
         String coords = String.format("X: %d, Z: %d", (int) Math.floor(mouseWorldX), (int) Math.floor(mouseWorldZ));
-        graphics.fill(this.width / 2 - 60, 2, this.width / 2 + 60, 16, 0xAA000000);
-        graphics.drawCenteredString(this.font, coords, this.width / 2, 5, 0xFFFFFF);
+        int coordsW = this.font.width(coords) + 12;
+        int boxX = this.width / 2 - coordsW / 2;
+        graphics.fill(boxX, 2, boxX + coordsW, 18, 0xFFFFFFFF);
+        graphics.drawCenteredString(this.font, coords, this.width / 2, 6, 0xFF000000);
 
         // Zoom indicator
         String zoomText = zoom >= 0.1f ? String.format("Zoom: %.1fx", zoom)
