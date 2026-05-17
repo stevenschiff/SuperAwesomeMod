@@ -11,9 +11,19 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public final class MiniMapChunkScanner {
 
     private MiniMapChunkScanner() {}
+
+    private static final ExecutorService SCAN_EXECUTOR =
+        Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "MiniMap-ChunkScanner");
+            t.setDaemon(true);
+            return t;
+        });
 
     public static void register() {
         ClientChunkEvents.CHUNK_LOAD.register(MiniMapChunkScanner::onChunkLoad);
@@ -25,10 +35,16 @@ public final class MiniMapChunkScanner {
         int chunkX = chunk.getPos().x;
         int chunkZ = chunk.getPos().z;
 
-        // Always rescan (terrain may have changed)
-        int[] colors = scanChunk(level, chunk);
-        MiniMapChunkCache.put(chunkX, chunkZ, colors);
-        MiniMapPersistence.markDirty();
+        // Scan asynchronously to avoid blocking the render thread
+        SCAN_EXECUTOR.execute(() -> {
+            try {
+                int[] colors = scanChunk(level, chunk);
+                MiniMapChunkCache.put(chunkX, chunkZ, colors);
+                MiniMapPersistence.markDirty();
+            } catch (Exception ignored) {
+                // Chunk may have been unloaded by the time we scan; silently skip
+            }
+        });
     }
 
     public static void scanLoadedChunks(ClientLevel level) {

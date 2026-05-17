@@ -43,6 +43,10 @@ public class MiniMapFullScreen extends Screen {
     private static float lastFsZoom = Float.NaN;
     private static boolean fsNeedsUpdate = true;
 
+    // Throttle regeneration to avoid per-frame full texture rebuilds
+    private long lastRegenerateTime = 0;
+    private static final long REGEN_INTERVAL_MS = 50; // max ~20 updates/sec
+
     public MiniMapFullScreen() {
         super(Component.literal("Map"));
     }
@@ -105,13 +109,15 @@ public class MiniMapFullScreen extends Screen {
 
         boolean viewChanged = Double.isNaN(lastFsPanX)
             || panX != lastFsPanX || panZ != lastFsPanZ || zoom != lastFsZoom;
-        if (viewChanged || fsNeedsUpdate) {
+        long now = System.currentTimeMillis();
+        if ((viewChanged || fsNeedsUpdate) && (now - lastRegenerateTime >= REGEN_INTERVAL_MS)) {
             regenerateFullscreenImage(w, h);
             fsTexture.upload();
             lastFsPanX = panX;
             lastFsPanZ = panZ;
             lastFsZoom = zoom;
             fsNeedsUpdate = false;
+            lastRegenerateTime = now;
         }
 
         graphics.blit(RenderPipelines.GUI_TEXTURED, fsTextureId, 0, 0, 0.0f, 0.0f, w, h, w, h);
