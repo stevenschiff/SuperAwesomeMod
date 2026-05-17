@@ -201,7 +201,7 @@ public final class MiniMapPersistence {
                 int z = obj.get("z").getAsInt();
                 int color = obj.get("color").getAsInt();
                 boolean visible = obj.has("visible") ? obj.get("visible").getAsBoolean() : true;
-                String dimension = obj.has("dimension") ? obj.get("dimension").getAsString() : "";
+                String dimension = obj.has("dimension") ? obj.get("dimension").getAsString() : "overworld";
                 wps.add(new MiniMapWaypoint(name, x, z, color, visible, dimension));
             }
             MiniMapData.setWaypoints(wps);
