@@ -82,11 +82,6 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             ZoomData.setKeyHeld(client.screen == null && ModKeybindings.zoom.isDown());
             ZoomData.tick();
 
-            // Maintain mod flight client-side every tick.
-            if (client.player != null && PlayerFlyData.isEnabled(client.player.getUUID())) {
-                client.player.getAbilities().mayfly = true;
-            }
-
             // Free look: active only when enabled AND in third-person.
             // Reset offsets whenever the player switches perspective (F5).
             CameraType currentCamera = client.options.getCameraType();

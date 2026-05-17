@@ -1,6 +1,5 @@
 package com.steveplays.superawesomemod;
 
-import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -13,7 +12,6 @@ import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
@@ -25,35 +23,6 @@ public class ModCommands {
 
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-
-            // --- /jumpheight ---
-            dispatcher.register(
-                Commands.literal("jumpheight")
-                    .requires(source -> true)
-                    .executes(ctx -> {
-                        if (ctx.getSource().getEntity() instanceof ServerPlayer player) {
-                            float current = PlayerJumpData.getMultiplier(player.getUUID());
-                            player.sendSystemMessage(Component.literal(
-                                "[SuperAwesomeMod] Jump multiplier: " + current + "x  (range " +
-                                PlayerJumpData.MIN + " – " + PlayerJumpData.MAX + ")"
-                            ));
-                        }
-                        return 1;
-                    })
-                    .then(Commands.argument("multiplier",
-                            FloatArgumentType.floatArg(PlayerJumpData.MIN, PlayerJumpData.MAX))
-                        .executes(ctx -> {
-                            if (ctx.getSource().getEntity() instanceof ServerPlayer player) {
-                                float value = FloatArgumentType.getFloat(ctx, "multiplier");
-                                PlayerJumpData.setMultiplier(player.getUUID(), value);
-                                player.sendSystemMessage(Component.literal(
-                                    "[SuperAwesomeMod] Jump height set to " + value + "x"
-                                ));
-                            }
-                            return 1;
-                        })
-                    )
-            );
 
             // --- /npc ---
             dispatcher.register(
