@@ -45,15 +45,22 @@ public final class MiniMapChunkScanner {
         int baseZ = chunk.getPos().z * 16;
 
         boolean isNether = level.dimension() == Level.NETHER;
+        int playerY = -1;
+        if (isNether) {
+            var player = Minecraft.getInstance().player;
+            if (player != null) {
+                playerY = (int) player.getY();
+            }
+        }
+
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
         for (int lx = 0; lx < 16; lx++) {
             for (int lz = 0; lz < 16; lz++) {
                 int surfaceY;
                 if (isNether) {
-                    // In the Nether, scan downward from below the bedrock roof
-                    // to find the actual terrain the player walks on
-                    surfaceY = findNetherSurface(chunk, lx, lz, baseX, baseZ, mutable);
+                    // Scan downward from the player's Y to find the floor
+                    surfaceY = findNetherSurface(chunk, lx, lz, baseX, baseZ, mutable, playerY);
                 } else {
                     surfaceY = chunk.getHeight(Heightmap.Types.WORLD_SURFACE, lx, lz);
                 }
@@ -73,19 +80,21 @@ public final class MiniMapChunkScanner {
     }
 
     /**
-     * Scan downward from below the nether bedrock roof (y=126) to find the
-     * first solid block, skipping air and lava gaps to get the walkable surface.
+     * In the Nether, scan downward from the player's Y level to find the
+     * first solid non-lava block. This gives us the actual floor the player
+     * is walking on rather than the ceiling/roof above.
      */
     private static int findNetherSurface(LevelChunk chunk, int lx, int lz,
                                           int baseX, int baseZ,
-                                          BlockPos.MutableBlockPos mutable) {
-        // Start below the bedrock ceiling (roof is at y=127)
-        for (int y = 126; y >= 0; y--) {
+                                          BlockPos.MutableBlockPos mutable,
+                                          int playerY) {
+        int startY = (playerY > 0) ? playerY : 80;
+        for (int y = startY; y >= 0; y--) {
             mutable.set(baseX + lx, y, baseZ + lz);
             BlockState state = chunk.getBlockState(mutable);
             if (state.isAir() || state.getBlock() == Blocks.LAVA) continue;
             return y;
         }
-        return 0; // fallback
+        return 0;
     }
 }

@@ -88,11 +88,13 @@ public final class MiniMapData {
     public static List<MiniMapWaypoint> getVisibleWaypoints() {
         return waypoints.stream()
             .filter(wp -> {
-                // Filter by dimension: show only waypoints in the current dimension
-                // Legacy waypoints with empty dimension are shown everywhere
-                if (!wp.dimension().isEmpty() && !currentDimension.isEmpty()
-                        && !wp.dimension().equals(currentDimension)) {
-                    return false;
+                // Filter by dimension: only show waypoints that match the current dimension.
+                // Treat empty dimension as "overworld" for legacy waypoints.
+                if (!currentDimension.isEmpty()) {
+                    String wpDim = wp.dimension().isEmpty() ? "overworld" : wp.dimension();
+                    if (!wpDim.equals(currentDimension)) {
+                        return false;
+                    }
                 }
                 // Filter by visibility if specific waypoints mode is on
                 return !specificWaypoints || wp.visible();
