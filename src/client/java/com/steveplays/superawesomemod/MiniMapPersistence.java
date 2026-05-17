@@ -92,38 +92,46 @@ public final class MiniMapPersistence {
             .resolve(MiniMapData.getCurrentWorldId());
     }
 
-    // --- Chunk persistence (binary) ---
+    // --- Chunk persistence (binary, per-dimension) ---
 
     private static void saveChunks() {
         try {
             Path dir = getBaseDir();
             Files.createDirectories(dir);
-            Path file = dir.resolve("chunks.dat");
-            Path temp = dir.resolve("chunks.dat.tmp");
 
-            try (DataOutputStream out = new DataOutputStream(
-                    new BufferedOutputStream(Files.newOutputStream(temp)))) {
-                // Header
-                out.writeInt(1); // version
-                out.writeInt(MiniMapChunkCache.size()); // chunk count
+            // Save each dimension to its own file
+            for (String dimension : MiniMapChunkCache.getDimensions()) {
+                var cache = MiniMapChunkCache.getForDimension(dimension);
+                if (cache.isEmpty()) continue;
 
-                // Chunks
-                MiniMapChunkCache.forEach((key, colors) -> {
-                    try {
-                        out.writeInt(MiniMapChunkCache.unpackX(key));
-                        out.writeInt(MiniMapChunkCache.unpackZ(key));
-                        for (int color : colors) {
-                            out.writeInt(color);
+                Path file = dir.resolve("chunks_" + dimension + ".dat");
+                Path temp = dir.resolve("chunks_" + dimension + ".dat.tmp");
+
+                try (DataOutputStream out = new DataOutputStream(
+                        new BufferedOutputStream(Files.newOutputStream(temp)))) {
+                    out.writeInt(1); // version
+                    out.writeInt(cache.size());
+
+                    cache.forEach((key, colors) -> {
+                        try {
+                            out.writeInt(MiniMapChunkCache.unpackX(key));
+                            out.writeInt(MiniMapChunkCache.unpackZ(key));
+                            for (int color : colors) {
+                                out.writeInt(color);
+                            }
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
                         }
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                });
+                    });
+                }
+
+                Files.deleteIfExists(file);
+                Files.move(temp, file);
             }
 
-            // Atomic rename
-            Files.deleteIfExists(file);
-            Files.move(temp, file);
+            // Clean up old single-file format if it exists
+            Path oldFile = dir.resolve("chunks.dat");
+            Files.deleteIfExists(oldFile);
 
         } catch (Exception e) {
             SuperAwesomeMod.LOGGER.warn("[MiniMap] Failed to save chunk data", e);
@@ -131,29 +139,60 @@ public final class MiniMapPersistence {
     }
 
     private static void loadChunks() {
-        Path file = getBaseDir().resolve("chunks.dat");
-        if (!Files.exists(file)) return;
+        Path dir = getBaseDir();
+        if (!Files.exists(dir)) return;
 
-        try (DataInputStream in = new DataInputStream(
-                new BufferedInputStream(Files.newInputStream(file)))) {
-            int version = in.readInt();
-            if (version != 1) return; // unsupported version
+        // Load per-dimension files
+        String[] dimensions = {"overworld", "the_nether", "the_end"};
+        for (String dimension : dimensions) {
+            Path file = dir.resolve("chunks_" + dimension + ".dat");
+            if (!Files.exists(file)) continue;
 
-            int count = in.readInt();
-            for (int i = 0; i < count; i++) {
-                int chunkX = in.readInt();
-                int chunkZ = in.readInt();
-                int[] colors = new int[256];
-                for (int j = 0; j < 256; j++) {
-                    colors[j] = in.readInt();
+            try (DataInputStream in = new DataInputStream(
+                    new BufferedInputStream(Files.newInputStream(file)))) {
+                int version = in.readInt();
+                if (version != 1) continue;
+
+                int count = in.readInt();
+                for (int i = 0; i < count; i++) {
+                    int chunkX = in.readInt();
+                    int chunkZ = in.readInt();
+                    int[] colors = new int[256];
+                    for (int j = 0; j < 256; j++) {
+                        colors[j] = in.readInt();
+                    }
+                    MiniMapChunkCache.putForDimension(dimension, chunkX, chunkZ, colors);
                 }
-                MiniMapChunkCache.put(chunkX, chunkZ, colors);
+
+                SuperAwesomeMod.LOGGER.info("[MiniMap] Loaded {} chunks for dimension '{}'", count, dimension);
+
+            } catch (Exception e) {
+                SuperAwesomeMod.LOGGER.warn("[MiniMap] Failed to load chunks for dimension '{}'", dimension, e);
             }
+        }
 
-            SuperAwesomeMod.LOGGER.info("[MiniMap] Loaded {} chunks from disk", count);
-
-        } catch (Exception e) {
-            SuperAwesomeMod.LOGGER.warn("[MiniMap] Failed to load chunk data", e);
+        // Migrate old single-file format (treat as overworld)
+        Path oldFile = dir.resolve("chunks.dat");
+        if (Files.exists(oldFile)) {
+            try (DataInputStream in = new DataInputStream(
+                    new BufferedInputStream(Files.newInputStream(oldFile)))) {
+                int version = in.readInt();
+                if (version == 1) {
+                    int count = in.readInt();
+                    for (int i = 0; i < count; i++) {
+                        int chunkX = in.readInt();
+                        int chunkZ = in.readInt();
+                        int[] colors = new int[256];
+                        for (int j = 0; j < 256; j++) {
+                            colors[j] = in.readInt();
+                        }
+                        MiniMapChunkCache.putForDimension("overworld", chunkX, chunkZ, colors);
+                    }
+                    SuperAwesomeMod.LOGGER.info("[MiniMap] Migrated {} old chunks to overworld", count);
+                }
+            } catch (Exception e) {
+                SuperAwesomeMod.LOGGER.warn("[MiniMap] Failed to migrate old chunk data", e);
+            }
         }
     }
 

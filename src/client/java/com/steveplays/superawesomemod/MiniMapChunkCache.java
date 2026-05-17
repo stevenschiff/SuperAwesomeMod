@@ -1,5 +1,6 @@
 package com.steveplays.superawesomemod;
 
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
@@ -7,8 +8,15 @@ public final class MiniMapChunkCache {
 
     private MiniMapChunkCache() {}
 
-    // Key = packed (chunkX, chunkZ), value = int[256] of ARGB colors (lx * 16 + lz)
-    private static final ConcurrentHashMap<Long, int[]> CACHE = new ConcurrentHashMap<>();
+    // Per-dimension caches: dimension -> (packed chunkX/Z -> colors)
+    private static final ConcurrentHashMap<String, ConcurrentHashMap<Long, int[]>> CACHES =
+        new ConcurrentHashMap<>();
+
+    private static ConcurrentHashMap<Long, int[]> currentCache() {
+        String dim = MiniMapData.getCurrentDimension();
+        if (dim.isEmpty()) dim = "overworld";
+        return CACHES.computeIfAbsent(dim, k -> new ConcurrentHashMap<>());
+    }
 
     public static long packKey(int chunkX, int chunkZ) {
         return ((long) chunkX << 32) | (chunkZ & 0xFFFFFFFFL);
@@ -23,26 +31,41 @@ public final class MiniMapChunkCache {
     }
 
     public static int[] get(int chunkX, int chunkZ) {
-        return CACHE.get(packKey(chunkX, chunkZ));
+        return currentCache().get(packKey(chunkX, chunkZ));
     }
 
     public static void put(int chunkX, int chunkZ, int[] colors) {
-        CACHE.put(packKey(chunkX, chunkZ), colors);
+        currentCache().put(packKey(chunkX, chunkZ), colors);
     }
 
     public static boolean contains(int chunkX, int chunkZ) {
-        return CACHE.containsKey(packKey(chunkX, chunkZ));
+        return currentCache().containsKey(packKey(chunkX, chunkZ));
     }
 
     public static void clear() {
-        CACHE.clear();
+        CACHES.clear();
     }
 
     public static int size() {
-        return CACHE.size();
+        return currentCache().size();
     }
 
     public static void forEach(BiConsumer<Long, int[]> consumer) {
-        CACHE.forEach(consumer);
+        currentCache().forEach(consumer);
+    }
+
+    // --- Persistence helpers for saving/loading all dimensions ---
+
+    public static Set<String> getDimensions() {
+        return CACHES.keySet();
+    }
+
+    public static ConcurrentHashMap<Long, int[]> getForDimension(String dimension) {
+        return CACHES.computeIfAbsent(dimension, k -> new ConcurrentHashMap<>());
+    }
+
+    public static void putForDimension(String dimension, int chunkX, int chunkZ, int[] colors) {
+        CACHES.computeIfAbsent(dimension, k -> new ConcurrentHashMap<>())
+              .put(packKey(chunkX, chunkZ), colors);
     }
 }
