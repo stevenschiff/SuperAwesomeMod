@@ -8,7 +8,15 @@ group       = project.maven_group
 base.archivesName = project.archives_base_name
 
 repositories {
-    // Add third-party mod dependencies here if needed.
+    maven {
+        name = 'Ladysnake Mods'
+        url = 'https://maven.ladysnake.org/releases'
+        content {
+            includeGroup 'io.github.ladysnake'
+            includeGroup 'org.ladysnake'
+            includeGroupByRegex 'dev\\.onyxstudios.*'
+        }
+    }
 }
 
 loom {
@@ -32,6 +40,10 @@ dependencies {
 
     // Fabric API
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // Satin API (shader support for motion blur)
+    modImplementation "org.ladysnake:satin:${project.satin_version}"
+    include "org.ladysnake:satin:${project.satin_version}"
 }
 
 processResources {

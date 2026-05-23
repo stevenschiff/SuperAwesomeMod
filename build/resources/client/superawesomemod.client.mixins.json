@@ -16,8 +16,7 @@
     "OptionInstanceAccessor",
     "ItemEntityRendererMixin",
     "ItemInHandRendererMixin",
-    "MinecraftSwingMixin",
-    "GameRendererMotionBlurMixin"
+    "MinecraftSwingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

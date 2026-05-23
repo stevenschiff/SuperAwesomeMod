@@ -28,6 +28,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         XrayLineRenderType.touch();
         MiniMapOverlay.register();
         MiniMapChunkScanner.register();
+        MotionBlurRenderer.register();
         MiniMapWaypointRenderer.register();
 
         // Mini Map: world join/leave persistence hooks
