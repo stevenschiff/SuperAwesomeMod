@@ -16,7 +16,10 @@
     "OptionInstanceAccessor",
     "ItemEntityRendererMixin",
     "ItemInHandRendererMixin",
-    "MinecraftSwingMixin"
+    "MinecraftSwingMixin",
+    "PostChainAccessor",
+    "PostPassAccessor",
+    "GameRendererMotionBlurMixin"
   ],
   "injectors": {
     "defaultRequire": 1
