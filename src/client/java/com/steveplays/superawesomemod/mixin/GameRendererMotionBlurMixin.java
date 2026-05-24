@@ -17,7 +17,7 @@ public abstract class GameRendererMotionBlurMixin {
     @Shadow @Final private CrossFrameResourcePool resourcePool;
 
     @Inject(method = "render", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/GameRenderer;doEntityOutline()V",
+            target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V",
             shift = At.Shift.AFTER))
     private void superawesomemod$afterEntityOutline(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci) {
         MotionBlurRenderer.onRenderPost(this.resourcePool);
