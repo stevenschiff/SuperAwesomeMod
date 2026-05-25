@@ -23,95 +23,114 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 17 buttons centered vertically around cy: rows 0..16 of `gap`.
-        int row0 = cy - (16 * gap) / 2;
+        // 18 buttons centered vertically around cy: rows 0..17 of `gap`.
+        int row0 = cy - (17 * gap) / 2;
+
+        // --- Enable All preset ---
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Enable All"),
+            btn -> {
+                FreeLookData.setEnabled(true);
+                ArmorHudData.setEnabled(true);
+                CombatHitboxData.setEnabled(true);
+                CombatCrosshairData.setEnabled(true);
+                CombatPotionEffectsData.setEnabled(true);
+                AppleSkinData.setEnabled(true);
+                ShulkerTooltipData.setEnabled(true);
+                OldPvpData.setSwingWhileUsingEnabled(true);
+                MiniMapData.setEnabled(true);
+                MiniMapData.setHudVisible(true);
+                MiniMapData.setMinimapSize(64);
+                MiniMapData.setCorner(3); // Bottom-Right
+            }
+        ).bounds(cx - btnW / 2, row0, btnW, btnH).build());
 
         // --- Feature buttons (add more below as the mod grows) ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Free Look"),
             btn -> this.minecraft.setScreen(new FreeLookScreen(this))
-        ).bounds(cx - btnW / 2, row0, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Armor HUD"),
             btn -> this.minecraft.setScreen(new ArmorHudScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 2, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Combat Hitboxes"),
             btn -> this.minecraft.setScreen(new CombatHitboxScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 2, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 3, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Combat Crosshair"),
             btn -> this.minecraft.setScreen(new CombatCrosshairScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 3, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 4, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Combat Potion Effects"),
             btn -> this.minecraft.setScreen(new CombatPotionEffectsScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 4, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 5, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("PvP Cheat Detector"),
             btn -> this.minecraft.setScreen(new PvpDetectorScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 5, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 6, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Autoclicker"),
             btn -> this.minecraft.setScreen(new AutoclickerScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 6, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 7, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Freecam"),
             btn -> this.minecraft.setScreen(new FreecamScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 7, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 8, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("AppleSkin"),
             btn -> this.minecraft.setScreen(new AppleSkinScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 8, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 9, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Shulker Tooltips"),
             btn -> this.minecraft.setScreen(new ShulkerTooltipScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 9, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 10, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Render Distance"),
             btn -> this.minecraft.setScreen(new RenderDistanceScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 10, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 11, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Item Physics"),
             btn -> this.minecraft.setScreen(new ItemPhysicsScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 11, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 12, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("1.7 PvP Animations"),
             btn -> this.minecraft.setScreen(new OldPvpScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 12, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 13, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("X-Ray"),
             btn -> this.minecraft.setScreen(new XrayScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 13, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 14, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Mini Map"),
             btn -> this.minecraft.setScreen(new MiniMapScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 14, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 15, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Motion Blur"),
             btn -> this.minecraft.setScreen(new MotionBlurScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 15, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 16, btnW, btnH).build());
 
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 16, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 17, btnW, btnH).build());
     }
 
     @Override
