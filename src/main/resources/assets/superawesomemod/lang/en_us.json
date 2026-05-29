@@ -1,5 +1,8 @@
 {
   "key.superawesomemod.open_menu": "Open Mod Menu",
   "key.superawesomemod.zoom": "Zoom (hold)",
+  "key.superawesomemod.schematic_layer_up": "Schematic Layer Up",
+  "key.superawesomemod.schematic_layer_down": "Schematic Layer Down",
+  "key.superawesomemod.schematic_toggle": "Toggle Schematics",
   "key.categories.superawesomemod": "SuperAwesomeMod"
 }
