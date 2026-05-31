@@ -23,8 +23,8 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 19 buttons centered vertically around cy: rows 0..18 of `gap`.
-        int row0 = cy - (18 * gap) / 2;
+        // 20 buttons centered vertically around cy: rows 0..19 of `gap`.
+        int row0 = cy - (19 * gap) / 2;
 
         // --- Enable All preset ---
         this.addRenderableWidget(Button.builder(
@@ -131,11 +131,16 @@ public class ModMenuScreen extends Screen {
             btn -> this.minecraft.setScreen(new SchematicScreen(this))
         ).bounds(cx - btnW / 2, row0 + gap * 17, btnW, btnH).build());
 
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Min Ping"),
+            btn -> this.minecraft.setScreen(new MinPingScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 18, btnW, btnH).build());
+
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 18, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 19, btnW, btnH).build());
     }
 
     @Override

@@ -2,12 +2,15 @@ package com.steveplays.superawesomemod;
 
 import com.steveplays.superawesomemod.mixin.MinecraftAutoclickerInvoker;
 import com.steveplays.superawesomemod.mixin.OptionInstanceAccessor;
+import com.steveplays.superawesomemod.mixin.ConnectionAccessor;
+import io.netty.channel.Channel;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
+import net.minecraft.network.Connection;
 import net.minecraft.tags.ItemTags;
 
 public class SuperAwesomeModClient implements ClientModInitializer {
@@ -37,6 +40,14 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         // Mini Map: world join/leave persistence hooks
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             MiniMapPersistence.onWorldJoin(Minecraft.getInstance());
+
+            // Inject Min Ping handler into the Netty pipeline.
+            Connection connection = handler.getConnection();
+            Channel channel = ((ConnectionAccessor) connection).getChannel();
+            if (channel != null && channel.pipeline().get("superawesomemod_min_ping") == null) {
+                channel.pipeline().addBefore("packet_handler", "superawesomemod_min_ping",
+                    new MinPingHandler());
+            }
         });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             MiniMapPersistence.onWorldLeave();
