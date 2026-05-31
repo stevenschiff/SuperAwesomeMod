@@ -19,8 +19,7 @@
     "MinecraftSwingMixin",
     "PostChainAccessor",
     "PostPassAccessor",
-    "GameRendererMotionBlurMixin",
-    "SchematicEasyPlaceMixin"
+    "GameRendererMotionBlurMixin"
   ],
   "injectors": {
     "defaultRequire": 1

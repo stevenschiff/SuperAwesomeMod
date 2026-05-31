@@ -126,10 +126,10 @@ public class ModMenuScreen extends Screen {
             btn -> this.minecraft.setScreen(new MotionBlurScreen(this))
         ).bounds(cx - btnW / 2, row0 + gap * 16, btnW, btnH).build());
 
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Schematics"),
-            btn -> this.minecraft.setScreen(new SchematicScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 17, btnW, btnH).build());
+        // this.addRenderableWidget(Button.builder(
+        //     Component.literal("Schematics"),
+        //     btn -> this.minecraft.setScreen(new SchematicScreen(this))
+        // ).bounds(cx - btnW / 2, row0 + gap * 17, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Min Ping"),

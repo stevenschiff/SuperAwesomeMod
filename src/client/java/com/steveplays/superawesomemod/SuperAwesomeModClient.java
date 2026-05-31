@@ -33,9 +33,9 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         MiniMapChunkScanner.register();
         MotionBlurRenderer.register();
         MiniMapWaypointRenderer.register();
-        SchematicRenderer.register();
-        SchematicRenderType.touch();
-        SchematicOverlay.register();
+        // SchematicRenderer.register();
+        // SchematicRenderType.touch();
+        // SchematicOverlay.register();
 
         // Mini Map: world join/leave persistence hooks
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
@@ -193,29 +193,29 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 OldPvpData.setCustomBlocking(false);
             }
 
-            // Schematic: layer up/down keybinds
-            while (ModKeybindings.schematicLayerUp.consumeClick()) {
-                if (SchematicData.isEnabled() && SchematicData.isLayerMode()) {
-                    SchematicData.setCurrentLayer(
-                        Math.min(SchematicData.getCurrentLayer() + 1, SchematicData.getMaxLayer()));
-                    SchematicVerifier.clearCache();
-                }
-            }
-            while (ModKeybindings.schematicLayerDown.consumeClick()) {
-                if (SchematicData.isEnabled() && SchematicData.isLayerMode()) {
-                    SchematicData.setCurrentLayer(
-                        Math.max(0, SchematicData.getCurrentLayer() - 1));
-                    SchematicVerifier.clearCache();
-                }
-            }
-            while (ModKeybindings.schematicToggle.consumeClick()) {
-                SchematicData.setEnabled(!SchematicData.isEnabled());
-            }
-
-            // Schematic: verifier tick
-            if (SchematicData.isEnabled() && SchematicData.getRenderMode() == 1) {
-                SchematicVerifier.tick(client.level, SchematicData.getCurrentPlacement());
-            }
+            // // Schematic: layer up/down keybinds (commented out — fix later)
+            // while (ModKeybindings.schematicLayerUp.consumeClick()) {
+            //     if (SchematicData.isEnabled() && SchematicData.isLayerMode()) {
+            //         SchematicData.setCurrentLayer(
+            //             Math.min(SchematicData.getCurrentLayer() + 1, SchematicData.getMaxLayer()));
+            //         SchematicVerifier.clearCache();
+            //     }
+            // }
+            // while (ModKeybindings.schematicLayerDown.consumeClick()) {
+            //     if (SchematicData.isEnabled() && SchematicData.isLayerMode()) {
+            //         SchematicData.setCurrentLayer(
+            //             Math.max(0, SchematicData.getCurrentLayer() - 1));
+            //         SchematicVerifier.clearCache();
+            //     }
+            // }
+            // while (ModKeybindings.schematicToggle.consumeClick()) {
+            //     SchematicData.setEnabled(!SchematicData.isEnabled());
+            // }
+            //
+            // // Schematic: verifier tick
+            // if (SchematicData.isEnabled() && SchematicData.getRenderMode() == 1) {
+            //     SchematicVerifier.tick(client.level, SchematicData.getCurrentPlacement());
+            // }
 
             // Autoclicker: fire as many simulated clicks as elapsed wall-clock allows.
             if (AutoclickerData.isEnabled() && client.screen == null
