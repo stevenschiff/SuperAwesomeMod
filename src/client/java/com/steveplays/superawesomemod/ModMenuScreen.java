@@ -23,8 +23,8 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 20 buttons centered vertically around cy: rows 0..19 of `gap`.
-        int row0 = cy - (19 * gap) / 2;
+        // 22 buttons centered vertically around cy: rows 0..21 of `gap`.
+        int row0 = cy - (21 * gap) / 2;
 
         // --- Enable All preset ---
         this.addRenderableWidget(Button.builder(
@@ -132,15 +132,25 @@ public class ModMenuScreen extends Screen {
         // ).bounds(cx - btnW / 2, row0 + gap * 17, btnW, btnH).build());
 
         this.addRenderableWidget(Button.builder(
+            Component.literal("Health Indicators"),
+            btn -> this.minecraft.setScreen(new HealthIndicatorScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 18, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Nametag"),
+            btn -> this.minecraft.setScreen(new NametagScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 19, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
             Component.literal("Min Ping"),
             btn -> this.minecraft.setScreen(new MinPingScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 18, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 20, btnW, btnH).build());
 
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 19, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 21, btnW, btnH).build());
     }
 
     @Override

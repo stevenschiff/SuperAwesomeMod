@@ -5,12 +5,12 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-public class ItemPhysicsScreen extends Screen {
+public class NametagScreen extends Screen {
 
     private final Screen parent;
 
-    public ItemPhysicsScreen(Screen parent) {
-        super(Component.literal("Item Physics"));
+    public NametagScreen(Screen parent) {
+        super(Component.literal("Nametag"));
         this.parent = parent;
     }
 
@@ -24,7 +24,7 @@ public class ItemPhysicsScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             toggleLabel(),
             btn -> {
-                ItemPhysicsData.setEnabled(!ItemPhysicsData.isEnabled());
+                NametagData.setEnabled(!NametagData.isEnabled());
                 btn.setMessage(toggleLabel());
             }
         ).bounds(cx - btnW / 2, cy - 20, btnW, btnH).build());
@@ -36,8 +36,8 @@ public class ItemPhysicsScreen extends Screen {
     }
 
     private Component toggleLabel() {
-        return Component.literal(ItemPhysicsData.isEnabled()
-            ? "Item Physics: Enabled" : "Item Physics: Disabled");
+        return Component.literal(NametagData.isEnabled()
+            ? "Nametag: Enabled" : "Nametag: Disabled");
     }
 
     @Override
@@ -47,7 +47,7 @@ public class ItemPhysicsScreen extends Screen {
         int cy = this.height / 2;
         graphics.drawCenteredString(this.font, this.title, cx, cy - 50, 0xFFFFFF);
         graphics.drawCenteredString(this.font,
-            Component.literal("Blocks sit on the ground instead of floating"),
+            Component.literal("See your own nametag in third person (F5)"),
             cx, cy - 36, 0xAAAAAA);
         super.render(graphics, mouseX, mouseY, delta);
     }
