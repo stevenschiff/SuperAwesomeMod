@@ -23,8 +23,8 @@ public class ModMenuScreen extends Screen {
         int btnH  = 20;
         int gap   = 24;
 
-        // 22 buttons centered vertically around cy: rows 0..21 of `gap`.
-        int row0 = cy - (21 * gap) / 2;
+        // 26 buttons centered vertically around cy: rows 0..25 of `gap`.
+        int row0 = cy - (25 * gap) / 2;
 
         // --- Enable All preset ---
         this.addRenderableWidget(Button.builder(
@@ -146,18 +146,38 @@ public class ModMenuScreen extends Screen {
             btn -> this.minecraft.setScreen(new MinPingScreen(this))
         ).bounds(cx - btnW / 2, row0 + gap * 20, btnW, btnH).build());
 
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Higher Crouch"),
+            btn -> this.minecraft.setScreen(new HigherCrouchScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 21, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Farther Players"),
+            btn -> this.minecraft.setScreen(new FartherPlayersScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 22, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("CPS Counter"),
+            btn -> this.minecraft.setScreen(new CpsScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 23, btnW, btnH).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("Keystrokes"),
+            btn -> this.minecraft.setScreen(new KeystrokesScreen(this))
+        ).bounds(cx - btnW / 2, row0 + gap * 24, btnW, btnH).build());
+
         // --- Close ---
         this.addRenderableWidget(Button.builder(
             Component.literal("Close"),
             btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 21, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, row0 + gap * 25, btnW, btnH).build());
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.renderBackground(graphics, mouseX, mouseY, delta);
         graphics.drawCenteredString(this.font, this.title,
-            this.width / 2, this.height / 2 - 132, 0xFFFFFF);
+            this.width / 2, this.height / 2 - (25 * 24) / 2 - 12, 0xFFFFFF);
         super.render(graphics, mouseX, mouseY, delta);
     }
 

@@ -35,6 +35,8 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         MiniMapWaypointRenderer.register();
         HealthIndicatorRenderer.register();
         NametagRenderer.register();
+        CpsOverlay.register();
+        KeystrokesOverlay.register();
         // SchematicRenderer.register();
         // SchematicRenderType.touch();
         // SchematicOverlay.register();

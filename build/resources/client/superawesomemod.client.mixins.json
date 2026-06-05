@@ -19,7 +19,10 @@
     "MinecraftSwingMixin",
     "PostChainAccessor",
     "PostPassAccessor",
-    "GameRendererMotionBlurMixin"
+    "GameRendererMotionBlurMixin",
+    "HigherCrouchMixin",
+    "FartherPlayersMixin",
+    "CpsClickMixin"
   ],
   "injectors": {
     "defaultRequire": 1
