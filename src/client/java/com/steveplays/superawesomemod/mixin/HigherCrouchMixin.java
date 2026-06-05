@@ -32,7 +32,7 @@ public abstract class HigherCrouchMixin {
 
     @Unique private boolean wasCrouching = false;
     @Unique private int uncrouchFrames = 0;
-    private static final int UNCROUCH_OVERRIDE_FRAMES = 10;
+    private static final int UNCROUCH_OVERRIDE_FRAMES = 15;
 
     @Inject(method = "setup", at = @At("TAIL"))
     private void superawesomemod$higherCrouch(Level level, Entity entity, boolean detached,
