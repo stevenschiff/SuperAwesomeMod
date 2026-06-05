@@ -5,10 +5,11 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
+@SuppressWarnings("deprecation")
 public final class KeystrokesOverlay {
 
-    private static final int KEY_SIZE = 22;
-    private static final int GAP     = 2;
+    private static final int BASE_KEY_SIZE = 22;
+    private static final int BASE_GAP     = 2;
 
     // Colors
     private static final int BG_PRESSED   = 0xC0CCCCCC; // slightly darker white
@@ -27,11 +28,39 @@ public final class KeystrokesOverlay {
         Minecraft mc = Minecraft.getInstance();
         if (mc.options.hideGui || mc.player == null) return;
 
-        int width = graphics.guiWidth();
+        int screenWidth  = graphics.guiWidth();
+        int screenHeight = graphics.guiHeight();
+        float scale = KeystrokesData.getScale() / 5.0f; // scale 5 = 1.0x
 
-        // Top-right corner with some padding
-        int baseX = width - 3 * (KEY_SIZE + GAP) - 6;
-        int baseY = 6;
+        int keySize = BASE_KEY_SIZE;
+        int gap     = BASE_GAP;
+
+        // Total widget size in unscaled coords
+        int widgetW = 3 * keySize + 2 * gap;
+        int widgetH = 3 * keySize + 2 * gap; // 3 rows: W, ASD, Space
+
+        // Compute anchor based on corner
+        int corner = KeystrokesData.getCorner();
+        int padding = 6;
+        float anchorX, anchorY;
+        switch (corner) {
+            case 0 -> { // Top-Left
+                anchorX = padding;
+                anchorY = padding;
+            }
+            case 2 -> { // Bottom-Left
+                anchorX = padding;
+                anchorY = screenHeight - widgetH * scale - padding;
+            }
+            case 3 -> { // Bottom-Right
+                anchorX = screenWidth - widgetW * scale - padding;
+                anchorY = screenHeight - widgetH * scale - padding;
+            }
+            default -> { // 1 = Top-Right
+                anchorX = screenWidth - widgetW * scale - padding;
+                anchorY = padding;
+            }
+        }
 
         boolean w     = mc.options.keyUp.isDown();
         boolean a     = mc.options.keyLeft.isDown();
@@ -39,36 +68,42 @@ public final class KeystrokesOverlay {
         boolean d     = mc.options.keyRight.isDown();
         boolean space = mc.options.keyJump.isDown();
 
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(anchorX, anchorY);
+        graphics.pose().scale(scale, scale);
+
         // Row 0: W (centered)
-        drawKey(graphics, mc, "W", baseX + KEY_SIZE + GAP, baseY, w);
+        drawKey(graphics, mc, "W", keySize + gap, 0, keySize, w);
 
         // Row 1: A S D
-        int row1Y = baseY + KEY_SIZE + GAP;
-        drawKey(graphics, mc, "A", baseX, row1Y, a);
-        drawKey(graphics, mc, "S", baseX + KEY_SIZE + GAP, row1Y, s);
-        drawKey(graphics, mc, "D", baseX + 2 * (KEY_SIZE + GAP), row1Y, d);
+        int row1Y = keySize + gap;
+        drawKey(graphics, mc, "A", 0, row1Y, keySize, a);
+        drawKey(graphics, mc, "S", keySize + gap, row1Y, keySize, s);
+        drawKey(graphics, mc, "D", 2 * (keySize + gap), row1Y, keySize, d);
 
         // Row 2: Spacebar (full width)
-        int row2Y = row1Y + KEY_SIZE + GAP;
-        int spaceWidth = 3 * KEY_SIZE + 2 * GAP;
+        int row2Y = 2 * (keySize + gap);
+        int spaceWidth = widgetW;
         int bg = space ? BG_PRESSED : BG_RELEASED;
-        graphics.fill(baseX, row2Y, baseX + spaceWidth, row2Y + KEY_SIZE, bg);
+        graphics.fill(0, row2Y, spaceWidth, row2Y + keySize, bg);
         String spaceLabel = "\u2014"; // em dash to represent spacebar
         int textW = mc.font.width(spaceLabel);
         graphics.drawString(mc.font, spaceLabel,
-            baseX + (spaceWidth - textW) / 2,
-            row2Y + (KEY_SIZE - 8) / 2,
+            (spaceWidth - textW) / 2,
+            row2Y + (keySize - 8) / 2,
             TEXT_COLOR, true);
+
+        graphics.pose().popMatrix();
     }
 
     private static void drawKey(GuiGraphics graphics, Minecraft mc,
-                                String label, int x, int y, boolean pressed) {
+                                String label, int x, int y, int size, boolean pressed) {
         int bg = pressed ? BG_PRESSED : BG_RELEASED;
-        graphics.fill(x, y, x + KEY_SIZE, y + KEY_SIZE, bg);
+        graphics.fill(x, y, x + size, y + size, bg);
         int textW = mc.font.width(label);
         graphics.drawString(mc.font, label,
-            x + (KEY_SIZE - textW) / 2,
-            y + (KEY_SIZE - 8) / 2,
+            x + (size - textW) / 2,
+            y + (size - 8) / 2,
             TEXT_COLOR, true);
     }
 }

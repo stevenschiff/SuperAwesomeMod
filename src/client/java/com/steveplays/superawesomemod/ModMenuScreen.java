@@ -42,6 +42,15 @@ public class ModMenuScreen extends Screen {
                 MiniMapData.setHudVisible(true);
                 MiniMapData.setMinimapSize(64);
                 MiniMapData.setCorner(3); // Bottom-Right
+                NametagData.setEnabled(true);
+                MotionBlurData.setEnabled(true);
+                MotionBlurData.setStrength(3);
+                HealthIndicatorData.setEnabled(true);
+                HigherCrouchData.setEnabled(true);
+                CpsData.setEnabled(true);
+                CpsData.setScale(5);
+                KeystrokesData.setEnabled(true);
+                KeystrokesData.setCorner(3); // Bottom-Right
             }
         ).bounds(cx - btnW / 2, row0, btnW, btnH).build());
 

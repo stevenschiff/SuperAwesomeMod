@@ -26,28 +26,38 @@ public final class CpsOverlay {
         int leftCps  = CpsData.getLeftCps();
         int rightCps = CpsData.getRightCps();
 
-        String text = leftCps + " | " + rightCps + " CPS";
+        String leftText  = String.valueOf(leftCps);
+        String separator = " | ";
+        String rightText = String.valueOf(rightCps);
+        String cpsLabel  = " CPS";
+        String fullText  = leftText + separator + rightText + cpsLabel;
 
         float scale = CpsData.getScale() / 5.0f; // scale 5 = 1.0x
 
         // Position: right of the hotbar. Hotbar right edge is at width/2 + 91.
         int hotbarRight = width / 2 + 91;
-        int textWidth = mc.font.width(text);
+        int fullTextWidth = mc.font.width(fullText);
+
+        // Compute box dimensions in scaled space
+        int padding = 4;
+        int boxWidth  = fullTextWidth + padding * 2;
+        int boxHeight = mc.font.lineHeight + padding * 2;
+
+        // Anchor: right of hotbar, vertically centered on hotbar row
+        int anchorX = (int)(hotbarRight + 8);
+        int anchorY = (int)(height - 10 - (boxHeight * scale) / 2);
 
         graphics.pose().pushMatrix();
-        // Anchor point: right of hotbar, vertically centered on hotbar row.
-        float anchorX = hotbarRight + 8;
-        float anchorY = height - 14;
-        graphics.pose().translate(anchorX, anchorY);
+        graphics.pose().translate((float) anchorX, (float) anchorY);
         graphics.pose().scale(scale, scale);
 
-        // Background box
-        int bgWidth  = textWidth + 6;
-        int bgHeight = 12;
-        graphics.fill(-3, -2, bgWidth - 3, bgHeight - 2, 0x80000000);
+        // Pure black background
+        graphics.fill(0, 0, boxWidth, boxHeight, 0xFF000000);
 
-        // Text
-        graphics.drawString(mc.font, text, 0, 0, 0xFFFFFF, true);
+        // Draw text centered in box
+        int textX = padding;
+        int textY = padding;
+        graphics.drawString(mc.font, fullText, textX, textY, 0xFFFFFFFF, false);
 
         graphics.pose().popMatrix();
     }
