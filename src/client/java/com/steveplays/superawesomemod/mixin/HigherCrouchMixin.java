@@ -30,9 +30,7 @@ public abstract class HigherCrouchMixin {
     private static final double STANDING_EYE_HEIGHT = 1.62;
     private static final double CROUCH_EYE_HEIGHT = 1.54;
 
-    @Unique private boolean wasCrouching = false;
-    @Unique private int uncrouchFrames = 0;
-    private static final int UNCROUCH_OVERRIDE_FRAMES = 15;
+    @Unique private boolean hasCrouchedOnce = false;
 
     @Inject(method = "setup", at = @At("TAIL"))
     private void superawesomemod$higherCrouch(Level level, Entity entity, boolean detached,
@@ -47,18 +45,14 @@ public abstract class HigherCrouchMixin {
         if (crouching) {
             // Force camera to our crouch eye height instantly — no interpolation.
             setPosition(new Vec3(this.position.x, lerpedFeetY + CROUCH_EYE_HEIGHT, this.position.z));
-            wasCrouching = true;
-            uncrouchFrames = 0;
-        } else {
-            if (wasCrouching) {
-                wasCrouching = false;
-                uncrouchFrames = UNCROUCH_OVERRIDE_FRAMES;
-            }
-            // Keep forcing standing eye height for several frames after uncrouching
-            // to completely suppress vanilla's smooth stand-up animation.
-            if (uncrouchFrames > 0) {
-                setPosition(new Vec3(this.position.x, lerpedFeetY + STANDING_EYE_HEIGHT, this.position.z));
-                uncrouchFrames--;
+            hasCrouchedOnce = true;
+        } else if (hasCrouchedOnce) {
+            // Not crouching — if vanilla's camera is below standing eye height,
+            // it's still playing the stand-up interpolation. Force it to
+            // standing height every frame until vanilla catches up.
+            double standingEyeY = lerpedFeetY + STANDING_EYE_HEIGHT;
+            if (this.position.y < standingEyeY - 0.001) {
+                setPosition(new Vec3(this.position.x, standingEyeY, this.position.z));
             }
         }
     }
