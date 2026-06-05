@@ -16,12 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Higher Crouch: instant crouch/uncrouch with barely any camera dip (1.8 style).
  *
- * Instead of setting an absolute Y from entity position (which causes choppiness
- * during jumps), this adds an offset to vanilla's already-interpolated camera Y.
- * Vanilla smoothly interpolates the camera to crouching eye (~1.27). We add the
- * difference to bring it up to our target (~1.54), giving +0.27 offset.
- * On uncrouch, vanilla interpolates back up from 1.27 — we counteract by removing
- * our offset instantly so there's no snap-down.
+ * Bypasses vanilla's smooth crouch interpolation entirely by forcing the camera
+ * to the correct absolute eye height each frame. When crouching the camera
+ * instantly drops to 1.54 (only 0.08 below standing); when releasing shift
+ * the camera instantly returns to 1.62.
  */
 @Mixin(value = Camera.class, priority = 1050)
 public abstract class HigherCrouchMixin {
@@ -29,13 +27,10 @@ public abstract class HigherCrouchMixin {
     @Shadow private Vec3 position;
     @Shadow protected abstract void setPosition(Vec3 pos);
 
-    // How much higher our crouch eye is compared to vanilla's crouch eye.
-    // Vanilla crouch eye ~1.27, we want ~1.54, so offset = +0.27.
-    private static final double CROUCH_Y_OFFSET = 0.27;
+    private static final double STANDING_EYE_HEIGHT = 1.62;
+    private static final double CROUCH_EYE_HEIGHT = 1.54;
 
     @Unique private boolean wasCrouching = false;
-    @Unique private int uncrouchFrames = 0;
-    private static final int UNCROUCH_OVERRIDE_FRAMES = 10;
 
     @Inject(method = "setup", at = @At("TAIL"))
     private void superawesomemod$higherCrouch(Level level, Entity entity, boolean detached,
@@ -45,35 +40,17 @@ public abstract class HigherCrouchMixin {
         if (detached) return;
 
         boolean crouching = player.isCrouching();
+        double lerpedFeetY = player.yOld + (player.getY() - player.yOld) * partialTick;
 
         if (crouching) {
-            // Vanilla has already set the camera to its interpolated crouch position.
-            // Just bump it up by our offset. This preserves vanilla's smooth handling
-            // of jumps, movement, etc. — we only change the crouch depth.
-            setPosition(new Vec3(this.position.x, this.position.y + CROUCH_Y_OFFSET, this.position.z));
+            // Force camera to our crouch eye height instantly — no interpolation.
+            setPosition(new Vec3(this.position.x, lerpedFeetY + CROUCH_EYE_HEIGHT, this.position.z));
             wasCrouching = true;
-            uncrouchFrames = 0;
         } else if (wasCrouching) {
+            // Just stopped crouching — force camera to standing eye height
+            // instantly so vanilla's slow uncrouch interpolation is skipped.
+            setPosition(new Vec3(this.position.x, lerpedFeetY + STANDING_EYE_HEIGHT, this.position.z));
             wasCrouching = false;
-            uncrouchFrames = UNCROUCH_OVERRIDE_FRAMES;
-        }
-
-        if (!crouching && uncrouchFrames > 0) {
-            // Vanilla is smoothly interpolating from crouch eye back to standing.
-            // Its current Y is somewhere between 1.27 and 1.62. But standing is
-            // the correct final position — just force it there by adding whatever
-            // vanilla still has left to interpolate, making uncrouch instant.
-            // The interpolated player eye Y from vanilla is this.position.y.
-            // Standing eye Y would be entity lerped Y + 1.62.
-            // We compute the lerped feet Y from vanilla's position minus whatever
-            // eye height vanilla used, but simpler: just use the entity's
-            // interpolated position.
-            double lerpedFeetY = player.yOld + (player.getY() - player.yOld) * partialTick;
-            double standingEyeY = lerpedFeetY + 1.62;
-            if (this.position.y < standingEyeY - 0.001) {
-                setPosition(new Vec3(this.position.x, standingEyeY, this.position.z));
-            }
-            uncrouchFrames--;
         }
     }
 }
