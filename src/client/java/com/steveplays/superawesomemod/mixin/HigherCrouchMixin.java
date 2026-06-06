@@ -3,6 +3,7 @@ package com.steveplays.superawesomemod.mixin;
 import com.steveplays.superawesomemod.HigherCrouchData;
 import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -16,10 +17,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Higher Crouch: instant crouch/uncrouch with barely any camera dip (1.8 style).
  *
- * Bypasses vanilla's smooth crouch interpolation entirely by forcing the camera
- * to the correct absolute eye height each frame. When crouching the camera
- * instantly drops to 1.54 (only 0.08 below standing); when releasing shift
- * the camera instantly returns to 1.62.
+ * Only activates when the player is in the CROUCHING pose — crawling, swimming,
+ * elytra flight, and other poses are left at their vanilla camera height.
+ *
+ * Also syncs the entity's eye height to the camera position so the raycast
+ * (crosshair target) matches what the player sees.
  */
 @Mixin(value = Camera.class, priority = 1050)
 public abstract class HigherCrouchMixin {
@@ -39,17 +41,18 @@ public abstract class HigherCrouchMixin {
         if (!(entity instanceof Player player)) return;
         if (detached) return;
 
-        boolean crouching = player.isCrouching();
+        Pose pose = player.getPose();
         double lerpedFeetY = player.yOld + (player.getY() - player.yOld) * partialTick;
 
-        if (crouching) {
+        if (pose == Pose.CROUCHING) {
             // Force camera to our crouch eye height instantly — no interpolation.
             setPosition(new Vec3(this.position.x, lerpedFeetY + CROUCH_EYE_HEIGHT, this.position.z));
+            // Sync entity eye height so raycasts start from the same position as the camera.
+            ((EntityEyeHeightAccessor) player).superawesomemod$setEyeHeight((float) CROUCH_EYE_HEIGHT);
             hasCrouchedOnce = true;
-        } else if (hasCrouchedOnce) {
-            // Not crouching — if vanilla's camera is below standing eye height,
-            // it's still playing the stand-up interpolation. Force it to
-            // standing height every frame until vanilla catches up.
+        } else if (hasCrouchedOnce && pose == Pose.STANDING) {
+            // Only force standing height when actually standing — not when
+            // crawling (SWIMMING), flying (FALL_FLYING), or any other non-standing pose.
             double standingEyeY = lerpedFeetY + STANDING_EYE_HEIGHT;
             if (this.position.y < standingEyeY - 0.001) {
                 setPosition(new Vec3(this.position.x, standingEyeY, this.position.z));

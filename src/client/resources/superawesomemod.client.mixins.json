@@ -21,6 +21,7 @@
     "PostPassAccessor",
     "GameRendererMotionBlurMixin",
     "HigherCrouchMixin",
+    "EntityEyeHeightAccessor",
     "FartherPlayersMixin",
     "CpsClickMixin"
   ],

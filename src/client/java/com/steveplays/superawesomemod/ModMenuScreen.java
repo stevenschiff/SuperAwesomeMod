@@ -2,14 +2,32 @@ package com.steveplays.superawesomemod;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Main mod menu screen. Add a new Button entry here for each future feature.
+ * Main mod menu screen. Buttons flow left-to-right in rows with a search bar
+ * at the top-left. Matching buttons are highlighted with a white outline.
  * Open with the G keybind (rebindable in Options → Controls → SuperAwesomeMod).
  */
 public class ModMenuScreen extends Screen {
+
+    private EditBox searchField;
+    private final List<FeatureButton> featureButtons = new ArrayList<>();
+
+    private static class FeatureButton {
+        final String label;
+        final Button button;
+
+        FeatureButton(String label, Button button) {
+            this.label = label;
+            this.button = button;
+        }
+    }
 
     public ModMenuScreen() {
         super(Component.literal("SuperAwesomeMod"));
@@ -17,177 +35,116 @@ public class ModMenuScreen extends Screen {
 
     @Override
     protected void init() {
-        int cx    = this.width / 2;
-        int cy    = this.height / 2;
-        int btnW  = 200;
-        int btnH  = 20;
-        int gap   = 24;
+        featureButtons.clear();
 
-        // 26 buttons centered vertically around cy: rows 0..25 of `gap`.
-        int row0 = cy - (25 * gap) / 2;
+        int padding = 10;
+        int btnW = 140;
+        int btnH = 20;
+        int gapX = 4;
+        int gapY = 4;
 
-        // --- Enable All preset ---
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Enable All"),
-            btn -> {
-                FreeLookData.setEnabled(true);
-                ArmorHudData.setEnabled(true);
-                CombatHitboxData.setEnabled(true);
-                CombatCrosshairData.setEnabled(true);
-                CombatPotionEffectsData.setEnabled(true);
-                AppleSkinData.setEnabled(true);
-                ShulkerTooltipData.setEnabled(true);
-                OldPvpData.setSwingWhileUsingEnabled(true);
-                MiniMapData.setEnabled(true);
-                MiniMapData.setHudVisible(true);
-                MiniMapData.setMinimapSize(64);
-                MiniMapData.setCorner(3); // Bottom-Right
-                NametagData.setEnabled(true);
-                MotionBlurData.setEnabled(true);
-                MotionBlurData.setStrength(3);
-                HealthIndicatorData.setEnabled(true);
-                HigherCrouchData.setEnabled(true);
-                CpsData.setEnabled(true);
-                CpsData.setScale(5);
-                KeystrokesData.setEnabled(true);
-                KeystrokesData.setCorner(3); // Bottom-Right
-            }
-        ).bounds(cx - btnW / 2, row0, btnW, btnH).build());
+        // --- Search bar at top-left ---
+        searchField = new EditBox(this.font, padding, padding, 200, btnH,
+                Component.literal("Search"));
+        searchField.setHint(Component.literal("Search..."));
+        searchField.setMaxLength(50);
+        this.addRenderableWidget(searchField);
 
-        // --- Feature buttons (add more below as the mod grows) ---
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Free Look"),
-            btn -> this.minecraft.setScreen(new FreeLookScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap, btnW, btnH).build());
+        // --- Buttons start below the search bar ---
+        int startY = padding + btnH + gapY + 4;
+        int availableWidth = this.width - 2 * padding;
+        int buttonsPerRow = Math.max(1, (availableWidth + gapX) / (btnW + gapX));
 
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Armor HUD"),
-            btn -> this.minecraft.setScreen(new ArmorHudScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 2, btnW, btnH).build());
+        // Enable All
+        addFeature("Enable All", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY,
+                btn -> {
+                    FreeLookData.setEnabled(true);
+                    ArmorHudData.setEnabled(true);
+                    CombatHitboxData.setEnabled(true);
+                    CombatCrosshairData.setEnabled(true);
+                    CombatPotionEffectsData.setEnabled(true);
+                    AppleSkinData.setEnabled(true);
+                    ShulkerTooltipData.setEnabled(true);
+                    OldPvpData.setSwingWhileUsingEnabled(true);
+                    MiniMapData.setEnabled(true);
+                    MiniMapData.setHudVisible(true);
+                    MiniMapData.setMinimapSize(64);
+                    MiniMapData.setCorner(3);
+                    NametagData.setEnabled(true);
+                    MotionBlurData.setEnabled(true);
+                    MotionBlurData.setStrength(3);
+                    HealthIndicatorData.setEnabled(true);
+                    HigherCrouchData.setEnabled(true);
+                    CpsData.setEnabled(true);
+                    CpsData.setScale(5);
+                    KeystrokesData.setEnabled(true);
+                    KeystrokesData.setCorner(3);
+                });
 
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Combat Hitboxes"),
-            btn -> this.minecraft.setScreen(new CombatHitboxScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 3, btnW, btnH).build());
+        // Feature buttons
+        addFeature("Free Look",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FreeLookScreen(this)));
+        addFeature("Armor HUD",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new ArmorHudScreen(this)));
+        addFeature("Combat Hitboxes",       buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new CombatHitboxScreen(this)));
+        addFeature("Combat Crosshair",      buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new CombatCrosshairScreen(this)));
+        addFeature("Combat Potion Effects", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new CombatPotionEffectsScreen(this)));
+        addFeature("PvP Cheat Detector",    buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new PvpDetectorScreen(this)));
+        addFeature("Autoclicker",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AutoclickerScreen(this)));
+        addFeature("Freecam",               buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FreecamScreen(this)));
+        addFeature("AppleSkin",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AppleSkinScreen(this)));
+        addFeature("Shulker Tooltips",      buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new ShulkerTooltipScreen(this)));
+        addFeature("Render Distance",       buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new RenderDistanceScreen(this)));
+        addFeature("Item Physics",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new ItemPhysicsScreen(this)));
+        addFeature("1.7 PvP Animations",   buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new OldPvpScreen(this)));
+        addFeature("X-Ray",                buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new XrayScreen(this)));
+        addFeature("Mini Map",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MiniMapScreen(this)));
+        addFeature("Motion Blur",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MotionBlurScreen(this)));
+        addFeature("Health Indicators",    buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new HealthIndicatorScreen(this)));
+        addFeature("Nametag",              buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NametagScreen(this)));
+        addFeature("Min Ping",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MinPingScreen(this)));
+        addFeature("Higher Crouch",        buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new HigherCrouchScreen(this)));
+        addFeature("Farther Players",      buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FartherPlayersScreen(this)));
+        addFeature("CPS Counter",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new CpsScreen(this)));
+        addFeature("Keystrokes",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new KeystrokesScreen(this)));
 
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Combat Crosshair"),
-            btn -> this.minecraft.setScreen(new CombatCrosshairScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 4, btnW, btnH).build());
+        // Close button
+        addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());
+    }
 
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Combat Potion Effects"),
-            btn -> this.minecraft.setScreen(new CombatPotionEffectsScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 5, btnW, btnH).build());
+    private void addFeature(String label, int buttonsPerRow, int btnW, int btnH,
+                            int gapX, int gapY, int padding, int startY,
+                            Button.OnPress action) {
+        int index = featureButtons.size();
+        int col = index % buttonsPerRow;
+        int row = index / buttonsPerRow;
+        int x = padding + col * (btnW + gapX);
+        int y = startY + row * (btnH + gapY);
 
-        this.addRenderableWidget(Button.builder(
-            Component.literal("PvP Cheat Detector"),
-            btn -> this.minecraft.setScreen(new PvpDetectorScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 6, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Autoclicker"),
-            btn -> this.minecraft.setScreen(new AutoclickerScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 7, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Freecam"),
-            btn -> this.minecraft.setScreen(new FreecamScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 8, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("AppleSkin"),
-            btn -> this.minecraft.setScreen(new AppleSkinScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 9, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Shulker Tooltips"),
-            btn -> this.minecraft.setScreen(new ShulkerTooltipScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 10, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Render Distance"),
-            btn -> this.minecraft.setScreen(new RenderDistanceScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 11, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Item Physics"),
-            btn -> this.minecraft.setScreen(new ItemPhysicsScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 12, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("1.7 PvP Animations"),
-            btn -> this.minecraft.setScreen(new OldPvpScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 13, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("X-Ray"),
-            btn -> this.minecraft.setScreen(new XrayScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 14, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Mini Map"),
-            btn -> this.minecraft.setScreen(new MiniMapScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 15, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Motion Blur"),
-            btn -> this.minecraft.setScreen(new MotionBlurScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 16, btnW, btnH).build());
-
-        // this.addRenderableWidget(Button.builder(
-        //     Component.literal("Schematics"),
-        //     btn -> this.minecraft.setScreen(new SchematicScreen(this))
-        // ).bounds(cx - btnW / 2, row0 + gap * 17, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Health Indicators"),
-            btn -> this.minecraft.setScreen(new HealthIndicatorScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 18, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Nametag"),
-            btn -> this.minecraft.setScreen(new NametagScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 19, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Min Ping"),
-            btn -> this.minecraft.setScreen(new MinPingScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 20, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Higher Crouch"),
-            btn -> this.minecraft.setScreen(new HigherCrouchScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 21, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Farther Players"),
-            btn -> this.minecraft.setScreen(new FartherPlayersScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 22, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("CPS Counter"),
-            btn -> this.minecraft.setScreen(new CpsScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 23, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Keystrokes"),
-            btn -> this.minecraft.setScreen(new KeystrokesScreen(this))
-        ).bounds(cx - btnW / 2, row0 + gap * 24, btnW, btnH).build());
-
-        // --- Close ---
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Close"),
-            btn -> this.onClose()
-        ).bounds(cx - btnW / 2, row0 + gap * 25, btnW, btnH).build());
+        Button btn = Button.builder(Component.literal(label), action)
+                .bounds(x, y, btnW, btnH).build();
+        this.addRenderableWidget(btn);
+        featureButtons.add(new FeatureButton(label, btn));
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.renderBackground(graphics, mouseX, mouseY, delta);
-        graphics.drawCenteredString(this.font, this.title,
-            this.width / 2, this.height / 2 - (25 * 24) / 2 - 12, 0xFFFFFF);
         super.render(graphics, mouseX, mouseY, delta);
+
+        // Draw white outline around buttons that match the search query
+        String query = searchField.getValue().toLowerCase().trim();
+        if (!query.isEmpty()) {
+            for (FeatureButton fb : featureButtons) {
+                if (fb.label.toLowerCase().contains(query)) {
+                    int x = fb.button.getX() - 2;
+                    int y = fb.button.getY() - 2;
+                    int w = fb.button.getWidth() + 4;
+                    int h = fb.button.getHeight() + 4;
+                    // White outline (2px border via nested outlines)
+                    graphics.renderOutline(x, y, w, h, 0xFFFFFFFF);
+                    graphics.renderOutline(x + 1, y + 1, w - 2, h - 2, 0xFFFFFFFF);
+                }
+            }
+        }
     }
 
     @Override
