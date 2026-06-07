@@ -44,7 +44,7 @@ public final class CpsOverlay {
         int boxHeight = mc.font.lineHeight + padding * 2;
 
         // Anchor: right of hotbar, vertically centered on hotbar row
-        int anchorX = (int)(hotbarRight + 8);
+        int anchorX = (int)(hotbarRight + CpsData.getOffset());
         int anchorY = (int)(height - 10 - (boxHeight * scale) / 2);
 
         graphics.pose().pushMatrix();

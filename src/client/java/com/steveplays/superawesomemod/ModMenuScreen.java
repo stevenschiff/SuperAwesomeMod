@@ -79,6 +79,7 @@ public class ModMenuScreen extends Screen {
                     CpsData.setScale(5);
                     KeystrokesData.setEnabled(true);
                     KeystrokesData.setCorner(3);
+                    NoFogData.setEnabled(true);
                 });
 
         // Feature buttons
@@ -105,6 +106,7 @@ public class ModMenuScreen extends Screen {
         addFeature("Farther Players",      buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FartherPlayersScreen(this)));
         addFeature("CPS Counter",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new CpsScreen(this)));
         addFeature("Keystrokes",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new KeystrokesScreen(this)));
+        addFeature("No Fog",              buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NoFogScreen(this)));
 
         // Close button
         addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());
@@ -127,7 +129,8 @@ public class ModMenuScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.renderBackground(graphics, mouseX, mouseY, delta);
+        // Draw a fully opaque background so the menu always covers F3 and other overlays.
+        graphics.fill(0, 0, this.width, this.height, 0xFF000000);
         super.render(graphics, mouseX, mouseY, delta);
 
         // Draw white outline around buttons that match the search query

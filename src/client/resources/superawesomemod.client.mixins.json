@@ -23,7 +23,8 @@
     "HigherCrouchMixin",
     "EntityEyeHeightAccessor",
     "FartherPlayersMixin",
-    "CpsClickMixin"
+    "CpsClickMixin",
+    "NoFogMixin"
   ],
   "injectors": {
     "defaultRequire": 1

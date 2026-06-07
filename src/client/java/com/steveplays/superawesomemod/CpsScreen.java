@@ -35,10 +35,15 @@ public class CpsScreen extends Screen {
             CpsData.getScale()
         ));
 
+        this.addRenderableWidget(new OffsetSlider(
+            cx - btnW / 2, cy + 6, btnW, btnH,
+            CpsData.getOffset()
+        ));
+
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
             btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, cy + 14, 100, btnH).build());
+        ).bounds(cx - 50, cy + 34, 100, btnH).build());
     }
 
     private Component toggleLabel() {
@@ -83,6 +88,25 @@ public class CpsScreen extends Screen {
         protected void applyValue() {
             int s = (int) Math.round(this.value * 9.0 + 1.0);
             CpsData.setScale(s);
+        }
+    }
+
+    private static final class OffsetSlider extends AbstractSliderButton {
+        OffsetSlider(int x, int y, int w, int h, int initialOffset) {
+            super(x, y, w, h, Component.empty(), initialOffset / 100.0);
+            this.updateMessage();
+        }
+
+        @Override
+        protected void updateMessage() {
+            int o = (int) Math.round(this.value * 100.0);
+            this.setMessage(Component.literal("Hotbar Distance: " + o));
+        }
+
+        @Override
+        protected void applyValue() {
+            int o = (int) Math.round(this.value * 100.0);
+            CpsData.setOffset(o);
         }
     }
 }
