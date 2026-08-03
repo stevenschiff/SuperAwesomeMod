@@ -80,6 +80,7 @@ public class ModMenuScreen extends Screen {
                     KeystrokesData.setEnabled(true);
                     KeystrokesData.setCorner(3);
                     NoFogData.setEnabled(true);
+                    FlightData.setEnabled(true);
                 });
 
         // Feature buttons
@@ -91,6 +92,7 @@ public class ModMenuScreen extends Screen {
         addFeature("PvP Cheat Detector",    buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new PvpDetectorScreen(this)));
         addFeature("Autoclicker",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AutoclickerScreen(this)));
         addFeature("Freecam",               buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FreecamScreen(this)));
+        addFeature("Flight",                buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FlightScreen(this)));
         addFeature("AppleSkin",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AppleSkinScreen(this)));
         addFeature("Shulker Tooltips",      buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new ShulkerTooltipScreen(this)));
         addFeature("Render Distance",       buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new RenderDistanceScreen(this)));

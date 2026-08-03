@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class NoFogMixin {
 
     @Redirect(
-        method = "renderLevel",
+        method = "updateCamera",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/client/renderer/fog/FogRenderer;getBuffer(Lnet/minecraft/client/renderer/fog/FogRenderer$FogMode;)Lcom/mojang/blaze3d/buffers/GpuBufferSlice;",

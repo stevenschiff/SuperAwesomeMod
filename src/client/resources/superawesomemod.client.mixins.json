@@ -24,7 +24,8 @@
     "EntityEyeHeightAccessor",
     "FartherPlayersMixin",
     "CpsClickMixin",
-    "NoFogMixin"
+    "NoFogMixin",
+    "FlightMixin"
   ],
   "injectors": {
     "defaultRequire": 1
