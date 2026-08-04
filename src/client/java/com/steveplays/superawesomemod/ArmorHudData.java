@@ -2,12 +2,17 @@ package com.steveplays.superawesomemod;
 
 public class ArmorHudData {
     private static boolean enabled = false;
-    /** Scale factor 1-5 (1 = default 16px icons, 5 = 80px icons). */
-    private static int scale = 1;
+    /** Scale factor 0.5–5.0 in 0.1 increments. */
+    private static float scale = 1.0f;
+    /** Pixel offset above the armor icon for the durability number (0–30). */
+    private static int durabilityHeight = 10;
 
     public static boolean isEnabled()           { return enabled; }
     public static void    setEnabled(boolean e) { enabled = e; }
 
-    public static int  getScale()      { return scale; }
-    public static void setScale(int s) { scale = Math.clamp(s, 1, 5); }
+    public static float getScale()       { return scale; }
+    public static void  setScale(float s) { scale = Math.max(0.5f, Math.min(s, 5.0f)); }
+
+    public static int  getDurabilityHeight()      { return durabilityHeight; }
+    public static void setDurabilityHeight(int h)  { durabilityHeight = Math.max(0, Math.min(h, 30)); }
 }

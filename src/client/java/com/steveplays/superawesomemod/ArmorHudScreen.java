@@ -28,16 +28,20 @@ public class ArmorHudScreen extends Screen {
                 ArmorHudData.setEnabled(!ArmorHudData.isEnabled());
                 btn.setMessage(toggleLabel());
             }
-        ).bounds(cx - btnW / 2, cy - 40, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, cy - 55, btnW, btnH).build());
 
-        // Size slider (1-5)
-        this.addRenderableWidget(new ScaleSlider(cx - btnW / 2, cy - 10, btnW, btnH,
+        // Size slider (0.5 – 5.0 in 0.1 steps)
+        this.addRenderableWidget(new ScaleSlider(cx - btnW / 2, cy - 30, btnW, btnH,
                 ArmorHudData.getScale()));
+
+        // Durability height offset slider (0 – 30)
+        this.addRenderableWidget(new HeightSlider(cx - btnW / 2, cy - 5, btnW, btnH,
+                ArmorHudData.getDurabilityHeight()));
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
             btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, cy + 20, 100, btnH).build());
+        ).bounds(cx - 50, cy + 25, 100, btnH).build());
     }
 
     private Component toggleLabel() {
@@ -49,10 +53,10 @@ public class ArmorHudScreen extends Screen {
         this.renderBackground(graphics, mouseX, mouseY, delta);
         int cx = this.width / 2;
         int cy = this.height / 2;
-        graphics.drawCenteredString(this.font, this.title, cx, cy - 70, 0xFFFFFF);
+        graphics.drawCenteredString(this.font, this.title, cx, cy - 85, 0xFFFFFF);
         graphics.drawCenteredString(this.font,
             Component.literal("Shows armor with exact durability numbers"),
-            cx, cy - 56, 0xAAAAAA);
+            cx, cy - 71, 0xAAAAAA);
         super.render(graphics, mouseX, mouseY, delta);
     }
 
@@ -61,17 +65,44 @@ public class ArmorHudScreen extends Screen {
         return false;
     }
 
+    // ---- Size slider: 0.5 to 5.0 in 0.1 increments ----
     private static final class ScaleSlider extends AbstractSliderButton {
-        private static final int MIN = 1;
-        private static final int MAX = 5;
+        private static final float MIN = 0.5f;
+        private static final float MAX = 5.0f;
 
-        ScaleSlider(int x, int y, int w, int h, int initial) {
+        ScaleSlider(int x, int y, int w, int h, float initial) {
             super(x, y, w, h, Component.empty(), normalize(initial));
             this.updateMessage();
         }
 
-        private static double normalize(int v) {
-            return (double) (v - MIN) / (MAX - MIN);
+        private static double normalize(float v) {
+            return (v - MIN) / (MAX - MIN);
+        }
+
+        private float denormalize() {
+            float raw = (float) (this.value * (MAX - MIN) + MIN);
+            return Math.round(raw * 10.0f) / 10.0f; // snap to 0.1
+        }
+
+        @Override
+        protected void updateMessage() {
+            this.setMessage(Component.literal("Size: " + String.format("%.1f", denormalize())));
+        }
+
+        @Override
+        protected void applyValue() {
+            ArmorHudData.setScale(denormalize());
+        }
+    }
+
+    // ---- Durability height slider: 0 to 30 pixels ----
+    private static final class HeightSlider extends AbstractSliderButton {
+        private static final int MIN = 0;
+        private static final int MAX = 30;
+
+        HeightSlider(int x, int y, int w, int h, int initial) {
+            super(x, y, w, h, Component.empty(), (double) (initial - MIN) / (MAX - MIN));
+            this.updateMessage();
         }
 
         private int denormalize() {
@@ -80,12 +111,12 @@ public class ArmorHudScreen extends Screen {
 
         @Override
         protected void updateMessage() {
-            this.setMessage(Component.literal("Size: " + denormalize()));
+            this.setMessage(Component.literal("Durability Height: " + denormalize()));
         }
 
         @Override
         protected void applyValue() {
-            ArmorHudData.setScale(denormalize());
+            ArmorHudData.setDurabilityHeight(denormalize());
         }
     }
 }

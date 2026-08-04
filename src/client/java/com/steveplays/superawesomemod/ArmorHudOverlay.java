@@ -39,25 +39,27 @@ public final class ArmorHudOverlay {
 
         int width  = graphics.guiWidth();
         int height = graphics.guiHeight();
-        int scale  = ArmorHudData.getScale();
-        int iconSize = BASE_ICON_SIZE * scale;
-        int gap = 2 * scale;
+        float scale = ArmorHudData.getScale();
+        float iconSize = BASE_ICON_SIZE * scale;
+        float gap = 2 * scale;
 
         // Calculate total row width and position it left of the hotbar
-        int rowWidth = SLOTS.length * iconSize + (SLOTS.length - 1) * gap;
-        int xLeft    = width / 2 - 91 - SHIELD_GAP - rowWidth;
-        int yTop     = height - 19 - (iconSize - BASE_ICON_SIZE); // align bottom with hotbar
+        float rowWidth = SLOTS.length * iconSize + (SLOTS.length - 1) * gap;
+        float xLeft    = width / 2.0f - 91 - SHIELD_GAP - rowWidth;
+        float yTop     = height - 19 - (iconSize - BASE_ICON_SIZE); // align bottom with hotbar
+
+        int durabilityHeight = ArmorHudData.getDurabilityHeight();
 
         for (int i = 0; i < SLOTS.length; i++) {
             ItemStack stack = player.getItemBySlot(SLOTS[i]);
             if (stack.isEmpty()) continue;
 
-            int x = xLeft + i * (iconSize + gap);
+            float x = xLeft + i * (iconSize + gap);
 
             // Render the item icon scaled
             graphics.pose().pushMatrix();
-            graphics.pose().translate((float) x, (float) yTop);
-            graphics.pose().scale((float) scale, (float) scale);
+            graphics.pose().translate(x, yTop);
+            graphics.pose().scale(scale, scale);
             graphics.renderItem(stack, 0, 0);
             graphics.renderItemDecorations(mc.font, stack, 0, 0);
             graphics.pose().popMatrix();
@@ -68,7 +70,7 @@ public final class ArmorHudOverlay {
                 int maxDurability = stack.getMaxDamage();
                 float ratio = (float) durability / maxDurability;
 
-                // Color: green when full, yellow at half, red when low
+                // Color: green >60%, yellow 30-60%, red <=30%
                 int color;
                 if (ratio > 0.6f) {
                     color = 0x55FF55; // green
@@ -80,8 +82,8 @@ public final class ArmorHudOverlay {
 
                 String text = durability + "/" + maxDurability;
                 int textWidth = mc.font.width(text);
-                int textX = x + iconSize / 2 - textWidth / 2;
-                int textY = yTop - 10;
+                int textX = (int) (x + iconSize / 2) - textWidth / 2;
+                int textY = (int) yTop - durabilityHeight;
                 graphics.drawString(mc.font, text, textX, textY, color, true);
             }
         }
