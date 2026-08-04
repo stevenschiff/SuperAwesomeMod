@@ -25,7 +25,11 @@
     "FartherPlayersMixin",
     "CpsClickMixin",
     "NoFogMixin",
-    "FlightMixin"
+    "FlightMixin",
+    "NoFallMixin",
+    "BoatFlyMixin",
+    "WaterFogMixin",
+    "LavaFogMixin"
   ],
   "injectors": {
     "defaultRequire": 1

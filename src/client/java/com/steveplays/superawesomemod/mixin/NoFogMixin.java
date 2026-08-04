@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /**
- * Disables world fog (underwater, nether, etc.) by replacing the WORLD fog
- * mode with NONE when the No Fog feature is enabled.
+ * Disables world fog by replacing the WORLD fog mode with NONE
+ * when the No Fog feature is enabled.
  */
 @Mixin(FogRenderer.class)
 public class NoFogMixin {

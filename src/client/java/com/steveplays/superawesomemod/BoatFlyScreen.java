@@ -6,12 +6,12 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-public class FlightScreen extends Screen {
+public class BoatFlyScreen extends Screen {
 
     private final Screen parent;
 
-    public FlightScreen(Screen parent) {
-        super(Component.literal("Flight"));
+    public BoatFlyScreen(Screen parent) {
+        super(Component.literal("Boat Fly"));
         this.parent = parent;
     }
 
@@ -26,14 +26,14 @@ public class FlightScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             toggleLabel(),
             btn -> {
-                FlightData.setEnabled(!FlightData.isEnabled());
+                BoatFlyData.setEnabled(!BoatFlyData.isEnabled());
                 btn.setMessage(toggleLabel());
             }
         ).bounds(cx - btnW / 2, cy - 40, btnW, btnH).build());
 
         // Speed slider (1-250 blocks/second)
         this.addRenderableWidget(new SpeedSlider(cx - btnW / 2, cy - 10, btnW, btnH,
-                FlightData.getBlocksPerSecond()));
+                BoatFlyData.getBlocksPerSecond()));
 
         // Back
         this.addRenderableWidget(Button.builder(
@@ -43,7 +43,7 @@ public class FlightScreen extends Screen {
     }
 
     private Component toggleLabel() {
-        return Component.literal(FlightData.isEnabled() ? "Disable Flight" : "Enable Flight");
+        return Component.literal(BoatFlyData.isEnabled() ? "Disable Boat Fly" : "Enable Boat Fly");
     }
 
     @Override
@@ -55,13 +55,13 @@ public class FlightScreen extends Screen {
 
         graphics.drawCenteredString(this.font, this.title, cx, cy - 70, 0xFFFFFF);
 
-        boolean on = FlightData.isEnabled();
+        boolean on = BoatFlyData.isEnabled();
         graphics.drawCenteredString(this.font,
             Component.literal("Status: " + (on ? "Enabled" : "Disabled")),
             cx, cy - 58, on ? 0x55FF55 : 0xFF5555);
 
         graphics.drawCenteredString(this.font,
-            Component.literal("WASD/Space/Shift to fly  |  Works in survival"),
+            Component.literal("Fly while riding a boat  |  Space/Shift for up/down"),
             cx, cy + 46, 0xAAAAAA);
 
         super.render(graphics, mouseX, mouseY, delta);
@@ -98,7 +98,7 @@ public class FlightScreen extends Screen {
 
         @Override
         protected void applyValue() {
-            FlightData.setBlocksPerSecond(denormalize());
+            BoatFlyData.setBlocksPerSecond(denormalize());
         }
     }
 }

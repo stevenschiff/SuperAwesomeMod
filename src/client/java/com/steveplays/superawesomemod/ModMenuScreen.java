@@ -67,20 +67,23 @@ public class ModMenuScreen extends Screen {
                     ShulkerTooltipData.setEnabled(true);
                     OldPvpData.setSwingWhileUsingEnabled(true);
                     MiniMapData.setEnabled(true);
-                    MiniMapData.setHudVisible(true);
+                    MiniMapData.setHudVisible(false); // corner map off
                     MiniMapData.setMinimapSize(64);
                     MiniMapData.setCorner(3);
                     NametagData.setEnabled(true);
                     MotionBlurData.setEnabled(true);
                     MotionBlurData.setStrength(3);
                     HealthIndicatorData.setEnabled(true);
-                    HigherCrouchData.setEnabled(true);
+                    HigherCrouchData.setEnabled(false); // higher crouch off
                     CpsData.setEnabled(true);
                     CpsData.setScale(5);
+                    CpsData.setOffset(30); // slider slightly more to the right
                     KeystrokesData.setEnabled(true);
+                    KeystrokesData.setScale(4); // size 4 instead of 5
                     KeystrokesData.setCorner(3);
                     NoFogData.setEnabled(true);
-                    FlightData.setEnabled(true);
+                    FlightData.setEnabled(false); // flight off
+                    NoFallData.setEnabled(true);
                 });
 
         // Feature buttons
@@ -109,6 +112,8 @@ public class ModMenuScreen extends Screen {
         addFeature("CPS Counter",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new CpsScreen(this)));
         addFeature("Keystrokes",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new KeystrokesScreen(this)));
         addFeature("No Fog",              buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NoFogScreen(this)));
+        addFeature("No Fall",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NoFallScreen(this)));
+        addFeature("Boat Fly",            buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new BoatFlyScreen(this)));
 
         // Close button
         addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());
