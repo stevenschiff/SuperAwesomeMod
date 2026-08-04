@@ -21,13 +21,16 @@ public class CombatHitboxScreen extends Screen {
         int btnW = 200;
         int btnH = 20;
 
+        int y = cy - 80;
+
         this.addRenderableWidget(Button.builder(
             toggleLabel(),
             btn -> {
                 CombatHitboxData.setEnabled(!CombatHitboxData.isEnabled());
                 btn.setMessage(toggleLabel());
             }
-        ).bounds(cx - btnW / 2, cy - 60, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, y, btnW, btnH).build());
+        y += 25;
 
         this.addRenderableWidget(Button.builder(
             xrayLabel(),
@@ -35,7 +38,8 @@ public class CombatHitboxScreen extends Screen {
                 CombatHitboxData.setSeeThroughWalls(!CombatHitboxData.isSeeThroughWalls());
                 btn.setMessage(xrayLabel());
             }
-        ).bounds(cx - btnW / 2, cy - 35, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, y, btnW, btnH).build());
+        y += 25;
 
         this.addRenderableWidget(Button.builder(
             scopeLabel(),
@@ -43,7 +47,8 @@ public class CombatHitboxScreen extends Screen {
                 CombatHitboxData.setPlayersOnly(!CombatHitboxData.isPlayersOnly());
                 btn.setMessage(scopeLabel());
             }
-        ).bounds(cx - btnW / 2, cy - 10, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, y, btnW, btnH).build());
+        y += 25;
 
         this.addRenderableWidget(Button.builder(
             invisibleLabel(),
@@ -51,12 +56,35 @@ public class CombatHitboxScreen extends Screen {
                 CombatHitboxData.setShowInvisible(!CombatHitboxData.isShowInvisible());
                 btn.setMessage(invisibleLabel());
             }
-        ).bounds(cx - btnW / 2, cy + 15, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, y, btnW, btnH).build());
+        y += 25;
+
+        // In-range color cycle
+        this.addRenderableWidget(Button.builder(
+            inRangeColorLabel(),
+            btn -> {
+                int next = (CombatHitboxData.getInRangeColor() + 1) % CombatHitboxData.COLOR_NAMES.length;
+                CombatHitboxData.setInRangeColor(next);
+                btn.setMessage(inRangeColorLabel());
+            }
+        ).bounds(cx - btnW / 2, y, btnW, btnH).build());
+        y += 25;
+
+        // Out-of-range color cycle
+        this.addRenderableWidget(Button.builder(
+            outOfRangeColorLabel(),
+            btn -> {
+                int next = (CombatHitboxData.getOutOfRangeColor() + 1) % CombatHitboxData.COLOR_NAMES.length;
+                CombatHitboxData.setOutOfRangeColor(next);
+                btn.setMessage(outOfRangeColorLabel());
+            }
+        ).bounds(cx - btnW / 2, y, btnW, btnH).build());
+        y += 25;
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
             btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, cy + 45, 100, btnH).build());
+        ).bounds(cx - 50, y, 100, btnH).build());
     }
 
     private Component toggleLabel() {
@@ -83,15 +111,23 @@ public class CombatHitboxScreen extends Screen {
             : "Show Invisible: Disabled");
     }
 
+    private Component inRangeColorLabel() {
+        return Component.literal("In Range: " + CombatHitboxData.getInRangeColorName());
+    }
+
+    private Component outOfRangeColorLabel() {
+        return Component.literal("Out of Range: " + CombatHitboxData.getOutOfRangeColorName());
+    }
+
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.renderBackground(graphics, mouseX, mouseY, delta);
         int cx = this.width / 2;
         int cy = this.height / 2;
-        graphics.drawCenteredString(this.font, this.title, cx, cy - 75, 0xFFFFFF);
+        graphics.drawCenteredString(this.font, this.title, cx, cy - 100, 0xFFFFFF);
         graphics.drawCenteredString(this.font,
-            Component.literal("White when out of reach, red when in attack reach"),
-            cx, cy - 75 + 14, 0xAAAAAA);
+            Component.literal("Customizable hitbox colors for in/out of attack range"),
+            cx, cy - 100 + 14, 0xAAAAAA);
         super.render(graphics, mouseX, mouseY, delta);
     }
 

@@ -79,11 +79,9 @@ public final class CombatHitboxRenderer {
             AABB box = entity.getBoundingBox().move(dx, dy, dz);
             boolean inReach = nearestPointDistanceSqr(eye, box) <= reachSqr;
 
-            float r = 1.0f;
-            float g = inReach ? 0.0f : 1.0f;
-            float b = inReach ? 0.0f : 1.0f;
+            float[] color = inReach ? CombatHitboxData.getInRangeRGB() : CombatHitboxData.getOutOfRangeRGB();
 
-            renderBoxLines(buffer, matrix, pose, box, camPos, r, g, b, 1.0f);
+            renderBoxLines(buffer, matrix, pose, box, camPos, color[0], color[1], color[2], 1.0f);
         }
     }
 

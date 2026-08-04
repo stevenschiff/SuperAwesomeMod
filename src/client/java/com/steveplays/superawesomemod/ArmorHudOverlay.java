@@ -19,8 +19,7 @@ public final class ArmorHudOverlay {
         EquipmentSlot.FEET
     };
 
-    private static final int ICON_SIZE = 16;
-    // Pixels of empty space to leave between the armor row and the hotbar/offhand for the shield slot.
+    private static final int BASE_ICON_SIZE = 16;
     private static final int SHIELD_GAP = 32;
 
     private ArmorHudOverlay() {}
@@ -40,21 +39,51 @@ public final class ArmorHudOverlay {
 
         int width  = graphics.guiWidth();
         int height = graphics.guiHeight();
+        int scale  = ArmorHudData.getScale();
+        int iconSize = BASE_ICON_SIZE * scale;
+        int gap = 2 * scale;
 
-        // Hotbar's left edge is at width/2 - 91. Place the armor row to the left of that,
-        // leaving SHIELD_GAP pixels free for the offhand/shield slot.
-        int rowWidth = SLOTS.length * ICON_SIZE;
+        // Calculate total row width and position it left of the hotbar
+        int rowWidth = SLOTS.length * iconSize + (SLOTS.length - 1) * gap;
         int xLeft    = width / 2 - 91 - SHIELD_GAP - rowWidth;
-        int yTop     = height - 19; // matches the y of hotbar items
+        int yTop     = height - 19 - (iconSize - BASE_ICON_SIZE); // align bottom with hotbar
 
         for (int i = 0; i < SLOTS.length; i++) {
             ItemStack stack = player.getItemBySlot(SLOTS[i]);
             if (stack.isEmpty()) continue;
 
-            int x = xLeft + i * ICON_SIZE;
-            graphics.renderItem(stack, x, yTop);
-            // Draws the vanilla durability bar (green/yellow/red) at the bottom of the icon.
-            graphics.renderItemDecorations(mc.font, stack, x, yTop);
+            int x = xLeft + i * (iconSize + gap);
+
+            // Render the item icon scaled
+            graphics.pose().pushMatrix();
+            graphics.pose().translate((float) x, (float) yTop);
+            graphics.pose().scale((float) scale, (float) scale);
+            graphics.renderItem(stack, 0, 0);
+            graphics.renderItemDecorations(mc.font, stack, 0, 0);
+            graphics.pose().popMatrix();
+
+            // Draw durability number above the icon
+            if (stack.isDamageableItem()) {
+                int durability = stack.getMaxDamage() - stack.getDamageValue();
+                int maxDurability = stack.getMaxDamage();
+                float ratio = (float) durability / maxDurability;
+
+                // Color: green when full, yellow at half, red when low
+                int color;
+                if (ratio > 0.6f) {
+                    color = 0x55FF55; // green
+                } else if (ratio > 0.3f) {
+                    color = 0xFFFF55; // yellow
+                } else {
+                    color = 0xFF5555; // red
+                }
+
+                String text = durability + "/" + maxDurability;
+                int textWidth = mc.font.width(text);
+                int textX = x + iconSize / 2 - textWidth / 2;
+                int textY = yTop - 10;
+                graphics.drawString(mc.font, text, textX, textY, color, true);
+            }
         }
     }
 }
