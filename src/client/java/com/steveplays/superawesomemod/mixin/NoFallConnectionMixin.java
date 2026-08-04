@@ -1,5 +1,6 @@
 package com.steveplays.superawesomemod.mixin;
 
+import com.steveplays.superawesomemod.FlightData;
 import com.steveplays.superawesomemod.NoFallData;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
@@ -18,7 +19,7 @@ public abstract class NoFallConnectionMixin {
 
     @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;)V", at = @At("HEAD"))
     private void superawesomemod$noFallPacket(Packet<?> packet, CallbackInfo ci) {
-        if (NoFallData.isEnabled() && packet instanceof ServerboundMovePlayerPacket) {
+        if ((NoFallData.isEnabled() || FlightData.isEnabled()) && packet instanceof ServerboundMovePlayerPacket) {
             ((NoFallPacketAccessor) packet).setOnGround(true);
         }
     }

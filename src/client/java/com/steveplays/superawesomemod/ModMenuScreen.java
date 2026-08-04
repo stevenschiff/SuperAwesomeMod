@@ -60,6 +60,7 @@ public class ModMenuScreen extends Screen {
                 btn -> {
                     FreeLookData.setEnabled(true);
                     ArmorHudData.setEnabled(true);
+                    ArmorHudData.setScale(1.3f);
                     CombatHitboxData.setEnabled(true);
                     CombatHitboxData.setInRangeColor(8);   // Black
                     CombatHitboxData.setOutOfRangeColor(10); // Magenta
