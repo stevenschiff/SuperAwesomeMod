@@ -80,11 +80,18 @@ public final class ArmorHudOverlay {
                     color = 0xFFFF5555; // red
                 }
 
-                String text = durability + "/" + maxDurability;
+                String text = String.valueOf(durability);
+                float textScale = ArmorHudData.getTextScale();
                 int textWidth = mc.font.width(text);
-                int textX = (int) (x + iconSize / 2) - textWidth / 2;
-                int textY = (int) yTop - durabilityHeight;
-                graphics.drawString(mc.font, text, textX, textY, color, true);
+                float scaledTextWidth = textWidth * textScale;
+                float textX = x + iconSize / 2 - scaledTextWidth / 2;
+                float textY = yTop - durabilityHeight;
+
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(textX, textY);
+                graphics.pose().scale(textScale, textScale);
+                graphics.drawString(mc.font, text, 0, 0, color, true);
+                graphics.pose().popMatrix();
             }
         }
     }

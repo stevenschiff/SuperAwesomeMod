@@ -28,20 +28,24 @@ public class ArmorHudScreen extends Screen {
                 ArmorHudData.setEnabled(!ArmorHudData.isEnabled());
                 btn.setMessage(toggleLabel());
             }
-        ).bounds(cx - btnW / 2, cy - 55, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, cy - 68, btnW, btnH).build());
 
-        // Size slider (0.5 – 5.0 in 0.1 steps)
-        this.addRenderableWidget(new ScaleSlider(cx - btnW / 2, cy - 30, btnW, btnH,
+        // Icon size slider (0.5 – 5.0 in 0.1 steps)
+        this.addRenderableWidget(new ScaleSlider(cx - btnW / 2, cy - 43, btnW, btnH,
                 ArmorHudData.getScale()));
 
+        // Text size slider (0.5 – 3.0 in 0.1 steps)
+        this.addRenderableWidget(new TextScaleSlider(cx - btnW / 2, cy - 18, btnW, btnH,
+                ArmorHudData.getTextScale()));
+
         // Durability height offset slider (0 – 30)
-        this.addRenderableWidget(new HeightSlider(cx - btnW / 2, cy - 5, btnW, btnH,
+        this.addRenderableWidget(new HeightSlider(cx - btnW / 2, cy + 7, btnW, btnH,
                 ArmorHudData.getDurabilityHeight()));
 
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
             btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, cy + 25, 100, btnH).build());
+        ).bounds(cx - 50, cy + 37, 100, btnH).build());
     }
 
     private Component toggleLabel() {
@@ -92,6 +96,36 @@ public class ArmorHudScreen extends Screen {
         @Override
         protected void applyValue() {
             ArmorHudData.setScale(denormalize());
+        }
+    }
+
+    // ---- Text size slider: 0.5 to 3.0 in 0.1 increments ----
+    private static final class TextScaleSlider extends AbstractSliderButton {
+        private static final float MIN = 0.5f;
+        private static final float MAX = 3.0f;
+
+        TextScaleSlider(int x, int y, int w, int h, float initial) {
+            super(x, y, w, h, Component.empty(), normalize(initial));
+            this.updateMessage();
+        }
+
+        private static double normalize(float v) {
+            return (v - MIN) / (MAX - MIN);
+        }
+
+        private float denormalize() {
+            float raw = (float) (this.value * (MAX - MIN) + MIN);
+            return Math.round(raw * 10.0f) / 10.0f;
+        }
+
+        @Override
+        protected void updateMessage() {
+            this.setMessage(Component.literal("Text Size: " + String.format("%.1f", denormalize())));
+        }
+
+        @Override
+        protected void applyValue() {
+            ArmorHudData.setTextScale(denormalize());
         }
     }
 
