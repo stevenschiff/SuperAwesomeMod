@@ -73,11 +73,11 @@ public final class ArmorHudOverlay {
                 // Color: green >60%, yellow 30-60%, red <=30%
                 int color;
                 if (ratio > 0.6f) {
-                    color = 0x55FF55; // green
+                    color = 0xFF55FF55; // green
                 } else if (ratio > 0.3f) {
-                    color = 0xFFFF55; // yellow
+                    color = 0xFFFFFF55; // yellow
                 } else {
-                    color = 0xFF5555; // red
+                    color = 0xFFFF5555; // red
                 }
 
                 String text = durability + "/" + maxDurability;

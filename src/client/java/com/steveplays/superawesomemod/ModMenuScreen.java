@@ -87,7 +87,7 @@ public class ModMenuScreen extends Screen {
                     KeystrokesData.setCorner(3);
                     NoFogData.setEnabled(true);
                     FlightData.setEnabled(false); // flight off
-                    NoFallData.setEnabled(true);
+                    NoFallData.setEnabled(false);
                 });
 
         // Feature buttons
