@@ -1,14 +1,15 @@
 package com.steveplays.superawesomemod;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class FlightScreen extends Screen {
 
     private final Screen parent;
+    private EditBox speedField;
 
     public FlightScreen(Screen parent) {
         super(Component.literal("Flight"));
@@ -22,24 +23,53 @@ public class FlightScreen extends Screen {
         int btnW = 200;
         int btnH = 20;
 
-        // Toggle on/off
+        // Toggle on/off — picks up whatever is typed in the speed box
         this.addRenderableWidget(Button.builder(
             toggleLabel(),
             btn -> {
+                applySpeed();
                 FlightData.setEnabled(!FlightData.isEnabled());
                 btn.setMessage(toggleLabel());
             }
-        ).bounds(cx - btnW / 2, cy - 40, btnW, btnH).build());
+        ).bounds(cx - btnW / 2, cy - 44, btnW, btnH).build());
 
-        // Speed slider (1-250 blocks/second)
-        this.addRenderableWidget(new SpeedSlider(cx - btnW / 2, cy - 10, btnW, btnH,
-                FlightData.getBlocksPerSecond()));
+        // Speed input box (1-10000 blocks/second)
+        speedField = new EditBox(this.font, cx - 40, cy - 6, 80, btnH,
+                Component.literal("Speed"));
+        speedField.setMaxLength(5);
+        speedField.setValue(String.valueOf(FlightData.getBlocksPerSecond()));
+        speedField.setResponder(text -> applySpeed());
+        this.addRenderableWidget(speedField);
 
         // Back
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
-            btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, cy + 20, 100, btnH).build());
+            btn -> {
+                applySpeed();
+                this.minecraft.setScreen(this.parent);
+            }
+        ).bounds(cx - 50, cy + 22, 100, btnH).build());
+    }
+
+    /**
+     * Reads the speed box and stores it. Empty or non-numeric text is ignored so
+     * half-typed values don't wipe the current speed.
+     */
+    private void applySpeed() {
+        if (speedField == null) return;
+        String text = speedField.getValue().trim();
+        if (text.isEmpty()) return;
+        try {
+            FlightData.setBlocksPerSecond(Integer.parseInt(text));
+        } catch (NumberFormatException ignored) {
+            // keep the previous speed
+        }
+    }
+
+    @Override
+    public void onClose() {
+        applySpeed();
+        super.onClose();
     }
 
     private Component toggleLabel() {
@@ -61,8 +91,18 @@ public class FlightScreen extends Screen {
             cx, cy - 58, on ? 0x55FF55 : 0xFF5555);
 
         graphics.drawCenteredString(this.font,
+            Component.literal("Speed (blocks/sec)"),
+            cx, cy - 18, 0xFFFFFF);
+
+        int speed = FlightData.getBlocksPerSecond();
+        graphics.drawCenteredString(this.font,
+            Component.literal("Using " + speed + " blocks/sec  |  "
+                + FlightData.MIN_BLOCKS_PER_SECOND + "-" + FlightData.MAX_BLOCKS_PER_SECOND),
+            cx, cy + 48, speed > 1000 ? 0xFFAA00 : 0xAAAAAA);
+
+        graphics.drawCenteredString(this.font,
             Component.literal("WASD/Space/Shift to fly  |  Works in survival"),
-            cx, cy + 46, 0xAAAAAA);
+            cx, cy + 60, 0xAAAAAA);
 
         super.render(graphics, mouseX, mouseY, delta);
     }
@@ -70,35 +110,5 @@ public class FlightScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
-    }
-
-    // ── Speed slider (1-250 blocks/second) ──────────────────────────────
-
-    private static final class SpeedSlider extends AbstractSliderButton {
-        private static final int MIN = 1;
-        private static final int MAX = 250;
-
-        SpeedSlider(int x, int y, int w, int h, int initial) {
-            super(x, y, w, h, Component.empty(), normalize(initial));
-            this.updateMessage();
-        }
-
-        private static double normalize(int v) {
-            return (double) (v - MIN) / (MAX - MIN);
-        }
-
-        private int denormalize() {
-            return (int) Math.round(this.value * (MAX - MIN) + MIN);
-        }
-
-        @Override
-        protected void updateMessage() {
-            this.setMessage(Component.literal("Speed: " + denormalize() + " blocks/sec"));
-        }
-
-        @Override
-        protected void applyValue() {
-            FlightData.setBlocksPerSecond(denormalize());
-        }
     }
 }

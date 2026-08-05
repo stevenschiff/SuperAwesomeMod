@@ -62,11 +62,11 @@ public class ModMenuScreen extends Screen {
                     ArmorHudData.setEnabled(true);
                     ArmorHudData.setScale(1.3f);
                     CombatHitboxData.setEnabled(true);
-                    CombatHitboxData.setInRangeColor(8);   // Black
-                    CombatHitboxData.setOutOfRangeColor(10); // Magenta
+                    CombatHitboxData.setInRangeColor(3);    // Green
+                    CombatHitboxData.setOutOfRangeColor(9); // Pink
                     CombatCrosshairData.setEnabled(true);
-                    CombatCrosshairData.setInRangeColor(8);   // Black
-                    CombatCrosshairData.setOutOfRangeColor(10); // Magenta
+                    CombatCrosshairData.setInRangeColor(3);    // Green
+                    CombatCrosshairData.setOutOfRangeColor(9); // Pink
                     CombatPotionEffectsData.setEnabled(true);
                     AppleSkinData.setEnabled(true);
                     ShulkerTooltipData.setEnabled(true);
