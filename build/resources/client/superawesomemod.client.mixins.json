@@ -29,7 +29,9 @@
     "NoFallMixin",
     "NoFallPacketAccessor",
     "NoFallConnectionMixin",
+    "FlightFallResetMixin",
     "BoatFlyMixin",
+    "XpMultiplierMixin",
     "WaterFogMixin",
     "LavaFogMixin"
   ],

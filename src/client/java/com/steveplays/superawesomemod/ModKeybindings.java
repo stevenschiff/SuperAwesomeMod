@@ -19,6 +19,7 @@ public class ModKeybindings {
     public static KeyMapping schematicLayerUp;
     public static KeyMapping schematicLayerDown;
     public static KeyMapping schematicToggle;
+    public static KeyMapping boatFlyDown;
 
     public static void register() {
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
@@ -55,6 +56,13 @@ public class ModKeybindings {
             "key.superawesomemod.schematic_toggle",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_UNKNOWN,
+            CATEGORY
+        ));
+        // Right Shift, not sneak — sneak leaves the boat.
+        boatFlyDown = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+            "key.superawesomemod.boat_fly_down",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_RIGHT_SHIFT,
             CATEGORY
         ));
     }

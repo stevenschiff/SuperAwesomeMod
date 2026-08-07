@@ -101,7 +101,7 @@ public class BoatFlyScreen extends Screen {
             cx, cy + 48, speed > 1000 ? 0xFFAA00 : 0xAAAAAA);
 
         graphics.drawCenteredString(this.font,
-            Component.literal("Fly while riding a boat  |  Space/Shift for up/down"),
+            Component.literal("Fly while riding a boat  |  Space up, Right Shift down"),
             cx, cy + 60, 0xAAAAAA);
 
         super.render(graphics, mouseX, mouseY, delta);
