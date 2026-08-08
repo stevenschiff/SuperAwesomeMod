@@ -53,9 +53,15 @@ public class PotionSaverScreen extends Screen {
         graphics.drawCenteredString(this.font, this.title, cx, cy - 70, 0xFFFFFF);
 
         boolean on = PotionSaverData.isEnabled();
-        graphics.drawCenteredString(this.font,
-            Component.literal("Status: " + (on ? "Enabled" : "Disabled")),
-            cx, cy - 58, on ? 0x55FF55 : 0xFF5555);
+        // Enabled but powerless is worth saying out loud — on someone else's server
+        // the timers aren't ours to hold, and a plain "Enabled" would imply they are.
+        boolean inactive = on && this.minecraft.level != null
+                && !this.minecraft.hasSingleplayerServer();
+
+        String status = !on ? "Disabled" : inactive ? "Enabled (not active here)" : "Enabled";
+        int statusColor = !on ? 0xFF5555 : inactive ? 0xFFAA00 : 0x55FF55;
+        graphics.drawCenteredString(this.font, Component.literal("Status: " + status),
+            cx, cy - 58, statusColor);
 
         graphics.drawCenteredString(this.font,
             Component.literal("Good effects stop counting down - bad ones run out"),

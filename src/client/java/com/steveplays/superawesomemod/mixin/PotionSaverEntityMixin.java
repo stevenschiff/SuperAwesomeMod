@@ -26,8 +26,14 @@ public abstract class PotionSaverEntityMixin {
     private void superawesomemod$beginPotionSaver(CallbackInfo ci) {
         if (!PotionSaverData.isEnabled()) return;
 
-        LivingEntity self = (LivingEntity) (Object) this;
         Minecraft mc = Minecraft.getInstance();
+        // On a server we don't run, only our own display copy is here to freeze —
+        // the real timer keeps running and the effect still expires. Holding the
+        // number still would just make it look like the feature works. Leave it
+        // alone so the countdown on screen is the truth.
+        if (!mc.hasSingleplayerServer()) return;
+
+        LivingEntity self = (LivingEntity) (Object) this;
         if (mc.player == null || !mc.player.getUUID().equals(self.getUUID())) return;
 
         PotionSaverData.setHolding(true);
