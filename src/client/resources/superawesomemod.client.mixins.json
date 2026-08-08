@@ -34,6 +34,10 @@
     "XpMultiplierMixin",
     "PotionSaverEntityMixin",
     "PotionSaverDurationMixin",
+    "AntiKnockbackMixin",
+    "NoSlowMixin",
+    "FastActionGameModeMixin",
+    "FastActionPlaceMixin",
     "WaterFogMixin",
     "LavaFogMixin"
   ],

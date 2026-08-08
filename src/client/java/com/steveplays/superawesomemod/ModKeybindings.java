@@ -20,6 +20,7 @@ public class ModKeybindings {
     public static KeyMapping schematicLayerDown;
     public static KeyMapping schematicToggle;
     public static KeyMapping boatFlyDown;
+    public static KeyMapping stunSlamCombo;
 
     public static void register() {
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
@@ -63,6 +64,14 @@ public class ModKeybindings {
             "key.superawesomemod.boat_fly_down",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_RIGHT_SHIFT,
+            CATEGORY
+        ));
+        // Unbound by default — the macro swaps hotbar slots, so it needs a
+        // deliberate choice rather than a key that might already mean something.
+        stunSlamCombo = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+            "key.superawesomemod.stun_slam_combo",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_UNKNOWN,
             CATEGORY
         ));
     }

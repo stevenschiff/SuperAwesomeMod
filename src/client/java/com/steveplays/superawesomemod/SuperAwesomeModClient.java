@@ -37,6 +37,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         NametagRenderer.register();
         CpsOverlay.register();
         KeystrokesOverlay.register();
+        TrajectoryRenderer.register();
         // SchematicRenderer.register();
         // SchematicRenderType.touch();
         // SchematicOverlay.register();
@@ -80,6 +81,15 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             if (MiniMapData.isEnabled()) {
                 MiniMapPersistence.tick();
             }
+
+            // Auto Totem: keep a totem in the offhand.
+            AutoTotemHandler.tick(client);
+
+            // Stun Slam: combo keybind, then the per-tick click queue.
+            while (ModKeybindings.stunSlamCombo.consumeClick()) {
+                StunSlamHandler.startMacro(client);
+            }
+            StunSlamHandler.tick(client);
 
             // Track current dimension for waypoint filtering
             if (client.level != null) {

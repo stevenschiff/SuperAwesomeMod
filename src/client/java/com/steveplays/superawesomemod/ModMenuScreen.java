@@ -121,6 +121,12 @@ public class ModMenuScreen extends Screen {
         addFeature("Boat Fly",            buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new BoatFlyScreen(this)));
         addFeature("XP Multiplier",       buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new XpMultiplierScreen(this)));
         addFeature("Potion Saver",        buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new PotionSaverScreen(this)));
+        addFeature("Anti-Knockback",      buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AntiKnockbackScreen(this)));
+        addFeature("No Slow",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NoSlowScreen(this)));
+        addFeature("Auto Totem",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AutoTotemScreen(this)));
+        addFeature("Stun Slam",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new StunSlamScreen(this)));
+        addFeature("Fast Actions",        buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FastActionScreen(this)));
+        addFeature("Trajectory Preview",  buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new TrajectoryScreen(this)));
 
         // Close button
         addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());
