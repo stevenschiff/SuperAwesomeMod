@@ -32,6 +32,8 @@
     "FlightFallResetMixin",
     "BoatFlyMixin",
     "XpMultiplierMixin",
+    "PotionSaverEntityMixin",
+    "PotionSaverDurationMixin",
     "WaterFogMixin",
     "LavaFogMixin"
   ],
