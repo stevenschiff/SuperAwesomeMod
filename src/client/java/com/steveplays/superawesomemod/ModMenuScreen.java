@@ -127,6 +127,7 @@ public class ModMenuScreen extends Screen {
         addFeature("Stun Slam",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new StunSlamScreen(this)));
         addFeature("Fast Actions",        buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FastActionScreen(this)));
         addFeature("Trajectory Preview",  buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new TrajectoryScreen(this)));
+        addFeature("B Hop",               buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new BHopScreen(this)));
 
         // Close button
         addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());

@@ -38,6 +38,7 @@
     "NoSlowMixin",
     "FastActionGameModeMixin",
     "FastActionPlaceMixin",
+    "BHopMixin",
     "WaterFogMixin",
     "LavaFogMixin"
   ],
