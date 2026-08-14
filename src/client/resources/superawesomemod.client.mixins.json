@@ -40,7 +40,6 @@
     "FastActionPlaceMixin",
     "BHopMixin",
     "AttackTimingMixin",
-    "QuickThrowMixin",
     "WaterFogMixin",
     "LavaFogMixin"
   ],

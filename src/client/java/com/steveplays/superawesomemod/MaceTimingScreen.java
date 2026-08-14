@@ -59,11 +59,11 @@ public class MaceTimingScreen extends Screen {
             cx, cy - 58, on ? 0x55FF55 : 0xFF5555);
 
         graphics.drawCenteredString(this.font,
-            Component.literal("Holds early mace clicks until the swing is charged"),
+            Component.literal("Drops mace clicks that land before the swing recharges"),
             cx, cy + 46, 0xAAAAAA);
 
         graphics.drawCenteredString(this.font,
-            Component.literal("The held click still fires - it waits, it isn't eaten"),
+            Component.literal("Never swings for you - it stops one click poisoning the next"),
             cx, cy + 58, 0xAAAAAA);
 
         super.render(graphics, mouseX, mouseY, delta);

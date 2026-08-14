@@ -91,7 +91,7 @@ public class ModMenuScreen extends Screen {
                     NoFallData.setEnabled(false);
                     MaceTimingData.setEnabled(true);
                     SwapSyncData.setEnabled(true);
-                    QuickThrowData.setEnabled(true);
+                    SlamOptimizerData.setEnabled(true);
                 });
 
         // Feature buttons
@@ -133,7 +133,7 @@ public class ModMenuScreen extends Screen {
         addFeature("B Hop",               buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new BHopScreen(this)));
         addFeature("Mace Timing",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MaceTimingScreen(this)));
         addFeature("Swap Sync",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SwapSyncScreen(this)));
-        addFeature("Quick Throw",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new QuickThrowScreen(this)));
+        addFeature("Stun Slam Optimizer", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SlamOptimizerScreen(this)));
 
         // Close button
         addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());
