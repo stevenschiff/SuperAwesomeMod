@@ -85,6 +85,9 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             // Auto Totem: keep a totem in the offhand.
             AutoTotemHandler.tick(client);
 
+            // Mace Timing / Swap Sync: release any swing that was held back.
+            AttackTimingHandler.tick(client);
+
             // Stun Slam: combo keybind, then the per-tick click queue.
             while (ModKeybindings.stunSlamCombo.consumeClick()) {
                 StunSlamHandler.startMacro(client);

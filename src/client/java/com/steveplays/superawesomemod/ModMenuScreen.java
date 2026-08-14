@@ -89,6 +89,9 @@ public class ModMenuScreen extends Screen {
                     NoFogData.setEnabled(true);
                     FlightData.setEnabled(false); // flight off
                     NoFallData.setEnabled(false);
+                    MaceTimingData.setEnabled(true);
+                    SwapSyncData.setEnabled(true);
+                    QuickThrowData.setEnabled(true);
                 });
 
         // Feature buttons
@@ -128,6 +131,9 @@ public class ModMenuScreen extends Screen {
         addFeature("Fast Actions",        buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FastActionScreen(this)));
         addFeature("Trajectory Preview",  buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new TrajectoryScreen(this)));
         addFeature("B Hop",               buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new BHopScreen(this)));
+        addFeature("Mace Timing",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MaceTimingScreen(this)));
+        addFeature("Swap Sync",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SwapSyncScreen(this)));
+        addFeature("Quick Throw",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new QuickThrowScreen(this)));
 
         // Close button
         addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());
