@@ -87,8 +87,8 @@ public class FastActionScreen extends Screen {
             cx, cy + 72, 0xAAAAAA);
 
         graphics.drawCenteredString(this.font,
-            Component.literal("Auto Tool swaps only on a strictly faster tool"),
-            cx, cy + 84, 0xAAAAAA);
+            Component.literal("Fast Place = 20/sec while held, for any item you hold"),
+            cx, cy + 84, 0xFFAA00);
 
         super.render(graphics, mouseX, mouseY, delta);
     }

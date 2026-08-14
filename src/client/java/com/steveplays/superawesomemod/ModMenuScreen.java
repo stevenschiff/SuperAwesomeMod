@@ -89,9 +89,6 @@ public class ModMenuScreen extends Screen {
                     NoFogData.setEnabled(true);
                     FlightData.setEnabled(false); // flight off
                     NoFallData.setEnabled(false);
-                    MaceTimingData.setEnabled(true);
-                    SwapSyncData.setEnabled(true);
-                    SlamOptimizerData.setEnabled(true);
                 });
 
         // Feature buttons

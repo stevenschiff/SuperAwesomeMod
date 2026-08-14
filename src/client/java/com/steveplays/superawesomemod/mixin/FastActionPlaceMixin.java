@@ -2,8 +2,6 @@ package com.steveplays.superawesomemod.mixin;
 
 import com.steveplays.superawesomemod.FastActionData;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.item.BlockItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,13 +10,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Fast Place: clears the 4-tick cooldown vanilla puts between held right-clicks,
- * so holding use places blocks every tick instead of every fifth one.
+ * so holding use fires every tick — 20 per second instead of 5.
  *
- * <p>Only while a block is held. {@code rightClickDelay} gates nothing but the
- * held-button repeat path, so clearing it unconditionally doesn't make single
- * clicks any faster — it just empties a stack of rockets, pearls or golden apples
- * the instant you hold right-click. Fast placement is wanted for building and
- * nowhere else, so the check is on the item rather than on the delay.
+ * <p>Applies to whatever is in hand, by design. {@code rightClickDelay} is the only
+ * thing gating the held-repeat path, and it doesn't know what you're holding, so the
+ * same clearing that gives fast building also empties a stack of rockets or pearls
+ * while right-click is held. That is the cost of the feature rather than a bug in it —
+ * it is off unless Fast Actions is on, and Fast Actions is not part of Enable All.
  */
 @Mixin(Minecraft.class)
 public abstract class FastActionPlaceMixin {
@@ -27,12 +25,8 @@ public abstract class FastActionPlaceMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void superawesomemod$fastPlace(CallbackInfo ci) {
-        if (!FastActionData.isFastPlace()) return;
-
-        LocalPlayer player = ((Minecraft) (Object) this).player;
-        if (player == null) return;
-        if (!(player.getMainHandItem().getItem() instanceof BlockItem)) return;
-
-        this.rightClickDelay = 0;
+        if (FastActionData.isFastPlace()) {
+            this.rightClickDelay = 0;
+        }
     }
 }
