@@ -5,6 +5,8 @@ public class CombatHitboxData {
     private static boolean seeThroughWalls = false;
     private static boolean playersOnly = false;
     private static boolean showInvisible = true;
+    /** Fill the whole body and armour with the in-range colour instead of only outlining. */
+    private static boolean fullColor = false;
 
     /** Color index for when entity IS in attack range. */
     private static int inRangeColor = 0;   // default: Red
@@ -42,6 +44,9 @@ public class CombatHitboxData {
     public static boolean isPlayersOnly()           { return playersOnly; }
     public static void    setPlayersOnly(boolean v) { playersOnly = v; }
 
+    public static boolean isFullColor()           { return fullColor; }
+    public static void    setFullColor(boolean v) { fullColor = v; }
+
     public static boolean isShowInvisible()           { return showInvisible; }
     public static void    setShowInvisible(boolean v) { showInvisible = v; }
 
@@ -53,6 +58,9 @@ public class CombatHitboxData {
 
     public static String getInRangeColorName()    { return COLOR_NAMES[inRangeColor]; }
     public static String getOutOfRangeColorName() { return COLOR_NAMES[outOfRangeColor]; }
+
+    public static int getInRangeARGB()    { return COLOR_ARGB[inRangeColor]; }
+    public static int getOutOfRangeARGB() { return COLOR_ARGB[outOfRangeColor]; }
 
     public static float[] getInRangeRGB()    { return COLOR_FLOAT[inRangeColor]; }
     public static float[] getOutOfRangeRGB() { return COLOR_FLOAT[outOfRangeColor]; }

@@ -131,6 +131,7 @@ public class ModMenuScreen extends Screen {
         addFeature("Mace Timing",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MaceTimingScreen(this)));
         addFeature("Swap Sync",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SwapSyncScreen(this)));
         addFeature("Stun Slam Optimizer", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SlamOptimizerScreen(this)));
+        addFeature("Spacing Trainer",     buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SpacingScreen(this)));
 
         // Close button
         addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());

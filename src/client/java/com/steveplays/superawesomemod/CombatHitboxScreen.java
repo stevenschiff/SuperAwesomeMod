@@ -21,7 +21,7 @@ public class CombatHitboxScreen extends Screen {
         int btnW = 200;
         int btnH = 20;
 
-        int y = cy - 80;
+        int y = cy - 92;
 
         this.addRenderableWidget(Button.builder(
             toggleLabel(),
@@ -55,6 +55,15 @@ public class CombatHitboxScreen extends Screen {
             btn -> {
                 CombatHitboxData.setShowInvisible(!CombatHitboxData.isShowInvisible());
                 btn.setMessage(invisibleLabel());
+            }
+        ).bounds(cx - btnW / 2, y, btnW, btnH).build());
+        y += 25;
+
+        this.addRenderableWidget(Button.builder(
+            fullColorLabel(),
+            btn -> {
+                CombatHitboxData.setFullColor(!CombatHitboxData.isFullColor());
+                btn.setMessage(fullColorLabel());
             }
         ).bounds(cx - btnW / 2, y, btnW, btnH).build());
         y += 25;
@@ -109,6 +118,12 @@ public class CombatHitboxScreen extends Screen {
         return Component.literal(CombatHitboxData.isShowInvisible()
             ? "Show Invisible: Enabled"
             : "Show Invisible: Disabled");
+    }
+
+    private Component fullColorLabel() {
+        return Component.literal(CombatHitboxData.isFullColor()
+            ? "Full Color: On"
+            : "Full Color: Off");
     }
 
     private Component inRangeColorLabel() {

@@ -38,6 +38,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         CpsOverlay.register();
         KeystrokesOverlay.register();
         TrajectoryRenderer.register();
+        SpacingOverlay.register();
         // SchematicRenderer.register();
         // SchematicRenderType.touch();
         // SchematicOverlay.register();
@@ -87,6 +88,9 @@ public class SuperAwesomeModClient implements ClientModInitializer {
 
             // Mace Timing / Swap Sync: release any swing that was held back.
             AttackTimingHandler.tick(client);
+
+            // Spacing Trainer: expire swings the server never acknowledged.
+            SpacingTracker.tick(client);
 
             // Stun Slam: combo keybind, then the per-tick click queue.
             while (ModKeybindings.stunSlamCombo.consumeClick()) {

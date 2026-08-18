@@ -40,6 +40,12 @@
     "FastActionPlaceMixin",
     "BHopMixin",
     "AttackTimingMixin",
+    "SpacingAttackMixin",
+    "SpacingDamageMixin",
+    "FullColorStateMixin",
+    "FullColorEntityMixin",
+    "FullColorArmorMixin",
+    "FullColorArmorColorMixin",
     "WaterFogMixin",
     "LavaFogMixin"
   ],
