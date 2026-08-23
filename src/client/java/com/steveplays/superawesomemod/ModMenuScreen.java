@@ -132,6 +132,7 @@ public class ModMenuScreen extends Screen {
         addFeature("Swap Sync",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SwapSyncScreen(this)));
         addFeature("Stun Slam Optimizer", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SlamOptimizerScreen(this)));
         addFeature("Spacing Trainer",     buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SpacingScreen(this)));
+        addFeature("Shield",              buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new ShieldScreen(this)));
 
         // Close button
         addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());

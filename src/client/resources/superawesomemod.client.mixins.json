@@ -46,6 +46,8 @@
     "FullColorEntityMixin",
     "FullColorArmorMixin",
     "FullColorArmorColorMixin",
+    "ShieldOffsetMixin",
+    "ShieldTransparencyMixin",
     "WaterFogMixin",
     "LavaFogMixin"
   ],
