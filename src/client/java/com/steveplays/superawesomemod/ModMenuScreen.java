@@ -133,6 +133,11 @@ public class ModMenuScreen extends Screen {
         addFeature("Stun Slam Optimizer", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SlamOptimizerScreen(this)));
         addFeature("Spacing Trainer",     buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SpacingScreen(this)));
         addFeature("Shield",              buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new ShieldScreen(this)));
+        addFeature("Anti-Hunger",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AntiHungerScreen(this)));
+        addFeature("Auto Eat",            buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AutoEatScreen(this)));
+        addFeature("Invincibility",       buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new InvincibilityScreen(this)));
+        addFeature("Nuker",               buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NukerScreen(this)));
+        addFeature("Mace Damage",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MaceDamageScreen(this)));
 
         // Close button
         addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());

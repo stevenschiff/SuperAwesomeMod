@@ -86,6 +86,16 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             // Auto Totem: keep a totem in the offhand.
             AutoTotemHandler.tick(client);
 
+            // Anti-Hunger: own what the server believes about our sprinting.
+            AntiHungerHandler.tick(client);
+
+            // Auto Eat / Nuker
+            AutoEatHandler.tick(client);
+            NukerHandler.tick(client);
+
+            // Mace Damage: track the fall distance the server is holding for us.
+            MaceDamageHandler.tick(client);
+
             // Mace Timing / Swap Sync: release any swing that was held back.
             AttackTimingHandler.tick(client);
 

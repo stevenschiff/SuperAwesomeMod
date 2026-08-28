@@ -48,6 +48,10 @@
     "FullColorArmorColorMixin",
     "ShieldOffsetMixin",
     "ShieldTransparencyMixin",
+    "AntiHungerSprintMixin",
+    "AntiHungerExhaustionMixin",
+    "InvincibilityMixin",
+    "MaceDamageMixin",
     "WaterFogMixin",
     "LavaFogMixin"
   ],

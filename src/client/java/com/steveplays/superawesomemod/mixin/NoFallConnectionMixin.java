@@ -1,7 +1,9 @@
 package com.steveplays.superawesomemod.mixin;
 
 import com.steveplays.superawesomemod.FlightData;
+import com.steveplays.superawesomemod.MaceDamageHandler;
 import com.steveplays.superawesomemod.NoFallData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
@@ -27,7 +29,12 @@ public abstract class NoFallConnectionMixin {
             // onGround. Never report a landing while flying; FlightFallResetMixin
             // keeps the server's accumulated fall distance at zero instead.
             ((NoFallPacketAccessor) packet).setOnGround(false);
-        } else if (NoFallData.isEnabled()) {
+        } else if (NoFallData.isEnabled()
+                   && !MaceDamageHandler.isActive(Minecraft.getInstance())) {
+            // Mace Damage wants the exact opposite of this — it keeps onGround false so
+            // the server holds on to the fall distance the smash bonus is scaled from.
+            // Standing down here makes that precedence explicit, rather than leaving two
+            // injectors to fight over one field in whatever order mixin applied them.
             ((NoFallPacketAccessor) packet).setOnGround(true);
         }
     }
