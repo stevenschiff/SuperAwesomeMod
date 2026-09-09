@@ -67,7 +67,6 @@ public class KeystrokesScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.renderBackground(graphics, mouseX, mouseY, delta);
         int cx = this.width / 2;
         int cy = this.height / 2;
         graphics.drawCenteredString(this.font, this.title, cx, cy - 76, 0xFFFFFF);

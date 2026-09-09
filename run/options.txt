@@ -17,10 +17,10 @@ graphicsPreset:"fancy"
 prioritizeChunkUpdates:1
 fullscreen:false
 gamma:0.5
-guiScale:0
+guiScale:2
 maxAnisotropyBit:1
 textureFiltering:1
-maxFps:120
+maxFps:260
 improvedTransparency:false
 inactivityFpsLimit:"afk"
 mipmapLevels:4
@@ -86,7 +86,7 @@ notificationDisplayTime:1.0
 useNativeTransport:true
 mainHand:"right"
 attackIndicator:1
-tutorialStep:movement
+tutorialStep:none
 mouseWheelSensitivity:1.0
 rawMouseInput:true
 allowCursorChanges:true
@@ -101,7 +101,7 @@ onlyShowSecureChat:false
 saveChatDrafts:false
 panoramaScrollSpeed:1.0
 telemetryOptInExtra:false
-onboardAccessibility:true
+onboardAccessibility:false
 menuBackgroundBlurriness:5
 startedCleanly:true
 musicToast:"never"
@@ -165,7 +165,15 @@ key_key.debug.dumpVersion:key.keyboard.v
 key_key.debug.profilingChart:key.keyboard.1
 key_key.debug.fpsCharts:key.keyboard.2
 key_key.debug.networkCharts:key.keyboard.3
-soundCategory_master:1.0
+key_key.superawesomemod.open_menu:key.keyboard.g
+key_key.superawesomemod.zoom:key.keyboard.x
+key_key.superawesomemod.minimap_toggle:key.keyboard.c
+key_key.superawesomemod.schematic_layer_up:key.keyboard.page.up
+key_key.superawesomemod.schematic_layer_down:key.keyboard.page.down
+key_key.superawesomemod.schematic_toggle:key.keyboard.unknown
+key_key.superawesomemod.boat_fly_down:key.keyboard.right.shift
+key_key.superawesomemod.stun_slam_combo:key.keyboard.unknown
+soundCategory_master:0.0
 soundCategory_music:1.0
 soundCategory_record:1.0
 soundCategory_weather:1.0

@@ -1,0 +1,6 @@
+/npc summon uidk
+/gamemode survival uidk
+/attribute uidk minecraft:knockback_resistance get
+/attribute uidk minecraft:knockback_resistance base reset
+/summon minecraft:mannequin
+/give Player278 shield

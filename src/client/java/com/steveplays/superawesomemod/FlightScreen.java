@@ -78,7 +78,6 @@ public class FlightScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.renderBackground(graphics, mouseX, mouseY, delta);
 
         int cx = this.width / 2;
         int cy = this.height / 2;
