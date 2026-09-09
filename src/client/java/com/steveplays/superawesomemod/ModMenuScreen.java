@@ -62,11 +62,12 @@ public class ModMenuScreen extends Screen {
                     ArmorHudData.setEnabled(true);
                     ArmorHudData.setScale(1.3f);
                     CombatHitboxData.setEnabled(true);
-                    CombatHitboxData.setInRangeColor(3);    // Green
-                    CombatHitboxData.setOutOfRangeColor(9); // Pink
+                    CombatHitboxData.setInRangeColor(0);    // Red
+                    CombatHitboxData.setOutOfRangeColor(4); // Cyan
+                    CombatHitboxData.setFullColor(true);
                     CombatCrosshairData.setEnabled(true);
-                    CombatCrosshairData.setInRangeColor(3);    // Green
-                    CombatCrosshairData.setOutOfRangeColor(9); // Pink
+                    CombatCrosshairData.setInRangeColor(0);    // Red
+                    CombatCrosshairData.setOutOfRangeColor(4); // Cyan
                     CombatPotionEffectsData.setEnabled(true);
                     AppleSkinData.setEnabled(true);
                     ShulkerTooltipData.setEnabled(true);
@@ -75,6 +76,7 @@ public class ModMenuScreen extends Screen {
                     MiniMapData.setHudVisible(false); // corner map off
                     MiniMapData.setMinimapSize(64);
                     MiniMapData.setCorner(3);
+                    MiniMapData.setSpecificWaypoints(true);
                     NametagData.setEnabled(true);
                     MotionBlurData.setEnabled(true);
                     MotionBlurData.setStrength(3);
@@ -89,6 +91,11 @@ public class ModMenuScreen extends Screen {
                     NoFogData.setEnabled(true);
                     FlightData.setEnabled(false); // flight off
                     NoFallData.setEnabled(false);
+                    ShieldData.setEnabled(true);
+                    ShieldData.setTransparency(50);
+                    ShieldData.setUsedOffset(-10);
+                    ShieldData.setNotUsedOffset(-30);
+                    BodyTwistData.setEnabled(true);
                 });
 
         // Feature buttons
@@ -138,6 +145,7 @@ public class ModMenuScreen extends Screen {
         addFeature("Invincibility",       buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new InvincibilityScreen(this)));
         addFeature("Nuker",               buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NukerScreen(this)));
         addFeature("Mace Damage",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MaceDamageScreen(this)));
+        addFeature("Body Twist",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new BodyTwistScreen(this)));
 
         // Close button
         addFeature("Close", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.onClose());

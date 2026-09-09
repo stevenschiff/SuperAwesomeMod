@@ -52,6 +52,7 @@
     "AntiHungerExhaustionMixin",
     "InvincibilityMixin",
     "MaceDamageMixin",
+    "BodyTwistMixin",
     "WaterFogMixin",
     "LavaFogMixin"
   ],
