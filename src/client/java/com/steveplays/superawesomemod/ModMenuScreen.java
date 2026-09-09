@@ -96,6 +96,7 @@ public class ModMenuScreen extends Screen {
                     ShieldData.setUsedOffset(-10);
                     ShieldData.setNotUsedOffset(-30);
                     BodyTwistData.setEnabled(true);
+                    BodyTwistData.setLeadLimit(60);
                 });
 
         // Feature buttons
