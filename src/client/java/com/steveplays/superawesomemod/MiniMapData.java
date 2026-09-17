@@ -20,8 +20,6 @@ public final class MiniMapData {
     // Corner position: 0=TL, 1=TR, 2=BL, 3=BR
     private static int corner = 1;
 
-    // Entity display mode: 0=None, 1=Players Only, 2=All Entities
-    private static int entityMode = 1;
 
     // Specific waypoints mode: when true, only show waypoints marked visible
     private static boolean specificWaypoints = false;
@@ -63,18 +61,6 @@ public final class MiniMapData {
         };
     }
 
-    // --- Entity display mode ---
-    public static int getEntityMode() { return entityMode; }
-    public static void setEntityMode(int mode) { entityMode = Math.max(0, Math.min(2, mode)); }
-
-    public static String getEntityModeName() {
-        return switch (entityMode) {
-            case 0 -> "None";
-            case 1 -> "Players Only";
-            case 2 -> "All Entities";
-            default -> "Players Only";
-        };
-    }
 
     // --- Specific waypoints mode ---
     public static boolean isSpecificWaypoints() { return specificWaypoints; }

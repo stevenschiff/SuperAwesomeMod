@@ -2,9 +2,7 @@ package com.steveplays.superawesomemod;
 
 public class CombatHitboxData {
     private static boolean enabled = false;
-    private static boolean seeThroughWalls = false;
     private static boolean playersOnly = false;
-    private static boolean showInvisible = true;
     /** Fill the whole body and armour with the in-range colour instead of only outlining. */
     private static boolean fullColor = false;
 
@@ -38,8 +36,6 @@ public class CombatHitboxData {
     public static boolean isEnabled()           { return enabled; }
     public static void    setEnabled(boolean e) { enabled = e; }
 
-    public static boolean isSeeThroughWalls()           { return seeThroughWalls; }
-    public static void    setSeeThroughWalls(boolean v) { seeThroughWalls = v; }
 
     public static boolean isPlayersOnly()           { return playersOnly; }
     public static void    setPlayersOnly(boolean v) { playersOnly = v; }
@@ -47,8 +43,6 @@ public class CombatHitboxData {
     public static boolean isFullColor()           { return fullColor; }
     public static void    setFullColor(boolean v) { fullColor = v; }
 
-    public static boolean isShowInvisible()           { return showInvisible; }
-    public static void    setShowInvisible(boolean v) { showInvisible = v; }
 
     public static int  getInRangeColor()      { return inRangeColor; }
     public static void setInRangeColor(int c)  { inRangeColor = Math.clamp(c, 0, COLOR_NAMES.length - 1); }

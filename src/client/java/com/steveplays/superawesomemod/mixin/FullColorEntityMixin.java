@@ -59,7 +59,7 @@ public abstract class FullColorEntityMixin {
         if (self == null || entity == self) return 0;
         if (!entity.isAttackable()) return 0;
         if (CombatHitboxData.isPlayersOnly() && !(entity instanceof Player)) return 0;
-        if (!CombatHitboxData.isShowInvisible() && entity.isInvisible()) return 0;
+        if (entity.isInvisible()) return 0;
 
         double reach = CombatReach.attackReach(self);
         double gapSqr = CombatReach.gapSqr(self.getEyePosition(), entity.getBoundingBox());

@@ -80,7 +80,6 @@ public class ModMenuScreen extends Screen {
                     NametagData.setEnabled(true);
                     MotionBlurData.setEnabled(true);
                     MotionBlurData.setStrength(3);
-                    HealthIndicatorData.setEnabled(true);
                     HigherCrouchData.setEnabled(false); // higher crouch off
                     CpsData.setEnabled(true);
                     CpsData.setScale(5);
@@ -89,8 +88,6 @@ public class ModMenuScreen extends Screen {
                     KeystrokesData.setScale(4); // size 4 instead of 5
                     KeystrokesData.setCorner(3);
                     NoFogData.setEnabled(true);
-                    FlightData.setEnabled(false); // flight off
-                    NoFallData.setEnabled(false);
                     ShieldData.setEnabled(true);
                     ShieldData.setTransparency(50);
                     ShieldData.setUsedOffset(-10);
@@ -106,46 +103,20 @@ public class ModMenuScreen extends Screen {
         addFeature("Combat Crosshair",      buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new CombatCrosshairScreen(this)));
         addFeature("Combat Potion Effects", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new CombatPotionEffectsScreen(this)));
         addFeature("PvP Cheat Detector",    buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new PvpDetectorScreen(this)));
-        addFeature("Autoclicker",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AutoclickerScreen(this)));
-        addFeature("Freecam",               buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FreecamScreen(this)));
-        addFeature("Flight",                buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FlightScreen(this)));
         addFeature("AppleSkin",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AppleSkinScreen(this)));
         addFeature("Shulker Tooltips",      buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new ShulkerTooltipScreen(this)));
         addFeature("Render Distance",       buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new RenderDistanceScreen(this)));
         addFeature("Item Physics",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new ItemPhysicsScreen(this)));
         addFeature("1.7 PvP Animations",   buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new OldPvpScreen(this)));
-        addFeature("X-Ray",                buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new XrayScreen(this)));
         addFeature("Mini Map",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MiniMapScreen(this)));
         addFeature("Motion Blur",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MotionBlurScreen(this)));
-        addFeature("Health Indicators",    buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new HealthIndicatorScreen(this)));
         addFeature("Nametag",              buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NametagScreen(this)));
         addFeature("Min Ping",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MinPingScreen(this)));
         addFeature("Higher Crouch",        buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new HigherCrouchScreen(this)));
-        addFeature("Farther Players",      buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FartherPlayersScreen(this)));
         addFeature("CPS Counter",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new CpsScreen(this)));
         addFeature("Keystrokes",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new KeystrokesScreen(this)));
         addFeature("No Fog",              buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NoFogScreen(this)));
-        addFeature("No Fall",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NoFallScreen(this)));
-        addFeature("Boat Fly",            buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new BoatFlyScreen(this)));
-        addFeature("XP Multiplier",       buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new XpMultiplierScreen(this)));
-        addFeature("Potion Saver",        buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new PotionSaverScreen(this)));
-        addFeature("Anti-Knockback",      buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AntiKnockbackScreen(this)));
-        addFeature("No Slow",             buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NoSlowScreen(this)));
-        addFeature("Auto Totem",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AutoTotemScreen(this)));
-        addFeature("Stun Slam",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new StunSlamScreen(this)));
-        addFeature("Fast Actions",        buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new FastActionScreen(this)));
-        addFeature("Trajectory Preview",  buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new TrajectoryScreen(this)));
-        addFeature("B Hop",               buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new BHopScreen(this)));
-        addFeature("Mace Timing",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MaceTimingScreen(this)));
-        addFeature("Swap Sync",           buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SwapSyncScreen(this)));
-        addFeature("Stun Slam Optimizer", buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SlamOptimizerScreen(this)));
-        addFeature("Spacing Trainer",     buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new SpacingScreen(this)));
         addFeature("Shield",              buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new ShieldScreen(this)));
-        addFeature("Anti-Hunger",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AntiHungerScreen(this)));
-        addFeature("Auto Eat",            buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new AutoEatScreen(this)));
-        addFeature("Invincibility",       buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new InvincibilityScreen(this)));
-        addFeature("Nuker",               buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new NukerScreen(this)));
-        addFeature("Mace Damage",         buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new MaceDamageScreen(this)));
         addFeature("Body Twist",          buttonsPerRow, btnW, btnH, gapX, gapY, padding, startY, btn -> this.minecraft.setScreen(new BodyTwistScreen(this)));
 
         // Close button

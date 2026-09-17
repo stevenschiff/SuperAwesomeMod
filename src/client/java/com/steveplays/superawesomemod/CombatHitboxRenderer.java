@@ -49,29 +49,25 @@ public final class CombatHitboxRenderer {
         PoseStack.Pose pose = ctx.matrices().last();
         Matrix4f matrix = pose.pose();
 
-        boolean seeThroughWalls = CombatHitboxData.isSeeThroughWalls();
 
-        // Two passes — never cache both buffers at once. The world's MultiBufferSource routes
-        // unknown render types through one shared BufferBuilder and ends the previous batch when
-        // a new shared type is requested, which would invalidate a held VertexConsumer.
-        // Normal pass: draws solid (depth-tested) outlines for entities the player can see directly.
-        // XRay pass: draws outlines through walls. Without "see through walls" it's limited to
-        // invisible entities; with it on, every attackable entity is drawn through walls too.
-        drawPass(consumers.getBuffer(RenderTypes.lines()),         level, self, eye, reachSqr, matrix, pose, camPos, partialTick, false, false);
-        drawPass(consumers.getBuffer(XrayLineRenderType.LINES_XRAY), level, self, eye, reachSqr, matrix, pose, camPos, partialTick, true,  seeThroughWalls);
+        // One pass only, depth-tested. The through-wall pass is gone: outlines now
+        // obey line of sight, so an entity behind a wall is hidden exactly as it is
+        // without the mod, and invisible entities stay invisible.
+        drawPass(consumers.getBuffer(RenderTypes.lines()), level, self, eye, reachSqr,
+                 matrix, pose, camPos, partialTick);
     }
 
     private static void drawPass(VertexConsumer buffer, ClientLevel level, LocalPlayer self,
                                  Vec3 eye, double reachSqr, Matrix4f matrix, PoseStack.Pose pose,
-                                 Vec3 camPos, float partialTick, boolean invisOnly, boolean includeAll) {
+                                 Vec3 camPos, float partialTick) {
         boolean playersOnly = CombatHitboxData.isPlayersOnly();
-        boolean showInvisible = CombatHitboxData.isShowInvisible();
         for (Entity entity : level.entitiesForRendering()) {
             if (entity == self) continue;
             if (!entity.isAttackable()) continue;
+            // Invisible means invisible — outlining these would be the giveaway the
+            // see-through option used to be.
+            if (entity.isInvisible()) continue;
             if (playersOnly && !(entity instanceof Player)) continue;
-            if (!showInvisible && entity.isInvisible()) continue;
-            if (!includeAll && entity.isInvisible() != invisOnly) continue;
 
             double dx = Mth.lerp(partialTick, entity.xo, entity.getX()) - entity.getX();
             double dy = Mth.lerp(partialTick, entity.yo, entity.getY()) - entity.getY();

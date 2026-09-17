@@ -39,7 +39,7 @@ public final class MiniMapWaypointRenderer {
 
         // --- Pass 1: Render all line geometry ---
         MultiBufferSource.BufferSource bufferSource = mc.renderBuffers().bufferSource();
-        VertexConsumer buf = bufferSource.getBuffer(XrayLineRenderType.LINES_XRAY);
+        VertexConsumer buf = bufferSource.getBuffer(WaypointLineRenderType.LINES_WAYPOINT);
 
         for (MiniMapWaypoint wp : MiniMapData.getVisibleWaypoints()) {
             float rawX = (float) (wp.x() + 0.5 - camPos.x);
@@ -75,7 +75,7 @@ public final class MiniMapWaypointRenderer {
         }
 
         // Flush lines before rendering text
-        bufferSource.endBatch(XrayLineRenderType.LINES_XRAY);
+        bufferSource.endBatch(WaypointLineRenderType.LINES_WAYPOINT);
 
         // --- Pass 2: Render all text labels ---
         for (MiniMapWaypoint wp : MiniMapData.getVisibleWaypoints()) {

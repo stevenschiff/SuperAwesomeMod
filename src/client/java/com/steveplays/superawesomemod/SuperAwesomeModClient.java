@@ -1,6 +1,5 @@
 package com.steveplays.superawesomemod;
 
-import com.steveplays.superawesomemod.mixin.MinecraftAutoclickerInvoker;
 import com.steveplays.superawesomemod.mixin.OptionInstanceAccessor;
 import com.steveplays.superawesomemod.mixin.ConnectionAccessor;
 import io.netty.channel.Channel;
@@ -27,18 +26,14 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         PvpDetectorOverlay.register();
         AppleSkinOverlay.register();
         LODTerrainRenderer.register();
-        XrayRenderer.register();
-        XrayLineRenderType.touch();
+        WaypointLineRenderType.touch();
         MiniMapOverlay.register();
         MiniMapChunkScanner.register();
         MotionBlurRenderer.register();
         MiniMapWaypointRenderer.register();
-        HealthIndicatorRenderer.register();
         NametagRenderer.register();
         CpsOverlay.register();
         KeystrokesOverlay.register();
-        TrajectoryRenderer.register();
-        SpacingOverlay.register();
         // SchematicRenderer.register();
         // SchematicRenderType.touch();
         // SchematicOverlay.register();
@@ -83,30 +78,6 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 MiniMapPersistence.tick();
             }
 
-            // Auto Totem: keep a totem in the offhand.
-            AutoTotemHandler.tick(client);
-
-            // Anti-Hunger: own what the server believes about our sprinting.
-            AntiHungerHandler.tick(client);
-
-            // Auto Eat / Nuker
-            AutoEatHandler.tick(client);
-            NukerHandler.tick(client);
-
-            // Mace Damage: track the fall distance the server is holding for us.
-            MaceDamageHandler.tick(client);
-
-            // Mace Timing / Swap Sync: release any swing that was held back.
-            AttackTimingHandler.tick(client);
-
-            // Spacing Trainer: expire swings the server never acknowledged.
-            SpacingTracker.tick(client);
-
-            // Stun Slam: combo keybind, then the per-tick click queue.
-            while (ModKeybindings.stunSlamCombo.consumeClick()) {
-                StunSlamHandler.startMacro(client);
-            }
-            StunSlamHandler.tick(client);
 
             // Track current dimension for waypoint filtering
             if (client.level != null) {
@@ -138,25 +109,6 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             boolean thirdPerson = currentCamera != CameraType.FIRST_PERSON;
             FreeLookData.setActive(FreeLookData.isEnabled() && thirdPerson);
 
-            // Freecam movement: WASD/Space/Shift translates the freecam position.
-            // Snapshot prev BEFORE applying input so the camera mixin can lerp from
-            // last tick's position across the frames between ticks.
-            if (FreecamData.isEnabled() && client.screen == null && client.player != null) {
-                FreecamData.beginTick();
-                Options o = client.options;
-                float forward = (o.keyUp.isDown()    ? 1f : 0f) - (o.keyDown.isDown()  ? 1f : 0f);
-                float strafeR = (o.keyRight.isDown() ? 1f : 0f) - (o.keyLeft.isDown()  ? 1f : 0f);
-                float vert    = (o.keyJump.isDown()  ? 1f : 0f) - (o.keyShift.isDown() ? 1f : 0f);
-                float yawRad = (float) Math.toRadians(FreecamData.getYaw());
-                double sinY = Math.sin(yawRad);
-                double cosY = Math.cos(yawRad);
-                double dx = -forward * sinY - strafeR * cosY;
-                double dz =  forward * cosY - strafeR * sinY;
-                double horiz = Math.sqrt(dx * dx + dz * dz);
-                if (horiz > 1.0) { dx /= horiz; dz /= horiz; }
-                float speed = FreecamData.getSpeed();
-                FreecamData.smoothMove(dx * speed, vert * speed, dz * speed);
-            }
 
             // Render distance override: force the client's render distance value
             // beyond vanilla limits using the accessor mixin.
@@ -248,19 +200,6 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             //     SchematicVerifier.tick(client.level, SchematicData.getCurrentPlacement());
             // }
 
-            // Autoclicker: fire as many simulated clicks as elapsed wall-clock allows.
-            if (AutoclickerData.isEnabled() && client.screen == null
-                && client.player != null && client.level != null) {
-                int n = AutoclickerData.clicksToFire(System.nanoTime());
-                if (n > 0) {
-                    MinecraftAutoclickerInvoker inv = (MinecraftAutoclickerInvoker)(Object) client;
-                    if (AutoclickerData.getButton() == AutoclickerData.Button.LEFT) {
-                        for (int i = 0; i < n; i++) inv.superawesomemod$startAttack();
-                    } else {
-                        for (int i = 0; i < n; i++) inv.superawesomemod$startUseItem();
-                    }
-                }
-            }
         });
     }
 }

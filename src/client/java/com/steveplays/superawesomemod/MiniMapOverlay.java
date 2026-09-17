@@ -37,9 +37,6 @@ public final class MiniMapOverlay {
     private static boolean needsUpdate = true;
 
     // Cached entity positions to avoid iterating all entities every frame
-    private record EntityPos(double x, double z, int color) {}
-    private static List<EntityPos> cachedPlayers = List.of();
-    private static List<EntityPos> cachedEntities = List.of();
 
     public static void register() {
         HudRenderCallback.EVENT.register(MiniMapOverlay::onHudRender);
@@ -157,7 +154,6 @@ public final class MiniMapOverlay {
             needsUpdate = false;
 
             // Refresh entity cache at the same interval as terrain
-            refreshEntityCache(mc);
         }
 
         // Render terrain as single texture blit
@@ -176,36 +172,6 @@ public final class MiniMapOverlay {
                 graphics.fill(ox + wpPx - 2, oy + wpPy, ox + wpPx + 3, oy + wpPy + 1, c);
                 graphics.fill(ox + wpPx - 1, oy + wpPy - 1, ox + wpPx + 2, oy + wpPy + 2, c);
                 graphics.fill(ox + wpPx, oy + wpPy - 2, ox + wpPx + 1, oy + wpPy + 3, c);
-            }
-        }
-
-        // Draw entities from cache (refreshed at UPDATE_INTERVAL, not every frame)
-        int entityMode = MiniMapData.getEntityMode();
-
-        if (entityMode >= 1) {
-            // Draw players (cyan diamond shape)
-            for (EntityPos ep : cachedPlayers) {
-                int pPx = halfSize + (int) (ep.x - playerX);
-                int pPy = halfSize + (int) (ep.z - playerZ);
-                if (pPx >= 2 && pPx < size - 2 && pPy >= 2 && pPy < size - 2) {
-                    graphics.fill(ox + pPx - 1, oy + pPy, ox + pPx + 2, oy + pPy + 1, 0xFF00FFFF);
-                    graphics.fill(ox + pPx, oy + pPy - 1, ox + pPx + 1, oy + pPy + 2, 0xFF00FFFF);
-                    graphics.fill(ox + pPx - 2, oy + pPy, ox + pPx - 1, oy + pPy + 1, 0xFFFFFFFF);
-                    graphics.fill(ox + pPx + 2, oy + pPy, ox + pPx + 3, oy + pPy + 1, 0xFFFFFFFF);
-                    graphics.fill(ox + pPx, oy + pPy - 2, ox + pPx + 1, oy + pPy - 1, 0xFFFFFFFF);
-                    graphics.fill(ox + pPx, oy + pPy + 2, ox + pPx + 1, oy + pPy + 3, 0xFFFFFFFF);
-                }
-            }
-        }
-
-        if (entityMode >= 2) {
-            // Draw other living entities (small orange dot)
-            for (EntityPos ep : cachedEntities) {
-                int ePx = halfSize + (int) (ep.x - playerX);
-                int ePy = halfSize + (int) (ep.z - playerZ);
-                if (ePx >= 0 && ePx < size && ePy >= 0 && ePy < size) {
-                    graphics.fill(ox + ePx, oy + ePy, ox + ePx + 1, oy + ePy + 1, 0xFFFF8800);
-                }
             }
         }
 
@@ -240,32 +206,6 @@ public final class MiniMapOverlay {
         graphics.drawString(mc.font, coordText, textX, textY, 0xDDDDDD, false);
     }
 
-    private static void refreshEntityCache(Minecraft mc) {
-        ClientLevel level = mc.level;
-        LocalPlayer player = mc.player;
-        if (level == null || player == null) return;
-
-        int entityMode = MiniMapData.getEntityMode();
-
-        if (entityMode >= 1) {
-            List<EntityPos> players = new ArrayList<>();
-            for (Player p : level.players()) {
-                if (p == player) continue;
-                players.add(new EntityPos(p.getX(), p.getZ(), 0xFF00FFFF));
-            }
-            cachedPlayers = players;
-        }
-
-        if (entityMode >= 2) {
-            List<EntityPos> entities = new ArrayList<>();
-            for (Entity entity : level.entitiesForRendering()) {
-                if (entity instanceof Player) continue;
-                if (!(entity instanceof LivingEntity)) continue;
-                entities.add(new EntityPos(entity.getX(), entity.getZ(), 0xFFFF8800));
-            }
-            cachedEntities = entities;
-        }
-    }
 
     private static void drawLine(GuiGraphics graphics, int x0, int y0, int x1, int y1, int color) {
         int dx = Math.abs(x1 - x0);

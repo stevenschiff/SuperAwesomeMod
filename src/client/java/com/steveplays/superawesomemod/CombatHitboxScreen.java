@@ -33,28 +33,10 @@ public class CombatHitboxScreen extends Screen {
         y += 25;
 
         this.addRenderableWidget(Button.builder(
-            xrayLabel(),
-            btn -> {
-                CombatHitboxData.setSeeThroughWalls(!CombatHitboxData.isSeeThroughWalls());
-                btn.setMessage(xrayLabel());
-            }
-        ).bounds(cx - btnW / 2, y, btnW, btnH).build());
-        y += 25;
-
-        this.addRenderableWidget(Button.builder(
             scopeLabel(),
             btn -> {
                 CombatHitboxData.setPlayersOnly(!CombatHitboxData.isPlayersOnly());
                 btn.setMessage(scopeLabel());
-            }
-        ).bounds(cx - btnW / 2, y, btnW, btnH).build());
-        y += 25;
-
-        this.addRenderableWidget(Button.builder(
-            invisibleLabel(),
-            btn -> {
-                CombatHitboxData.setShowInvisible(!CombatHitboxData.isShowInvisible());
-                btn.setMessage(invisibleLabel());
             }
         ).bounds(cx - btnW / 2, y, btnW, btnH).build());
         y += 25;
@@ -102,22 +84,10 @@ public class CombatHitboxScreen extends Screen {
             : "Combat Hitboxes: Disabled");
     }
 
-    private Component xrayLabel() {
-        return Component.literal(CombatHitboxData.isSeeThroughWalls()
-            ? "See Through Walls: Enabled"
-            : "See Through Walls: Disabled");
-    }
-
     private Component scopeLabel() {
         return Component.literal(CombatHitboxData.isPlayersOnly()
             ? "Show: Players Only"
             : "Show: All Entities");
-    }
-
-    private Component invisibleLabel() {
-        return Component.literal(CombatHitboxData.isShowInvisible()
-            ? "Show Invisible: Enabled"
-            : "Show Invisible: Disabled");
     }
 
     private Component fullColorLabel() {

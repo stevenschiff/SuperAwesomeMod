@@ -4,3 +4,4 @@
 /attribute uidk minecraft:knockback_resistance base reset
 /summon minecraft:mannequin
 /give Player278 shield
+/clear

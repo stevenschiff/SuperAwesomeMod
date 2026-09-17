@@ -163,42 +163,6 @@ public class MiniMapFullScreen extends Screen {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level != null && mc.player != null) {
             ClientLevel level = mc.level;
-            int entityMode = MiniMapData.getEntityMode();
-
-            if (entityMode >= 2) {
-                // Draw living entities (orange small dot)
-                for (Entity entity : level.entitiesForRendering()) {
-                    if (entity instanceof Player) continue;
-                    if (!(entity instanceof LivingEntity)) continue;
-                    int sx = worldToScreenX((int) entity.getX());
-                    int sy = worldToScreenZ((int) entity.getZ());
-                    if (sx < 0 || sx > this.width || sy < 0 || sy > this.height) continue;
-                    graphics.fill(sx - 1, sy - 1, sx + 2, sy + 2, 0xFFFF8800);
-                }
-            }
-
-            if (entityMode >= 1) {
-                // Get all players - use server player list in singleplayer for unlimited range
-                List<PlayerPos> playerPositions = getAllPlayerPositions(mc);
-
-                for (PlayerPos pp : playerPositions) {
-                    int sx = worldToScreenX((int) pp.x);
-                    int sy = worldToScreenZ((int) pp.z);
-                    if (sx < 0 || sx > this.width || sy < 0 || sy > this.height) continue;
-
-                    // Cyan filled diamond
-                    graphics.fill(sx - 2, sy, sx + 3, sy + 1, 0xFF00FFFF);
-                    graphics.fill(sx - 1, sy - 1, sx + 2, sy + 2, 0xFF00FFFF);
-                    graphics.fill(sx, sy - 2, sx + 1, sy + 3, 0xFF00FFFF);
-                    // White border
-                    graphics.fill(sx - 3, sy, sx - 2, sy + 1, 0xFFFFFFFF);
-                    graphics.fill(sx + 3, sy, sx + 4, sy + 1, 0xFFFFFFFF);
-                    graphics.fill(sx, sy - 3, sx + 1, sy - 2, 0xFFFFFFFF);
-                    graphics.fill(sx, sy + 3, sx + 1, sy + 4, 0xFFFFFFFF);
-                    // Name tag
-                    graphics.drawString(this.font, pp.name, sx + 6, sy - 4, 0xFF00FFFF, true);
-                }
-            }
 
             // Draw self marker (green arrow)
             LocalPlayer player = mc.player;
@@ -356,29 +320,6 @@ public class MiniMapFullScreen extends Screen {
         return (int) ((worldZ - panZ) * zoom + this.height / 2.0);
     }
 
-    // --- Player position helpers (for showing players from any distance) ---
-
-    private record PlayerPos(String name, double x, double z) {}
-
-    private static List<PlayerPos> getAllPlayerPositions(Minecraft mc) {
-        List<PlayerPos> positions = new ArrayList<>();
-
-        // In singleplayer, access the integrated server's player list for all player positions
-        if (mc.getSingleplayerServer() != null) {
-            for (ServerPlayer sp : mc.getSingleplayerServer().getPlayerList().getPlayers()) {
-                if (sp.getUUID().equals(mc.player.getUUID())) continue;
-                positions.add(new PlayerPos(sp.getName().getString(), sp.getX(), sp.getZ()));
-            }
-        } else {
-            // Multiplayer: use loaded players from client level (limited to server tracking range)
-            for (Player p : mc.level.players()) {
-                if (p == mc.player) continue;
-                positions.add(new PlayerPos(p.getName().getString(), p.getX(), p.getZ()));
-            }
-        }
-
-        return positions;
-    }
 
     private static void drawLine(GuiGraphics graphics, int x0, int y0, int x1, int y1, int color) {
         int dx = Math.abs(x1 - x0);
