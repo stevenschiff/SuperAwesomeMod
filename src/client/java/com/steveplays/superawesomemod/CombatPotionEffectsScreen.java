@@ -1,59 +1,16 @@
 package com.steveplays.superawesomemod;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 
-public class CombatPotionEffectsScreen extends Screen {
-
-    private final Screen parent;
+public class CombatPotionEffectsScreen extends GabeOptionScreen {
 
     public CombatPotionEffectsScreen(Screen parent) {
-        super(Component.literal("Combat Potion Effects"));
-        this.parent = parent;
+        super(parent, "Potion Effects");
     }
 
     @Override
-    protected void init() {
-        int cx   = this.width / 2;
-        int cy   = this.height / 2;
-        int btnW = 200;
-        int btnH = 20;
-
-        this.addRenderableWidget(Button.builder(
-            toggleLabel(),
-            btn -> {
-                CombatPotionEffectsData.setEnabled(!CombatPotionEffectsData.isEnabled());
-                btn.setMessage(toggleLabel());
-            }
-        ).bounds(cx - btnW / 2, cy - 20, btnW, btnH).build());
-
-        this.addRenderableWidget(Button.builder(
-            Component.literal("Back"),
-            btn -> this.minecraft.setScreen(this.parent)
-        ).bounds(cx - 50, cy + 10, 100, btnH).build());
-    }
-
-    private Component toggleLabel() {
-        return Component.literal(CombatPotionEffectsData.isEnabled()
-            ? "Combat Potion Effects: Enabled"
-            : "Combat Potion Effects: Disabled");
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        int cx = this.width / 2;
-        int cy = this.height / 2;
-        graphics.drawCenteredString(this.font, this.title, cx, cy - 50, 0xFFFFFF);
-        graphics.drawCenteredString(this.font,
-            Component.literal("Shows remaining duration on potion effect icons"),
-            cx, cy - 36, 0xAAAAAA);
-        super.render(graphics, mouseX, mouseY, delta);
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return false;
+    protected void buildOptions() {
+        toggle("Enabled", CombatPotionEffectsData::isEnabled, CombatPotionEffectsData::setEnabled);
+        info("Compact effect list with timers");
     }
 }
