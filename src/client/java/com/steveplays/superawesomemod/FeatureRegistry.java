@@ -137,9 +137,10 @@ public final class FeatureRegistry {
         NoFogData.setEnabled(true);
         ShieldData.setEnabled(true);
         ShieldData.setTransparency(50);
-        ShieldData.setUsedOffset(-10);
-        ShieldData.setNotUsedOffset(-30);
+        ShieldData.setUsedOffset(-15);
+        ShieldData.setNotUsedOffset(-35);
         BodyTwistData.setEnabled(true);
-        BodyTwistData.setLeadLimit(55);
+        BodyTwistData.setLeadLimit(70);
+        BodyTwistData.setSnapHeadRotation(true);
     }
 }
