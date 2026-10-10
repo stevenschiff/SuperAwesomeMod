@@ -5,3 +5,9 @@
 /summon minecraft:mannequin
 /give Player278 shield
 /clear
+/enchant Player508 minecraft:wind_burst
+/npc summon marlow
+/npc give marlow mainhand minecraft:shield
+/npc use marlow mainhand
+/npc shielddelay 5
+/npc shielddelay marlow 5
