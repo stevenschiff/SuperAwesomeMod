@@ -28,6 +28,9 @@
     "ShieldOffsetMixin",
     "ShieldTransparencyMixin",
     "BodyTwistMixin",
+    "AutoMineInputMixin",
+    "FishingHookAccessor",
+    "MinecraftUseInvoker",
     "WaterFogMixin",
     "LavaFogMixin"
   ],

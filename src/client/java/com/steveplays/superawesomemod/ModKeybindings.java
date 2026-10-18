@@ -19,6 +19,8 @@ public class ModKeybindings {
     public static KeyMapping schematicLayerUp;
     public static KeyMapping schematicLayerDown;
     public static KeyMapping schematicToggle;
+    public static KeyMapping autoMineMark;
+    public static KeyMapping autoMineToggle;
 
     public static void register() {
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
@@ -55,6 +57,19 @@ public class ModKeybindings {
             "key.superawesomemod.schematic_toggle",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_UNKNOWN,
+            CATEGORY
+        ));
+        // Inert unless Auto Miner is switched on in the menu, so V and B stay free.
+        autoMineMark = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+            "key.superawesomemod.automine_mark",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_V,
+            CATEGORY
+        ));
+        autoMineToggle = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+            "key.superawesomemod.automine_toggle",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_B,
             CATEGORY
         ));
     }

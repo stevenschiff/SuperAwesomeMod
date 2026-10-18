@@ -78,6 +78,19 @@ public class SuperAwesomeModClient implements ClientModInitializer {
                 MiniMapPersistence.tick();
             }
 
+            // Auto Miner: mark and start/stop keys are inert unless the feature is on.
+            while (ModKeybindings.autoMineMark.consumeClick()) {
+                if (AutoMineData.isEnabled()) markLookedAtBlock(client);
+            }
+            while (ModKeybindings.autoMineToggle.consumeClick()) {
+                if (AutoMineData.isEnabled()) {
+                    if (AutoMineData.isRunning()) AutoMineData.stop("Stopped by key");
+                    else AutoMineData.start();
+                }
+            }
+            AutoMineHandler.tick(client);
+            AutoFishHandler.tick(client);
+
 
             // Track current dimension for waypoint filtering
             if (client.level != null) {
@@ -201,5 +214,20 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             // }
 
         });
+    }
+
+    /** Marks the block type under the crosshair, so the miner knows what to hunt. */
+    private static void markLookedAtBlock(net.minecraft.client.Minecraft client) {
+        if (client.hitResult instanceof net.minecraft.world.phys.BlockHitResult hit
+            && client.level != null) {
+            var block = client.level.getBlockState(hit.getBlockPos()).getBlock();
+            AutoMineData.setTarget(block);
+            AutoMineData.setStatus("Marked " + block.getName().getString());
+            if (client.player != null) {
+                client.player.displayClientMessage(
+                    net.minecraft.network.chat.Component.literal(
+                        "Marked: " + block.getName().getString()), true);
+            }
+        }
     }
 }

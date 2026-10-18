@@ -171,6 +171,8 @@ key_key.superawesomemod.minimap_toggle:key.keyboard.c
 key_key.superawesomemod.schematic_layer_up:key.keyboard.page.up
 key_key.superawesomemod.schematic_layer_down:key.keyboard.page.down
 key_key.superawesomemod.schematic_toggle:key.keyboard.unknown
+key_key.superawesomemod.automine_mark:key.keyboard.v
+key_key.superawesomemod.automine_toggle:key.keyboard.b
 soundCategory_master:0.0
 soundCategory_music:1.0
 soundCategory_record:1.0

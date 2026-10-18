@@ -89,6 +89,11 @@ public final class FeatureRegistry {
         add("World", "Mini Map",
             MiniMapData::isEnabled, MiniMapData::setEnabled, MiniMapScreen::new);
 
+        add("Automation", "Auto Miner",
+            AutoMineData::isEnabled, AutoMineData::setEnabled, AutoMineScreen::new);
+        add("Automation", "Auto Fishing",
+            AutoFishData::isEnabled, AutoFishData::setEnabled, AutoFishScreen::new);
+
         add("Other", "Shulker Tooltips",
             ShulkerTooltipData::isEnabled, ShulkerTooltipData::setEnabled, ShulkerTooltipScreen::new);
         add("Other", "Higher Crouch",

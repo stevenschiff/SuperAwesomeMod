@@ -4,5 +4,7 @@
   "key.superawesomemod.schematic_layer_up": "Schematic Layer Up",
   "key.superawesomemod.schematic_layer_down": "Schematic Layer Down",
   "key.superawesomemod.schematic_toggle": "Toggle Schematics",
+  "key.superawesomemod.automine_mark": "Auto Miner: Mark Block",
+  "key.superawesomemod.automine_toggle": "Auto Miner: Start/Stop",
   "key.categories.superawesomemod": "SuperAwesomeMod"
 }
