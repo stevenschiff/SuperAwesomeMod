@@ -88,6 +88,8 @@ public final class FeatureRegistry {
 
         add("World", "Mini Map",
             MiniMapData::isEnabled, MiniMapData::setEnabled, MiniMapScreen::new);
+        add("World", "Nuker",
+            NukerData::isEnabled, NukerData::setEnabled, NukerScreen::new);
 
         add("Automation", "Auto Miner",
             AutoMineData::isEnabled, AutoMineData::setEnabled, AutoMineScreen::new);

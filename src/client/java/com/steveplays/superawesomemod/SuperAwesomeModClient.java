@@ -90,6 +90,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             }
             AutoMineHandler.tick(client);
             AutoFishHandler.tick(client);
+            NukerHandler.tick(client);
             ChatMacroHandler.tick(client);
 
 

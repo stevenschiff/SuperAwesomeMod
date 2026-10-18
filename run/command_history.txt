@@ -14,3 +14,5 @@
 /give Player932 minecraft:fishing_rod
 /enchant Player932 minecraft:lure 50
 /enchant Player932 minecraft:lure 3
+/give Player207 minecraft:netherite_shovel
+/enchant Player207 minecraft:efficiency 5
