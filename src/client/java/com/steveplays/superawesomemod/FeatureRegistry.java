@@ -93,6 +93,8 @@ public final class FeatureRegistry {
             AutoMineData::isEnabled, AutoMineData::setEnabled, AutoMineScreen::new);
         add("Automation", "Auto Fishing",
             AutoFishData::isEnabled, AutoFishData::setEnabled, AutoFishScreen::new);
+        add("Automation", "Chat Macro",
+            ChatMacroData::isEnabled, ChatMacroData::setEnabled, ChatMacroScreen::new);
 
         add("Other", "Shulker Tooltips",
             ShulkerTooltipData::isEnabled, ShulkerTooltipData::setEnabled, ShulkerTooltipScreen::new);

@@ -28,6 +28,8 @@ public final class AutoMineHandler {
     private static final double NODE_REACHED = 0.6;
     /** Interaction range to leave when standing next to the block being mined. */
     private static final double MINE_REACH = 3.5;
+    /** How far down the path to look while walking, in blocks. */
+    private static final double LOOK_AHEAD = 3.5;
     private static final int RESCAN_INTERVAL = 20;
 
     private enum State { SEARCH, PATH, WALK, MINE }
@@ -60,6 +62,8 @@ public final class AutoMineHandler {
         if (!AutoMineData.isRunning() || client.screen != null) {
             moveTarget = null;
             wantJump = false;
+            // Give the mouse back the moment the run ends, so nothing keeps steering.
+            RotationHelper.release();
             lastHealth = player.getHealth();
             return;
         }
@@ -168,8 +172,36 @@ public final class AutoMineHandler {
         wantJump = node.getY() > player.blockPosition().getY() && player.onGround();
 
         // Look where we are going, not at the target — staring at the ore while
-        // side-stepping toward it is not how a person walks.
-        RotationHelper.lookAt(player, nodeCentre.add(0, 1.2, 0), 8f);
+        // side-stepping toward it is not how a person walks. Aim well down the path
+        // rather than at the node underfoot: the yaw to a point half a block away
+        // swings hard for a small sideways step, which is what made the camera judder.
+        RotationHelper.lookAt(player, lookAheadPoint(player), 8f);
+    }
+
+    /**
+     * A point several blocks along the remaining path, at head height, so the direction
+     * to it changes slowly as the player walks. Falls back to the furthest node left when
+     * the path is shorter than {@link #LOOK_AHEAD}.
+     */
+    private static Vec3 lookAheadPoint(LocalPlayer player) {
+        Vec3 eye = player.getEyePosition();
+        double eyeOffset = eye.y - player.getY();
+        Vec3 chosen = null;
+
+        for (int i = pathIndex; i < path.size(); i++) {
+            BlockPos p = path.get(i);
+            // Head height above the node, so pitch tracks the slope of the route
+            // instead of pointing down at the player's own feet.
+            chosen = new Vec3(p.getX() + 0.5, p.getY() + eyeOffset, p.getZ() + 0.5);
+            double dx = chosen.x - eye.x;
+            double dz = chosen.z - eye.z;
+            if (dx * dx + dz * dz >= LOOK_AHEAD * LOOK_AHEAD) break;
+        }
+
+        if (chosen != null) return chosen;
+        return targetBlock != null
+            ? Vec3.atCenterOf(targetBlock)
+            : eye.add(player.getLookAngle());
     }
 
     private static void beginMining() {
@@ -243,5 +275,6 @@ public final class AutoMineHandler {
         wantJump = false;
         aimPoint = null;
         actionDelay = 0;
+        RotationHelper.release();
     }
 }

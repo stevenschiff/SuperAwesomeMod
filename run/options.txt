@@ -173,6 +173,11 @@ key_key.superawesomemod.schematic_layer_down:key.keyboard.page.down
 key_key.superawesomemod.schematic_toggle:key.keyboard.unknown
 key_key.superawesomemod.automine_mark:key.keyboard.v
 key_key.superawesomemod.automine_toggle:key.keyboard.b
+key_key.superawesomemod.chat_macro_1:key.mouse.5
+key_key.superawesomemod.chat_macro_2:key.mouse.4
+key_key.superawesomemod.chat_macro_3:key.keyboard.unknown
+key_key.superawesomemod.chat_macro_4:key.keyboard.unknown
+key_key.superawesomemod.chat_macro_5:key.keyboard.unknown
 soundCategory_master:0.0
 soundCategory_music:1.0
 soundCategory_record:1.0

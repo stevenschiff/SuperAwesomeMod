@@ -11,3 +11,6 @@
 /npc use marlow mainhand
 /npc shielddelay 5
 /npc shielddelay marlow 5
+/give Player932 minecraft:fishing_rod
+/enchant Player932 minecraft:lure 50
+/enchant Player932 minecraft:lure 3

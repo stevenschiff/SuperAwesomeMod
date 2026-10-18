@@ -29,6 +29,7 @@
     "ShieldTransparencyMixin",
     "BodyTwistMixin",
     "AutoMineInputMixin",
+    "SmoothRotationMixin",
     "FishingHookAccessor",
     "MinecraftUseInvoker",
     "WaterFogMixin",

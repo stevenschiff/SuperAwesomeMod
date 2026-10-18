@@ -90,6 +90,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
             }
             AutoMineHandler.tick(client);
             AutoFishHandler.tick(client);
+            ChatMacroHandler.tick(client);
 
 
             // Track current dimension for waypoint filtering

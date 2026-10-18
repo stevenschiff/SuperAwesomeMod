@@ -21,6 +21,8 @@ public class ModKeybindings {
     public static KeyMapping schematicToggle;
     public static KeyMapping autoMineMark;
     public static KeyMapping autoMineToggle;
+    /** One key per macro slot, unbound by default so nothing is stolen from vanilla. */
+    public static KeyMapping[] chatMacros;
 
     public static void register() {
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
@@ -72,5 +74,15 @@ public class ModKeybindings {
             GLFW.GLFW_KEY_B,
             CATEGORY
         ));
+
+        chatMacros = new KeyMapping[ChatMacroData.SLOTS];
+        for (int i = 0; i < ChatMacroData.SLOTS; i++) {
+            chatMacros[i] = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.superawesomemod.chat_macro_" + (i + 1),
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_UNKNOWN,
+                CATEGORY
+            ));
+        }
     }
 }

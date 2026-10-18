@@ -2,6 +2,8 @@ package com.steveplays.superawesomemod;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
@@ -39,10 +41,11 @@ public abstract class GabeOptionScreen extends Screen {
     protected final Screen parent;
     private final String title;
     private final List<Option> options = new ArrayList<>();
+    private int focusedText = -1;
     private int draggingSlider = -1;
     private long lastFrameNanos = 0L;
 
-    private enum Kind { TOGGLE, SLIDER, CYCLE, ACTION, INFO }
+    private enum Kind { TOGGLE, SLIDER, CYCLE, ACTION, INFO, TEXT }
 
     private static final class Option {
         Kind kind;
@@ -54,6 +57,7 @@ public abstract class GabeOptionScreen extends Screen {
         IntConsumer iset;
         IntFunction<String> fmt;
         Supplier<String> value;
+        Consumer<String> setText;
         Runnable run;
         int color = GabeTheme.TEXT_DIM;
         int x, y, w, h;
@@ -108,6 +112,16 @@ public abstract class GabeOptionScreen extends Screen {
     protected void action(String label, Runnable run) {
         Option o = new Option();
         o.kind = Kind.ACTION; o.label = label; o.run = run;
+        options.add(o);
+    }
+
+    /**
+     * An editable line. Clicking focuses it; typing edits in place. Kept in the same
+     * declarative list so a macro screen needs no bespoke widget code.
+     */
+    protected void text(String label, Supplier<String> get, Consumer<String> set) {
+        Option o = new Option();
+        o.kind = Kind.TEXT; o.label = label; o.value = get; o.setText = set;
         options.add(o);
     }
 
@@ -220,6 +234,29 @@ public abstract class GabeOptionScreen extends Screen {
                                 GabeTheme.ACCENT_TEXT, false);
                     }
                 }
+                case TEXT -> {
+                    int idx = options.indexOf(o);
+                    boolean focused = idx == focusedText;
+                    if (focused || hovered) {
+                        GabeTheme.roundedRect(g, o.x, o.y + 1, o.w, ROW_H - 2, 3,
+                                focused ? GabeTheme.blend(0x00000000, GabeTheme.ACCENT_SOFT, 0.5f)
+                                        : GabeTheme.ROW_HOVER);
+                    }
+                    g.drawString(this.font, o.label, o.x + PAD, textY, GabeTheme.TEXT, false);
+
+                    String val = o.value.get();
+                    if (val.isEmpty() && !focused) val = "(empty)";
+                    // Right-aligned and clipped from the left, so the caret end of a long
+                    // command stays visible while typing.
+                    int room = o.w - PAD * 2 - this.font.width(o.label) - 6;
+                    while (this.font.width(val) > room && val.length() > 1) {
+                        val = val.substring(1);
+                    }
+                    String shown = focused ? val + "_" : val;
+                    g.drawString(this.font, shown,
+                            o.x + o.w - PAD - this.font.width(shown), textY,
+                            focused ? GabeTheme.TEXT : GabeTheme.ACCENT_TEXT, false);
+                }
                 case INFO -> g.drawString(this.font, o.label, o.x + PAD, textY, o.color, false);
             }
         }
@@ -252,6 +289,7 @@ public abstract class GabeOptionScreen extends Screen {
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (event.button() == 0) {
             layout();
+            focusedText = -1;
             double mx = event.x();
             double my = event.y();
 
@@ -274,12 +312,43 @@ public abstract class GabeOptionScreen extends Screen {
                     case TOGGLE -> o.set.accept(!o.get.getAsBoolean());
                     case CYCLE, ACTION -> o.run.run();
                     case SLIDER -> { draggingSlider = i; applySlider(o, mx); }
+                    case TEXT -> focusedText = i;
                     case INFO -> { }
                 }
                 return true;
             }
         }
         return super.mouseClicked(event, doubleClick);
+    }
+
+    @Override
+    public boolean charTyped(CharacterEvent event) {
+        if (focusedText >= 0 && focusedText < options.size() && event.isAllowedChatCharacter()) {
+            Option o = options.get(focusedText);
+            o.setText.accept(o.value.get() + event.codepointAsString());
+            return true;
+        }
+        return super.charTyped(event);
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (focusedText >= 0 && focusedText < options.size()) {
+            Option o = options.get(focusedText);
+            switch (event.key()) {
+                case 259 -> { // backspace
+                    String v = o.value.get();
+                    if (!v.isEmpty()) o.setText.accept(v.substring(0, v.length() - 1));
+                    return true;
+                }
+                case 257, 335, 256 -> { // enter, numpad enter, escape all commit
+                    focusedText = -1;
+                    return true;
+                }
+                default -> { }
+            }
+        }
+        return super.keyPressed(event);
     }
 
     @Override

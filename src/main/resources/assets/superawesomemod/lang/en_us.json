@@ -6,5 +6,10 @@
   "key.superawesomemod.schematic_toggle": "Toggle Schematics",
   "key.superawesomemod.automine_mark": "Auto Miner: Mark Block",
   "key.superawesomemod.automine_toggle": "Auto Miner: Start/Stop",
+  "key.superawesomemod.chat_macro_1": "Chat Macro 1",
+  "key.superawesomemod.chat_macro_2": "Chat Macro 2",
+  "key.superawesomemod.chat_macro_3": "Chat Macro 3",
+  "key.superawesomemod.chat_macro_4": "Chat Macro 4",
+  "key.superawesomemod.chat_macro_5": "Chat Macro 5",
   "key.categories.superawesomemod": "SuperAwesomeMod"
 }
