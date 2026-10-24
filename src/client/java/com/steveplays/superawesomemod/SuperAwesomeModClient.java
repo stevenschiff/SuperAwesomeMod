@@ -19,6 +19,7 @@ public class SuperAwesomeModClient implements ClientModInitializer {
         SuperAwesomeMod.LOGGER.info("[SuperAwesomeMod] Client initialized!");
 
         ModKeybindings.register();
+        SmoothTextureReload.register();
         ArmorHudOverlay.register();
         CombatHitboxRenderer.register();
         CombatCrosshairOverlay.register();

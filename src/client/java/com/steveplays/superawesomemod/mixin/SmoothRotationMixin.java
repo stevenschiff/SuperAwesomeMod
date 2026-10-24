@@ -1,5 +1,6 @@
 package com.steveplays.superawesomemod.mixin;
 
+import com.steveplays.superawesomemod.SmoothTextureHandler;
 import com.steveplays.superawesomemod.RotationHelper;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -22,5 +23,6 @@ public abstract class SmoothRotationMixin {
     @Inject(method = "render", at = @At("HEAD"))
     private void superawesomemod$smoothRotation(DeltaTracker deltaTracker, boolean bl, CallbackInfo ci) {
         RotationHelper.renderStep(Minecraft.getInstance());
+        SmoothTextureHandler.onRenderFrame(Minecraft.getInstance());
     }
 }

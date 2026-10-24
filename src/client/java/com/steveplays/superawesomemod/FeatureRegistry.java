@@ -68,6 +68,8 @@ public final class FeatureRegistry {
             MotionBlurData::isEnabled, MotionBlurData::setEnabled, MotionBlurScreen::new);
         add("Render", "No Fog",
             NoFogData::isEnabled, NoFogData::setEnabled, NoFogScreen::new);
+        add("Render", "Smooth Textures",
+            SmoothTextureData::isEnabled, SmoothTextureData::setEnabled, SmoothTextureScreen::new);
         add("Render", "Render Distance",
             RenderDistanceData::isEnabled, RenderDistanceData::setEnabled, RenderDistanceScreen::new);
         add("Render", "Item Physics",

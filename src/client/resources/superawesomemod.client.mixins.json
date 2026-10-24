@@ -30,6 +30,8 @@
     "BodyTwistMixin",
     "AutoMineInputMixin",
     "SmoothRotationMixin",
+    "TextureManagerAccessor",
+    "TextureAtlasAccessor",
     "FishingHookAccessor",
     "MinecraftUseInvoker",
     "WaterFogMixin",
