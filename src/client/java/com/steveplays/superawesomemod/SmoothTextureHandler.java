@@ -3,6 +3,7 @@ package com.steveplays.superawesomemod;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuTexture;
+import com.steveplays.superawesomemod.mixin.AbstractTextureAccessor;
 import com.steveplays.superawesomemod.mixin.TextureAtlasAccessor;
 import com.steveplays.superawesomemod.mixin.TextureManagerAccessor;
 import net.minecraft.client.Minecraft;
@@ -75,7 +76,7 @@ public final class SmoothTextureHandler {
             drawAtlas(atlas, now);
         }
 
-        if (!reportedThisRun) {
+        if (!reportedThisRun && !CACHE.isEmpty()) {
             reportedThisRun = true;
             int moving = 0;
             for (SpriteAnimation anim : CACHE.values()) {
@@ -106,7 +107,11 @@ public final class SmoothTextureHandler {
     }
 
     private static void drawAtlas(TextureAtlas atlas, long now) {
-        GpuTexture target = atlas.getTexture();
+        // Read the field rather than calling getTexture(), which throws rather than
+        // returning null when nothing has created the texture yet. An atlas is tickable
+        // before it is uploaded, and during a resource reload it goes back to that state,
+        // so a frame landing in either window must skip the atlas, not crash on it.
+        GpuTexture target = ((AbstractTextureAccessor) atlas).superawesomemod$textureOrNull();
         if (target == null) return;
 
         List<TextureAtlasSprite> sprites;

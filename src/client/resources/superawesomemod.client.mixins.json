@@ -30,6 +30,7 @@
     "BodyTwistMixin",
     "AutoMineInputMixin",
     "SmoothRotationMixin",
+    "AbstractTextureAccessor",
     "TextureManagerAccessor",
     "TextureAtlasAccessor",
     "FishingHookAccessor",
